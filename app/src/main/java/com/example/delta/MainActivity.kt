@@ -42,12 +42,23 @@ class MainActivity : Activity(), SensorEventListener {
 
         samplingFrequency.text = "$samplingRateHertz Hz"
 
-        val toggle: ToggleButton = findViewById(R.id.activityToggleButton)
-        toggle.setOnCheckedChangeListener { _, isChecked ->
+        val recordToggle: ToggleButton = findViewById(R.id.activityToggleButton)
+        recordToggle.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                onStartButton()
+                onRecordStart()
+                Log.i("0001", "on")
             } else {
-                onStopButton()
+                onRecordStop()
+                Log.i("0001", "off")
+            }
+        }
+
+        val beginToggle: ToggleButton = findViewById(R.id.beginToggleButton)
+        beginToggle.setOnCheckedChangeListener{_, isChecked ->
+            if (isChecked){
+                beginActivity()
+            } else {
+                endActivity()
             }
         }
     }
@@ -59,7 +70,7 @@ class MainActivity : Activity(), SensorEventListener {
                 event.values[1].toString()+","+
                 event.values[2].toString()+"\n").toByteArray())
     }
-    private fun onStartButton() {
+    private fun onRecordStart() {
         currentTime = System.currentTimeMillis()
         filename.text = "$currentTime.csv"
 
@@ -71,9 +82,17 @@ class MainActivity : Activity(), SensorEventListener {
         }
     }
 
-    private fun onStopButton() {
+    private fun onRecordStop() {
         f.close()
         filename.text = ""
         sensorManager.unregisterListener(this)
+    }
+
+    private fun beginActivity() {
+        
+    }
+
+    private fun endActivity() {
+
     }
 }
