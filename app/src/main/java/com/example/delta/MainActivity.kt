@@ -9,6 +9,7 @@ import android.hardware.SensorEventListener
 import android.os.Bundle
 import android.util.Log
 import android.widget.ToggleButton
+import androidx.wear.widget.CurvedTextView
 import com.example.delta.databinding.ActivityMainBinding
 import java.io.FileOutputStream
 
@@ -17,9 +18,15 @@ class MainActivity : Activity(), SensorEventListener {
     private lateinit var binding: ActivityMainBinding
     private lateinit var sensorManager: SensorManager
     private lateinit var f: FileOutputStream
-    private val samplingRateHertz = 100
-    private val samplingRateMicroseconds = samplingRateHertz*100
+    private val samplingRateHertz = 1
+    private val samplingPeriodSeconds = 1/samplingRateHertz
+    private val samplingPeriodMicroseconds = samplingPeriodSeconds * 1000000
     private var mAccel: Sensor? = null
+
+    private lateinit var filename: CurvedTextView
+    private lateinit var samplingFrequency: CurvedTextView
+    private var currentTime = System.currentTimeMillis()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,42 +36,44 @@ class MainActivity : Activity(), SensorEventListener {
 
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         mAccel = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-        f = this.openFileOutput("out.csv", Context.MODE_PRIVATE)
+
+        samplingFrequency = findViewById(R.id.samplingFrequency)
+        filename = findViewById(R.id.filename)
+
+        samplingFrequency.text = "$samplingRateHertz Hz"
 
         val toggle: ToggleButton = findViewById(R.id.activityToggleButton)
         toggle.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 onStartButton()
-                Log.i("0001", "on")
             } else {
                 onStopButton()
-                Log.i("0001", "off")
             }
         }
     }
-    override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
-    }
+    override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
 
     override fun onSensorChanged(event: SensorEvent) {
-        Log.i("0001", "Logging")
         f.write((event.timestamp.toString()+","+
                 event.values[0].toString()+","+
                 event.values[1].toString()+","+
                 event.values[2].toString()+"\n").toByteArray())
     }
     private fun onStartButton() {
-        Log.i("0001", "Start")
-        f = this.openFileOutput("out.csv", Context.MODE_PRIVATE)
-        f.write("timestamp,x,y,z,test,est\n".toByteArray())
+        currentTime = System.currentTimeMillis()
+        filename.text = "$currentTime.csv"
+
+        f = this.openFileOutput("$currentTime.csv", Context.MODE_PRIVATE)
+        f.write("timestamp,acc_x,acc_y,acc_z\n".toByteArray())
         mAccel?.also { accel ->
             sensorManager.registerListener(this, accel,
-                samplingRateMicroseconds, samplingRateMicroseconds)
+                samplingPeriodMicroseconds, samplingPeriodMicroseconds)
         }
     }
 
     private fun onStopButton() {
-        Log.i("0001", "Stop")
         f.close()
+        filename.text = ""
         sensorManager.unregisterListener(this)
     }
 }
