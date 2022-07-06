@@ -31,8 +31,8 @@ class MainActivity : Activity(), SensorEventListener {
         mAccel = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
         f = this.openFileOutput("out.csv", Context.MODE_PRIVATE)
 
-        val toggle: ToggleButton = findViewById(R.id.activityToggleButton)
-        toggle.setOnCheckedChangeListener { _, isChecked ->
+        val recordToggle: ToggleButton = findViewById(R.id.activityToggleButton)
+        recordToggle.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 onStartButton()
                 Log.i("0001", "on")
@@ -41,6 +41,8 @@ class MainActivity : Activity(), SensorEventListener {
                 Log.i("0001", "off")
             }
         }
+
+        val 
     }
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
     }
