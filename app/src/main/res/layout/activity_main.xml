@@ -49,6 +49,7 @@
         android:text="ToggleButton"
         android:textOff="Begin"
         android:textOn="End"
+        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.496"

@@ -8,6 +8,7 @@ import android.hardware.SensorManager
 import android.hardware.SensorEventListener
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.ToggleButton
 import androidx.wear.widget.CurvedTextView
 import com.example.delta.databinding.ActivityMainBinding
@@ -25,6 +26,9 @@ class MainActivity : Activity(), SensorEventListener {
     private var mAccel: Sensor? = null
 
     private lateinit var xmlFilename: CurvedTextView
+    private lateinit var beginToggle: ToggleButton
+    private lateinit var recordToggle: ToggleButton
+
     private lateinit var samplingFrequency: CurvedTextView
     private var currentTime = System.currentTimeMillis()
 
@@ -50,7 +54,7 @@ class MainActivity : Activity(), SensorEventListener {
 
         samplingFrequency.text = "$samplingRateHertz Hz"
 
-        val recordToggle: ToggleButton = findViewById(R.id.activityToggleButton)
+        recordToggle = findViewById(R.id.activityToggleButton)
         recordToggle.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 onRecordStart()
@@ -61,7 +65,7 @@ class MainActivity : Activity(), SensorEventListener {
             }
         }
 
-        val beginToggle: ToggleButton = findViewById(R.id.beginToggleButton)
+        beginToggle = findViewById(R.id.beginToggleButton)
         beginToggle.setOnCheckedChangeListener{_, isChecked ->
             if (isChecked){
                 inActivity = true
@@ -81,6 +85,7 @@ class MainActivity : Activity(), SensorEventListener {
                 event.values[2].toString()+"\n").toByteArray())
     }
     private fun onRecordStart() {
+        beginToggle.visibility = View.VISIBLE     // make begin activity button visible
         currentTime = System.currentTimeMillis()
         rawFilename = "$userid.$currentTime.csv"       // file to save raw data
 
@@ -97,7 +102,8 @@ class MainActivity : Activity(), SensorEventListener {
     }
 
     private fun onRecordStop() {
-        // set activity button to not checked
+        beginToggle.isChecked = false    // set activity button to not checked
+        beginToggle.visibility = View.INVISIBLE     // make begin activity button visible
 
         fRaw.close()
         xmlFilename.text = ""
@@ -109,13 +115,16 @@ class MainActivity : Activity(), SensorEventListener {
         fSession.close()
     }
 
-    private fun beginActivity() {
+    private fun beginActivity(activityName: String = "Activity") {
         Log.i("0001", "Activity begin")
-
+        var startTime = System.currentTimeMillis()
+        sessionData.add("$activityName, $startTime, ")
     }
 
-    private fun endActivity() {
+    private fun endActivity(activityName: String = "Activity") {
         Log.i("0001", "Activity end")
+        var endTime = System.currentTimeMillis()
+        sessionData[sessionData.size - 1] += "$endTime"
     }
 
     private fun writeToSessionCsv() {
