@@ -34,15 +34,22 @@ class MainActivity : Activity(), SensorEventListener {
         val recordToggle: ToggleButton = findViewById(R.id.activityToggleButton)
         recordToggle.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                onStartButton()
+                onRecordStart()
                 Log.i("0001", "on")
             } else {
-                onStopButton()
+                onRecordStop()
                 Log.i("0001", "off")
             }
         }
 
-        val 
+        val beginToggle: ToggleButton = findViewById(R.id.beginToggleButton)
+        beginToggle.setOnCheckedChangeListener{_, isChecked ->
+            if (isChecked){
+                beginActivity()
+            } else {
+                endActivity()
+            }
+        }
     }
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
     }
@@ -54,7 +61,7 @@ class MainActivity : Activity(), SensorEventListener {
                 event.values[1].toString()+","+
                 event.values[2].toString()+"\n").toByteArray())
     }
-    private fun onStartButton() {
+    private fun onRecordStart() {
         Log.i("0001", "Start")
         f = this.openFileOutput("out.csv", Context.MODE_PRIVATE)
         f.write("timestamp,x,y,z,test,est\n".toByteArray())
@@ -64,9 +71,13 @@ class MainActivity : Activity(), SensorEventListener {
         }
     }
 
-    private fun onStopButton() {
+    private fun onRecordStop() {
         Log.i("0001", "Stop")
         f.close()
         sensorManager.unregisterListener(this)
+    }
+
+    private fun beginActivity() {
+        
     }
 }
