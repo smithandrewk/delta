@@ -17,15 +17,23 @@ class MainActivity : Activity(), SensorEventListener {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var sensorManager: SensorManager
-    private lateinit var f: FileOutputStream
+    private lateinit var fRaw: FileOutputStream
+    private lateinit var fSession: FileOutputStream
     private val samplingRateHertz = 1
     private val samplingPeriodSeconds = 1/samplingRateHertz
     private val samplingPeriodMicroseconds = samplingPeriodSeconds * 1000000
     private var mAccel: Sensor? = null
 
-    private lateinit var filename: CurvedTextView
+    private lateinit var xmlFilename: CurvedTextView
     private lateinit var samplingFrequency: CurvedTextView
     private var currentTime = System.currentTimeMillis()
+
+    private lateinit var rawFilename: String
+    private lateinit var sessionFilename: String
+    private lateinit var sessionData: MutableList<String>
+    private var inActivity = false
+
+    private var userid: Int = 0
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,7 +46,7 @@ class MainActivity : Activity(), SensorEventListener {
         mAccel = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
         samplingFrequency = findViewById(R.id.samplingFrequency)
-        filename = findViewById(R.id.filename)
+        xmlFilename = findViewById(R.id.filename)
 
         samplingFrequency.text = "$samplingRateHertz Hz"
 
@@ -56,8 +64,10 @@ class MainActivity : Activity(), SensorEventListener {
         val beginToggle: ToggleButton = findViewById(R.id.beginToggleButton)
         beginToggle.setOnCheckedChangeListener{_, isChecked ->
             if (isChecked){
+                inActivity = true
                 beginActivity()
             } else {
+                inActivity = false
                 endActivity()
             }
         }
@@ -65,34 +75,56 @@ class MainActivity : Activity(), SensorEventListener {
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
 
     override fun onSensorChanged(event: SensorEvent) {
-        f.write((event.timestamp.toString()+","+
+        fRaw.write((event.timestamp.toString()+","+
                 event.values[0].toString()+","+
                 event.values[1].toString()+","+
                 event.values[2].toString()+"\n").toByteArray())
     }
     private fun onRecordStart() {
         currentTime = System.currentTimeMillis()
-        filename.text = "$currentTime.csv"
+        rawFilename = "$userid.$currentTime.csv"       // file to save raw data
 
-        f = this.openFileOutput("$currentTime.csv", Context.MODE_PRIVATE)
-        f.write("timestamp,acc_x,acc_y,acc_z\n".toByteArray())
+        xmlFilename.text = rawFilename          // set filename for xml
+
+        fRaw = this.openFileOutput(rawFilename, Context.MODE_PRIVATE)
+        fRaw.write("Recording Real Start Time: $currentTime\n".toByteArray())
+        fRaw.write("timestamp,acc_x,acc_y,acc_z\n".toByteArray())
         mAccel?.also { accel ->
             sensorManager.registerListener(this, accel,
                 samplingPeriodMicroseconds, samplingPeriodMicroseconds)
         }
+        sessionData = mutableListOf("Session, $currentTime, ")
     }
 
     private fun onRecordStop() {
-        f.close()
-        filename.text = ""
+        // set activity button to not checked
+
+        fRaw.close()
+        xmlFilename.text = ""
         sensorManager.unregisterListener(this)
+
+        var endTime = System.currentTimeMillis()
+        sessionData[0] += "$endTime"         // write session end time to csv
+        writeToSessionCsv()
+        fSession.close()
     }
 
     private fun beginActivity() {
-        
+        Log.i("0001", "Activity begin")
+
     }
 
     private fun endActivity() {
+        Log.i("0001", "Activity end")
+    }
 
+    private fun writeToSessionCsv() {
+        sessionFilename = "$userid-session.$currentTime.csv"    // file to save session information
+
+        fSession = this.openFileOutput(sessionFilename, Context.MODE_PRIVATE)
+        fSession.write("Event, Start Time, Stop Time\n".toByteArray())
+        for(line in sessionData){
+            fSession.write("$line\n".toByteArray())
+        }
     }
 }
