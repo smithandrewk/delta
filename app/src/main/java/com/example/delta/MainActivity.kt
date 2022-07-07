@@ -2,10 +2,11 @@ package com.example.delta
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.hardware.Sensor
 import android.hardware.SensorEvent
-import android.hardware.SensorManager
 import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -14,7 +15,9 @@ import androidx.wear.widget.CurvedTextView
 import com.example.delta.databinding.ActivityMainBinding
 import java.io.FileOutputStream
 
+
 class MainActivity : Activity(), SensorEventListener {
+    private val LAUNCH_CHOOSE_ACTIVITY = 1
 
     private lateinit var binding: ActivityMainBinding
 
@@ -69,17 +72,48 @@ class MainActivity : Activity(), SensorEventListener {
         beginToggle = findViewById(R.id.beginToggleButton)
         beginToggle.setOnCheckedChangeListener{_, isChecked ->
             if (isChecked){
-                beginActivity()
+//                beginActivity()
+                // launch new app activity to choose what activity to record
+                var i = Intent(this, ChooseActivity::class.java)
+                startActivityForResult(i, LAUNCH_CHOOSE_ACTIVITY)
             } else {
                 endActivity()
             }
         }
     }
 
+//    override fun onResume(){
+//        super.onResume()
+//        // check if activity is chosen
+//        var extras: Bundle? = intent.extras
+//        Log.i("0001", "resume")
+//        if(extras != null){
+//            val chosenActivity: String? = extras.getString("chosenActivity")
+//            if (chosenActivity != null) {
+//                Log.i("0001", chosenActivity)
+//            }
+//        }
+//    }
     override fun onDestroy() {
         super.onDestroy()
         // if app is destroyed, end recording
         recordToggle.isChecked = false    // set record button to not checked to end recording
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent){
+        // Receives result from the ChooseActivity activity, and calls beginActivity with that result
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == LAUNCH_CHOOSE_ACTIVITY){
+            if (resultCode == Activity.RESULT_OK){
+                var chosenActivity: String? = data.getStringExtra("chosenActivity")
+                Log.i("0001", "$chosenActivity")
+                beginActivity("$chosenActivity")
+            }
+            else{
+                Log.i("0001", "error")
+            }
+        }
     }
 
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
