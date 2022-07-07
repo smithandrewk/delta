@@ -38,7 +38,6 @@ class MainActivity : Activity(), SensorEventListener {
     private lateinit var xmlFilename: CurvedTextView
     private lateinit var xmlSamplingFrequency: CurvedTextView
 
-    private var inActivity = false
     private var userid: Int = 0
 
 
@@ -70,10 +69,8 @@ class MainActivity : Activity(), SensorEventListener {
         beginToggle = findViewById(R.id.beginToggleButton)
         beginToggle.setOnCheckedChangeListener{_, isChecked ->
             if (isChecked){
-                inActivity = true
                 beginActivity()
             } else {
-                inActivity = false
                 endActivity()
             }
         }
