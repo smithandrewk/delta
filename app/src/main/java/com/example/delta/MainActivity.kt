@@ -17,26 +17,28 @@ import java.io.FileOutputStream
 class MainActivity : Activity(), SensorEventListener {
 
     private lateinit var binding: ActivityMainBinding
+
     private lateinit var sensorManager: SensorManager
-    private lateinit var fRaw: FileOutputStream
-    private lateinit var fSession: FileOutputStream
     private val samplingRateHertz = 1
     private val samplingPeriodSeconds = 1/samplingRateHertz
     private val samplingPeriodMicroseconds = samplingPeriodSeconds * 1000000
     private var mAccel: Sensor? = null
 
-    private lateinit var xmlFilename: CurvedTextView
+    private lateinit var fRaw: FileOutputStream
+    private lateinit var rawFilename: String
+    private lateinit var fSession: FileOutputStream
+    private lateinit var sessionFilename: String
+    
+    private lateinit var sessionData: MutableList<String>
+    private var currentTime = System.currentTimeMillis()
+    
     private lateinit var beginToggle: ToggleButton
     private lateinit var recordToggle: ToggleButton
 
-    private lateinit var samplingFrequency: CurvedTextView
-    private var currentTime = System.currentTimeMillis()
+    private lateinit var xmlFilename: CurvedTextView
+    private lateinit var xmlSamplingFrequency: CurvedTextView
 
-    private lateinit var rawFilename: String
-    private lateinit var sessionFilename: String
-    private lateinit var sessionData: MutableList<String>
     private var inActivity = false
-
     private var userid: Int = 0
 
 
@@ -49,10 +51,10 @@ class MainActivity : Activity(), SensorEventListener {
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         mAccel = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
-        samplingFrequency = findViewById(R.id.samplingFrequency)
+        xmlSamplingFrequency = findViewById(R.id.samplingFrequency)
         xmlFilename = findViewById(R.id.filename)
 
-        samplingFrequency.text = "$samplingRateHertz Hz"
+        xmlSamplingFrequency.text = "$samplingRateHertz Hz"
 
         recordToggle = findViewById(R.id.activityToggleButton)
         recordToggle.setOnCheckedChangeListener { _, isChecked ->
