@@ -81,19 +81,6 @@ class MainActivity : Activity(), SensorEventListener {
             }
         }
     }
-
-//    override fun onResume(){
-//        super.onResume()
-//        // check if activity is chosen
-//        var extras: Bundle? = intent.extras
-//        Log.i("0001", "resume")
-//        if(extras != null){
-//            val chosenActivity: String? = extras.getString("chosenActivity")
-//            if (chosenActivity != null) {
-//                Log.i("0001", chosenActivity)
-//            }
-//        }
-//    }
     override fun onDestroy() {
         super.onDestroy()
         // if app is destroyed, end recording
