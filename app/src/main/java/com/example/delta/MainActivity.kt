@@ -78,6 +78,13 @@ class MainActivity : Activity(), SensorEventListener {
             }
         }
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // if app is destroyed, end recording
+        recordToggle.isChecked = false    // set record button to not checked to end recording
+    }
+
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
 
     override fun onSensorChanged(event: SensorEvent) {
