@@ -7,10 +7,11 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.deltamobile.R
+import com.example.deltamobile.UpdateItem
 import kotlinx.android.synthetic.main.item_custom_row.view.*
 
 // adapter is responsible for pulling data into the recyclerview layouts
-class ItemAdapter(val context: Context, val items: ArrayList<String>,private val listener:OnItemClickListener) :
+class ItemAdapter(val context: Context, val items: ArrayList<UpdateItem>, private val listener:OnItemClickListener) :
     RecyclerView.Adapter<ItemAdapter.ViewHolder>() {
 
     /**
@@ -44,7 +45,9 @@ class ItemAdapter(val context: Context, val items: ArrayList<String>,private val
 
         val item = items.get(position)
         // set the text of the item to the text of the item
-        holder.tvItem.text = item
+        holder.tvHeaderText.text = item.text1
+        holder.tvSubText.text = item.text2
+        holder.imgView.setImageResource(item.imageResource)
 
         // Updating the background color according to the odd/even positions in list.
         if (position % 2 == 0) {
@@ -73,14 +76,16 @@ class ItemAdapter(val context: Context, val items: ArrayList<String>,private val
 
     /**
      * A ViewHolder describes an item view and metadata about its place within the RecyclerView.
+     * Is basically one row in the viewholder
      */
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView),
         View.OnClickListener {
 
         // Holds the TextView that will add each item to
-        val tvItem = itemView.tv_item_name
+        val tvHeaderText= itemView.tvHeaderText
+        val tvSubText = itemView.tvSubText
         val cardViewItem = itemView.card_view_item
-        val imgView = itemView.img_item
+        val imgView = itemView.imgItem
 
         init {
             itemView.setOnClickListener(this,)

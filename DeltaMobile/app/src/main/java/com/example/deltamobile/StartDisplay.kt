@@ -48,10 +48,16 @@ class MainActivity: AppCompatActivity() ,ItemAdapter.OnItemClickListener{
     }
     // function to get items for recycler view
     //
-    private fun getItemsList():ArrayList<String>{
-        val list = ArrayList<String>()
-        for(i in 0..5){
-            list.add("Item $i")
+    private fun getItemsList():ArrayList<UpdateItem>{
+        val list = ArrayList<UpdateItem>()
+        for(i in 0 until 12){
+            val drawable = when(i%3){
+                0 -> R.drawable.ic_baseline_accessibility_24
+                1 -> R.drawable.ic_baseline_bluetooth_24
+                else -> R.drawable.ic_baseline_cloud_upload_24
+            }
+            val item:UpdateItem = UpdateItem(drawable,"Item $i","Description $i")
+            list.add(item)
         }
         return list
     }
