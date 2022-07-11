@@ -17,7 +17,7 @@ class ChooseActivity : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_choose)
 
-        // get chosen activity from user - create onClickListener for each button and send corrosponsing string
+        // get chosen activity from user - create onClickListener for each button and send corresponding string
         activityOptions.forEach { (button, chosenActivity) ->
             findViewById<Button>(button).setOnClickListener {
                 val returnIntent = Intent()
@@ -26,24 +26,5 @@ class ChooseActivity : Activity() {
                 finish()
             }
         }
-//
-//        findViewById<Button>(R.id.eatButton).setOnClickListener{
-//            var returnIntent = Intent()
-//            returnIntent.putExtra("chosenActivity", chosenActivity)
-//            setResult(Activity.RESULT_OK, returnIntent)
-//            finish()
-//        }
-//        findViewById<Button>(R.id.drinkButton).setOnClickListener{
-//            var returnIntent = Intent()
-//            returnIntent.putExtra("chosenActivity", chosenActivity)
-//            setResult(Activity.RESULT_OK, returnIntent)
-//            finish()
-//        }
-//        findViewById<Button>(R.id.smokeButton).setOnClickListener{
-//            var returnIntent = Intent()
-//            returnIntent.putExtra("chosenActivity", chosenActivity)
-//            setResult(Activity.RESULT_OK, returnIntent)
-//            finish()
-//        }
     }
 }
