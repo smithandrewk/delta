@@ -10,8 +10,10 @@
             android:id="@+id/scrollView1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:focusable="true"
             app:layout_constraintTop_toTopOf="parent"
             tools:layout_editor_absoluteX="26dp">
+            <requestFocus />
 
             <LinearLayout
                 android:layout_width="match_parent"

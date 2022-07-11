@@ -8,7 +8,7 @@
         <entry key="app/src/main/res/drawable/ic_food.xml" value="0.3575" />
         <entry key="app/src/main/res/drawable/ic_pizza_outline.xml" value="0.3575" />
         <entry key="app/src/main/res/drawable/ic_smoking.xml" value="0.3575" />
-        <entry key="app/src/main/res/layout/activity_choose.xml" value="0.5905245346869712" />
+        <entry key="app/src/main/res/layout/activity_choose.xml" value="0.5" />
         <entry key="app/src/main/res/layout/activity_choose_button.xml" value="0.76431718061674" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.5877862595419847" />
       </map>
