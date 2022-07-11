@@ -6,40 +6,68 @@
     android:layout_height="match_parent"
     tools:context=".ChooseActivity">
 
+        <ScrollView
+            android:id="@+id/scrollView1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:layout_editor_absoluteX="26dp">
 
-    <Button
-        android:id="@+id/eatButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Eating"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.496"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.173" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingTop="50dp"
+                android:paddingBottom="50dp">
 
-    <Button
-        android:id="@+id/drinkButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Drinking"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.496"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.441" />
+                <Button
+                    android:id="@+id/eatButton"
+                    android:layout_width="150dp"
+                    android:layout_height="100dp"
+                    android:layout_gravity="center"
+                    android:gravity="bottom|end"
+                    android:drawableLeft="@drawable/ic_pizza_outline"
+                    android:text="Eating"
+                    android:textAllCaps="false"
+                    android:textSize="16sp"
+                    android:textColor="#000000"/>
 
-    <Button
-        android:id="@+id/smokeButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Smoking"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.496"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.709" />
+                <Button
+                    android:id="@+id/drinkButton"
+                    android:layout_width="150dp"
+                    android:layout_height="100dp"
+                    android:layout_gravity="center"
+                    android:gravity="bottom|end"
+                    android:drawableLeft="@drawable/ic_cafe_outline"
+                    android:text="Drinking"
+                    android:textAllCaps="false"
+                    android:textSize="16sp"
+                    android:textColor="#000000" />
+
+                <Button
+                    android:id="@+id/smokeButton"
+                    android:layout_width="150dp"
+                    android:layout_height="100dp"
+                    android:layout_gravity="center"
+                    android:gravity="bottom|end"
+                    android:drawableLeft="@drawable/ic_smoking"
+                    android:text="Smoking"
+                    android:textAllCaps="false"
+                    android:textSize="16sp"
+                    android:textColor="#000000" />
+            </LinearLayout>
+        </ScrollView>
+
+        <view
+            android:id="@+id/topText"
+            class="androidx.wear.widget.CurvedTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Choose an Activity"
+            android:layout_gravity="center_horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:textColor="#FFFFFF"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
