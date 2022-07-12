@@ -2,10 +2,11 @@ package com.example.delta
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.hardware.Sensor
 import android.hardware.SensorEvent
-import android.hardware.SensorManager
 import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -14,7 +15,9 @@ import androidx.wear.widget.CurvedTextView
 import com.example.delta.databinding.ActivityMainBinding
 import java.io.FileOutputStream
 
+
 class MainActivity : Activity(), SensorEventListener {
+    private val LAUNCH_CHOOSE_ACTIVITY_CODE = 1
 
     private lateinit var binding: ActivityMainBinding
 
@@ -69,17 +72,34 @@ class MainActivity : Activity(), SensorEventListener {
         beginToggle = findViewById(R.id.beginToggleButton)
         beginToggle.setOnCheckedChangeListener{_, isChecked ->
             if (isChecked){
-                beginActivity()
+                // launch new app activity to choose what activity to record
+                val i = Intent(this, ChooseActivity::class.java)
+                startActivityForResult(i, LAUNCH_CHOOSE_ACTIVITY_CODE)
             } else {
                 endActivity()
             }
         }
     }
-
     override fun onDestroy() {
         super.onDestroy()
         // if app is destroyed, end recording
         recordToggle.isChecked = false    // set record button to not checked to end recording
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent){
+        // Receives result from the ChooseActivity activity, and calls beginActivity with that result
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == LAUNCH_CHOOSE_ACTIVITY_CODE){
+            if (resultCode == Activity.RESULT_OK){
+                var chosenActivity: String? = data.getStringExtra("chosenActivity")
+                Log.i("0001", "$chosenActivity")
+                beginActivity("$chosenActivity")
+            }
+            else{
+                Log.i("0001", "error")
+            }
+        }
     }
 
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
@@ -115,7 +135,7 @@ class MainActivity : Activity(), SensorEventListener {
         xmlFilename.text = ""
         sensorManager.unregisterListener(this)
 
-        var endTime = System.currentTimeMillis()
+        val endTime = System.currentTimeMillis()
         sessionData[0] += "$endTime"         // write session end time to csv
         writeToSessionCsv()
         fSession.close()
@@ -123,13 +143,13 @@ class MainActivity : Activity(), SensorEventListener {
 
     private fun beginActivity(activityName: String = "Activity") {
         Log.i("0001", "Activity begin")
-        var startTime = System.currentTimeMillis()
+        val startTime = System.currentTimeMillis()
         sessionData.add("$activityName, $startTime, ")
     }
 
     private fun endActivity(activityName: String = "Activity") {
         Log.i("0001", "Activity end")
-        var endTime = System.currentTimeMillis()
+        val endTime = System.currentTimeMillis()
         sessionData[sessionData.size - 1] += "$endTime"
     }
 
