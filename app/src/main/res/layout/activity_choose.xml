@@ -52,8 +52,20 @@
                     android:layout_height="100dp"
                     android:layout_gravity="center"
                     android:gravity="bottom|end"
-                    android:drawableLeft="@drawable/ic_smoking"
+                    android:drawableStart="@drawable/ic_smoking"
                     android:text="Smoking"
+                    android:textAllCaps="false"
+                    android:textSize="16sp"
+                    android:textColor="#000000" />
+
+                <Button
+                    android:id="@+id/otherButton"
+                    android:layout_width="150dp"
+                    android:layout_height="100dp"
+                    android:layout_gravity="center"
+                    android:gravity="bottom|end"
+                    android:drawableStart="@drawable/ic_three_dots"
+                    android:text="Other Activity"
                     android:textAllCaps="false"
                     android:textSize="16sp"
                     android:textColor="#000000" />

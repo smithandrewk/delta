@@ -9,7 +9,8 @@ import android.widget.Button
 class ChooseActivity : Activity() {
     private val activityOptions = mapOf(R.id.eatButton to "Eating",
                                         R.id.drinkButton to "Drinking",
-                                        R.id.smokeButton to "Smoking")
+                                        R.id.smokeButton to "Smoking",
+                                        R.id.otherButton to "Other")
 
     private lateinit var chosenActivity: String
 
