@@ -29,7 +29,6 @@ class MainActivity : Activity(), SensorEventListener {
     private var rawFileIndex: Int = 0
     private var currentActivity: String = "None"
 
-//    private lateinit var sessionData: MutableList<String>
     private var currentTime = System.currentTimeMillis()
 
     private lateinit var xmlFilename: CurvedTextView
@@ -44,6 +43,7 @@ class MainActivity : Activity(), SensorEventListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.i("0001", "CREATED")
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -57,7 +57,7 @@ class MainActivity : Activity(), SensorEventListener {
         // create Session file
         sessionFilename = "Session.$currentTime.csv"    // file to save session information
         fSession = this.openFileOutput(sessionFilename, Context.MODE_PRIVATE)
-        fSession.write("Event, Start Time, Stop Time".toByteArray())
+        fSession.write("Event, Start Time, Stop Time\n".toByteArray())
 
         mAccel?.also { accel ->
             sensorManager.registerListener(this, accel,
@@ -69,9 +69,26 @@ class MainActivity : Activity(), SensorEventListener {
             findViewById<Button>(button).setOnClickListener {
                 Log.i("0001", "Started $chosenActivity")
                 currentActivity = chosenActivity
-                // TODO write to session file
-                // TODO open "End activity" page
+                // log start time to session file
+                val startTime = System.currentTimeMillis()
+                fSession.write("$chosenActivity, $startTime, ".toByteArray())
+                // start end button activity
+                val endButtonIntent = Intent(this, EndActivityButton::class.java)
+                endButtonIntent.putExtra("FilenameKey", rawFilename)
+                endButtonIntent.putExtra("SamplingRateKey", "$samplingRateHertz")
+                startActivity(endButtonIntent)
             }
+        }
+        // check if returning from EndActivityButton activity
+        val activityEnding: String? = intent.getStringExtra("EndActivityKey")
+        if (activityEnding != null){
+            // log end of activity
+            val stopTime = System.currentTimeMillis()
+            fSession.write("$stopTime\n".toByteArray())
+            currentActivity = "None"
+        }
+        else{
+            Log.i("0001", "activityEnding is null")
         }
     }
 
@@ -80,8 +97,6 @@ class MainActivity : Activity(), SensorEventListener {
             fRaw.close()
         }
         rawFilename = "$currentTime.$rawFileIndex.csv"       // file to save raw data
-
-//        xmlFilename.text = rawFilename          // set filename for xml
 
         fRaw = this.openFileOutput(rawFilename, Context.MODE_PRIVATE)
         fRaw.write("Recording Real Start Time: $currentTime\n".toByteArray())
@@ -99,9 +114,39 @@ class MainActivity : Activity(), SensorEventListener {
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
 
     override fun onSensorChanged(event: SensorEvent) {
+        val time = System.currentTimeMillis()
         fRaw.write((event.timestamp.toString()+","+
                 event.values[0].toString()+","+
                 event.values[1].toString()+","+
-                event.values[2].toString()+"\n").toByteArray())
+                event.values[2].toString()+","+
+                time+","+
+                currentActivity+"\n").toByteArray())
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        fSession.close()
+        fRaw.close()
+        Log.i("0001", "DESTROYED")
+    }
+    override fun onStop() {
+        super.onStop()
+        Log.i("0001", "STOPPED")
+    }
+    override fun onPause() {
+        super.onPause()
+        Log.i("0001", "PAUSED")
+    }
+    override fun onStart() {
+        super.onStart()
+        Log.i("0001", "STARTED")
+    }
+    override fun onRestart() {
+        super.onRestart()
+        Log.i("0001", "RESTARTED")
+    }
+    override fun onResume() {
+        super.onResume()
+        Log.i("0001", "RESUMED")
     }
 }
