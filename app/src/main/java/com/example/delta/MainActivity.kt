@@ -124,7 +124,10 @@ class MainActivity : Activity(), SensorEventListener {
             sensorManager.registerListener(this, accel,
                 samplingPeriodMicroseconds, samplingPeriodMicroseconds)
         }
+        // session file - write at every event to avoid data loss
+        sessionFilename = "$userid-session.$currentTime.csv"    // file to save session information
         sessionData = mutableListOf("Session, $currentTime, ")
+        writeToSessionCsv()
     }
 
     private fun onRecordStop() {
@@ -135,31 +138,33 @@ class MainActivity : Activity(), SensorEventListener {
         xmlFilename.text = ""
         sensorManager.unregisterListener(this)
 
+        // rewrite session csv, this time with the record stop time
         val endTime = System.currentTimeMillis()
-        sessionData[0] += "$endTime"         // write session end time to csv
+        sessionData[0] += "$endTime"         // record end time
         writeToSessionCsv()
-        fSession.close()
     }
 
     private fun beginActivity(activityName: String = "Activity") {
         Log.i("0001", "Activity begin")
         val startTime = System.currentTimeMillis()
         sessionData.add("$activityName, $startTime, ")
+        writeToSessionCsv()
     }
 
     private fun endActivity(activityName: String = "Activity") {
         Log.i("0001", "Activity end")
         val endTime = System.currentTimeMillis()
         sessionData[sessionData.size - 1] += "$endTime"
+        writeToSessionCsv()
     }
 
     private fun writeToSessionCsv() {
-        sessionFilename = "$userid-session.$currentTime.csv"    // file to save session information
-
+        // rewrite session file with new information
         fSession = this.openFileOutput(sessionFilename, Context.MODE_PRIVATE)
-        fSession.write("Event, Start Time, Stop Time\n".toByteArray())
+
         for(line in sessionData){
             fSession.write("$line\n".toByteArray())
         }
+        fSession.close()
     }
 }
