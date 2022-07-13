@@ -11,7 +11,7 @@ import com.example.deltamobile.UpdateItem
 import kotlinx.android.synthetic.main.item_custom_row.view.*
 
 // adapter is responsible for pulling data into the recyclerview layouts
-class ItemAdapter(private val context:Context,private val itemList:List<UpdateItem>, private val listener:OnItemClickListener) :
+class ItemAdapter(private val context:Context, private val itemList:List<UpdateItem>, private val listener:OnItemClickListener) :
     RecyclerView.Adapter<ItemAdapter.ViewHolder>() {
 
     /**

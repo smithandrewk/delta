@@ -3,18 +3,15 @@ package com.example.deltamobile
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.AbsListView
 import android.widget.Button
-import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.recyclerviewapp.ItemAdapter
 
 /*
-This is the start display for Delta.
+ This is the dashboard of the delta app
  */
-
-class MainActivity: AppCompatActivity() ,ItemAdapter.OnItemClickListener{
+class HomeScreen : AppCompatActivity() ,ItemAdapter.OnItemClickListener{
     private val listUpdates = getItemsList();
     // init the adapter class
     // where you pass data in
@@ -24,11 +21,11 @@ class MainActivity: AppCompatActivity() ,ItemAdapter.OnItemClickListener{
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.start_display)
+        setContentView(R.layout.homescreen)
 
         // get the recyclerview
         //
-        val rvItem:RecyclerView = findViewById(R.id.rvUpdates)
+        val rvItem: RecyclerView = findViewById(R.id.rvUpdates)
 
         rvItem.layoutManager = LinearLayoutManager(this)
 
@@ -68,8 +65,8 @@ class MainActivity: AppCompatActivity() ,ItemAdapter.OnItemClickListener{
     // function to open the dashboard
     //
     fun openDashboard(){
-        val intentOpenDashboard:Intent = Intent(this,Dashboard::class.java)
-        startActivity(intentOpenDashboard)
+        val intentOpenHomeScreen: Intent = Intent(this,Dashboard::class.java)
+        startActivity(intentOpenHomeScreen)
     }
     // implement on item click listener since interface
     override fun onItemClick(position: Int) {

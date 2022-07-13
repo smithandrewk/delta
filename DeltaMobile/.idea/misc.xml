@@ -6,7 +6,12 @@
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.3134057971014493" />
         <entry key="app/src/main/res/layout/activity_main2.xml" value="0.3134057971014493" />
         <entry key="app/src/main/res/layout/dashboard.xml" value="0.31875" />
+        <entry key="app/src/main/res/layout/fragment_home.xml" value="0.15625" />
+        <entry key="app/src/main/res/layout/fragment_screen01.xml" value="0.26145833333333335" />
+        <entry key="app/src/main/res/layout/fragment_screen02.xml" value="0.26145833333333335" />
+        <entry key="app/src/main/res/layout/fragment_screen03.xml" value="0.26145833333333335" />
         <entry key="app/src/main/res/layout/fragment_splash.xml" value="0.31875" />
+        <entry key="app/src/main/res/layout/fragment_view_pager_fragement.xml" value="0.26145833333333335" />
         <entry key="app/src/main/res/layout/item_custom_row.xml" value="0.33" />
         <entry key="app/src/main/res/layout/start_display.xml" value="0.15625" />
       </map>
