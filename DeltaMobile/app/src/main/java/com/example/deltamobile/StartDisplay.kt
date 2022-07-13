@@ -15,6 +15,12 @@ This is the start display for Delta.
  */
 
 class MainActivity: AppCompatActivity() ,ItemAdapter.OnItemClickListener{
+    private val listUpdates = getItemsList();
+    // init the adapter class
+    // where you pass data in
+    // TO DO: PASS DATA IN DEPENDING ON WHAT WE WOULD LIKE
+    //
+    private val itemAdapter = ItemAdapter(this,listUpdates,this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,13 +31,6 @@ class MainActivity: AppCompatActivity() ,ItemAdapter.OnItemClickListener{
         val rvItem:RecyclerView = findViewById(R.id.rvUpdates)
 
         rvItem.layoutManager = LinearLayoutManager(this)
-
-        // init the adapter class
-        // where you pass data in
-        // TO DO: PASS DATA IN DEPENDING ON WHAT WE WOULD LIKE
-        //
-        val itemAdapter:ItemAdapter = ItemAdapter(this,getItemsList(),this)
-
 
         // set layout manager that this recycler view will use
 
@@ -44,8 +43,13 @@ class MainActivity: AppCompatActivity() ,ItemAdapter.OnItemClickListener{
         btnGetStarted.setOnClickListener{
             openDashboard()
         }
-        rvItem.adapter= itemAdapter
+        rvItem.adapter= this.itemAdapter
+
+        // hide the action bar
+        //
+        supportActionBar?.hide()
     }
+
     // function to get items for recycler view
     //
     private fun getItemsList():ArrayList<UpdateItem>{
@@ -69,7 +73,9 @@ class MainActivity: AppCompatActivity() ,ItemAdapter.OnItemClickListener{
     }
     // implement on item click listener since interface
     override fun onItemClick(position: Int) {
-        Toast.makeText(this, "Item $position clicked", Toast.LENGTH_SHORT).show()
-        // get reference to clicked item
+        // remove the item
+        //
+        this.listUpdates.removeAt(position)
+        this.itemAdapter.notifyItemRemoved(position)
     }
 }

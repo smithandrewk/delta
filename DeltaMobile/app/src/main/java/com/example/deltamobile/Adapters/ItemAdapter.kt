@@ -11,7 +11,7 @@ import com.example.deltamobile.UpdateItem
 import kotlinx.android.synthetic.main.item_custom_row.view.*
 
 // adapter is responsible for pulling data into the recyclerview layouts
-class ItemAdapter(val context: Context, val items: ArrayList<UpdateItem>, private val listener:OnItemClickListener) :
+class ItemAdapter(private val context:Context,private val itemList:List<UpdateItem>, private val listener:OnItemClickListener) :
     RecyclerView.Adapter<ItemAdapter.ViewHolder>() {
 
     /**
@@ -22,13 +22,8 @@ class ItemAdapter(val context: Context, val items: ArrayList<UpdateItem>, privat
      */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         // called as soon as view holder is visible / created in app
-        return ViewHolder(
-            LayoutInflater.from(context).inflate(
-                R.layout.item_custom_row,
-                parent,
-                false
-            )
-        )
+        val itemView = LayoutInflater.from(parent.context).inflate(R.layout.item_custom_row,parent,false)
+        return ViewHolder(itemView)
     }
 
     /**
@@ -43,7 +38,7 @@ class ItemAdapter(val context: Context, val items: ArrayList<UpdateItem>, privat
      */
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
 
-        val item = items.get(position)
+        val item = itemList.get(position)
         // set the text of the item to the text of the item
         holder.tvHeaderText.text = item.text1
         holder.tvSubText.text = item.text2
@@ -71,7 +66,7 @@ class ItemAdapter(val context: Context, val items: ArrayList<UpdateItem>, privat
      * Gets the number of items in the list
      */
     override fun getItemCount(): Int {
-        return items.size
+        return itemList.size
     }
 
     /**
