@@ -1,24 +1,91 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.wear.widget.BoxInsetLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/boxInsetLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="@dimen/box_inset_layout_padding"
     tools:context=".MainActivity"
     tools:deviceIds="wear">
 
-    <FrameLayout
+
+    <ScrollView
+        android:id="@+id/scrollView1"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="@dimen/inner_frame_layout_padding"
-        app:layout_boxedEdges="all">
+        android:layout_height="wrap_content"
+        android:focusable="true"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteX="26dp">
+        <requestFocus />
 
-        <TextView
-            android:id="@+id/text"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/hello_world" />
+            android:orientation="vertical"
+            android:paddingTop="50dp"
+            android:paddingBottom="50dp">
 
-    </FrameLayout>
-</androidx.wear.widget.BoxInsetLayout>
+            <Button
+                android:id="@+id/eatButton"
+                android:layout_width="150dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center"
+                android:gravity="bottom|end"
+                android:drawableLeft="@drawable/ic_pizza_outline"
+                android:text="Eating"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:textColor="#000000"/>
+
+            <Button
+                android:id="@+id/drinkButton"
+                android:layout_width="150dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center"
+                android:gravity="bottom|end"
+                android:drawableLeft="@drawable/ic_cafe_outline"
+                android:text="Drinking"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:textColor="#000000" />
+
+            <Button
+                android:id="@+id/smokeButton"
+                android:layout_width="150dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center"
+                android:gravity="bottom|end"
+                android:drawableStart="@drawable/ic_smoking"
+                android:text="Smoking"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:textColor="#000000" />
+
+            <Button
+                android:id="@+id/otherButton"
+                android:layout_width="150dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center"
+                android:gravity="bottom|end"
+                android:drawableStart="@drawable/ic_three_dots"
+                android:text="Other Activity"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:textColor="#000000" />
+        </LinearLayout>
+    </ScrollView>
+
+    <view
+        android:id="@+id/topText"
+        class="androidx.wear.widget.CurvedTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Choose an Activity"
+        android:layout_gravity="center_horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:textColor="#FFFFFF"/>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
