@@ -14,6 +14,8 @@ import android.widget.ToggleButton
 import androidx.wear.widget.CurvedTextView
 import com.example.delta.databinding.ActivityMainBinding
 import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.*
 
 class MainActivity : Activity(), SensorEventListener {
     private lateinit var sensorManager: SensorManager
@@ -29,10 +31,8 @@ class MainActivity : Activity(), SensorEventListener {
     private var rawFileIndex: Int = 0
     private var currentActivity: String = "None"
 
-    private var currentTime = System.currentTimeMillis()
-
-    private lateinit var xmlFilename: CurvedTextView
-    private lateinit var xmlSamplingFrequency: CurvedTextView
+    private var currentTimeMillis = System.currentTimeMillis()
+    private val readableTime = SimpleDateFormat("yyyy-MM-dd_HH_mm_ss", Locale.ENGLISH).format(Date())
 
     private lateinit var binding: ActivityMainBinding
 
@@ -51,11 +51,11 @@ class MainActivity : Activity(), SensorEventListener {
         // start Recording on app creation
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         mAccel = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-        currentTime = System.currentTimeMillis()
+        currentTimeMillis = System.currentTimeMillis()
         createNewRawFile()
 
         // create Session file
-        sessionFilename = "Session.$currentTime.csv"    // file to save session information
+        sessionFilename = "Session.$currentTimeMillis.csv"    // file to save session information
         fSession = this.openFileOutput(sessionFilename, Context.MODE_PRIVATE)
         fSession.write("Event, Start Time, Stop Time\n".toByteArray())
 
@@ -96,19 +96,12 @@ class MainActivity : Activity(), SensorEventListener {
         if (rawFileIndex != 0){
             fRaw.close()
         }
-        rawFilename = "$currentTime.$rawFileIndex.csv"       // file to save raw data
+        rawFilename = "$currentTimeMillis.$rawFileIndex.csv"       // file to save raw data
 
         fRaw = this.openFileOutput(rawFilename, Context.MODE_PRIVATE)
-        fRaw.write("Recording Real Start Time: $currentTime\n".toByteArray())
+        fRaw.write("Recording Real Start Time: $currentTimeMillis\n".toByteArray())
         fRaw.write("timestamp,acc_x,acc_y,acc_z\n".toByteArray())
         rawFileIndex++
-    }
-    private fun beginActivity(){
-        // logs a session to session csv
-
-    }
-    private fun endActivity(){
-        // log end of session to session file
     }
 
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
