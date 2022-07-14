@@ -2,11 +2,35 @@ package com.example.deltamobile
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.fragment.app.FragmentPagerAdapter
+import androidx.viewpager.widget.ViewPager
+import com.example.deltamobile.DashboardTabNav.*
+import com.google.android.material.tabs.TabLayout
 
 class Dashboard : AppCompatActivity() {
+
+    private lateinit var tlTabs:TabLayout
+    private lateinit var vpPager: ViewPager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_dashboard)
+
+        // set up tab nav
+        this.tlTabs = findViewById(R.id.tlNavTabs)
+        this.vpPager = findViewById(R.id.vpNavPager)
+
+        this.tlTabs.setupWithViewPager(vpPager)
+
+        var vpAdapter = VPAdapter(supportFragmentManager,FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT)
+
+        // add frags
+        vpAdapter.addFragment(HomeFragment(),"Home")
+        vpAdapter.addFragment(StatsFragment(),"Stats")
+        vpAdapter.addFragment(FavoritesFragment(),"Favorites")
+        vpAdapter.addFragment(SettingsFragment(),"Settings")
+
+        vpPager.adapter = vpAdapter
 
         supportActionBar?.hide()
     }

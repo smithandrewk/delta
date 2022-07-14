@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.widget.ViewPager2
 import com.example.deltamobile.R
 
@@ -20,8 +21,12 @@ class Screen02 : Fragment() {
         val viewPager = activity?.findViewById<ViewPager2>(R.id.vpOnBoarding)
 
         // go to next screen on click
-        view.findViewById<TextView>(R.id.tvNext03).setOnClickListener{
+        view.findViewById<TextView>(R.id.tvNext02).setOnClickListener{
             viewPager?.currentItem = 2
+        }
+        // skip boarding if user wants to
+        view.findViewById<TextView>(R.id.tvSkip02).setOnClickListener{
+            findNavController().navigate(R.id.action_viewPagerFragment_to_dashboard)
         }
 
         return view
