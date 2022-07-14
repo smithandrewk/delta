@@ -59,7 +59,7 @@ class MainActivity : Activity(), SensorEventListener {
         // create Session file
         sessionFilename = "Session.$startTimeReadable.csv"    // file to save session information
         fSession = this.openFileOutput(sessionFilename, Context.MODE_PRIVATE)
-        fRaw.write("File Start Time: $startTimeMillis\n".toByteArray())
+        fSession.write("File Start Time: $startTimeMillis\n".toByteArray())
         fSession.write("Event, Start Time, Stop Time\n".toByteArray())
 
         mAccel?.also { accel ->
@@ -157,7 +157,6 @@ class MainActivity : Activity(), SensorEventListener {
     override fun onStart() {
         super.onStart()
         Log.i("0001", "STARTED")
-        // TODO open files
     }
     override fun onRestart() {
         super.onRestart()

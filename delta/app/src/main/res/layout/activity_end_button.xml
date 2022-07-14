@@ -6,15 +6,29 @@
     android:layout_height="match_parent"
     tools:context=".EndActivityButton">
 
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="190dp"
+        android:layout_height="23dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.63"
+        android:paddingEnd="4dp"
+        android:paddingStart="4dp"
+        android:elevation="7dp" />
     <Button
         android:id="@+id/endActivityButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="28dp"
-        android:layout_marginTop="88dp"
-        android:text="End Current Activity"
+        android:layout_width="190dp"
+        android:layout_height="70dp"
+        android:text="Finish Activity"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"/>
+
     <view
         android:id="@+id/filename"
         class="androidx.wear.widget.CurvedTextView"
@@ -34,4 +48,5 @@
         app:clockwise="false"
         app:layout_constraintStart_toStartOf="@+id/filename"
         app:layout_constraintTop_toTopOf="@+id/filename" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

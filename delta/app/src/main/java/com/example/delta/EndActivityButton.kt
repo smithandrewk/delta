@@ -3,11 +3,15 @@ package com.example.delta
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.util.Log
 import android.widget.Button
 import androidx.wear.widget.CurvedTextView
 
+
 class EndActivityButton : Activity() {
+    var cTimer: CountDownTimer? = null
+//    var progressBarAnswer =
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_end_button)
@@ -28,6 +32,27 @@ class EndActivityButton : Activity() {
         }
 
     }
+
+//    //start timer function
+//    fun startTimer() {
+//        cTimer = object : CountDownTimer(2000, 200) {
+//            override fun onTick(millisUntilFinished: Long) {
+//                progressBarAnswer.setProgress(progressBarAnswer.getProgress() + 10)
+//            }
+//
+//            override fun onFinish() {
+//                progressBarAnswer.setProgress(0)
+//                progressBarAnswer.setVisibility(View.INVISIBLE)
+//                showAnswer()
+//            }
+//        }
+//        cTimer.start()
+//    }
+//
+//    //cancel timer
+//    fun cancelTimer() {
+//        if (cTimer != null) cTimer!!.cancel()
+//    }
     override fun onDestroy() {
         super.onDestroy()
         Log.i("0002", "DESTROYED")
