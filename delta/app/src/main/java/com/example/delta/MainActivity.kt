@@ -31,9 +31,10 @@ class MainActivity : Activity(), SensorEventListener {
     private var rawFileIndex: Int = 0
     private var currentActivity: String = "None"
 
-    private var currentTimeMillis = System.currentTimeMillis()
-    private val readableTime = SimpleDateFormat("yyyy-MM-dd_HH_mm_ss", Locale.ENGLISH).format(Date())
+    private var startTimeMillis = System.currentTimeMillis()
+    private val startTimeReadable = SimpleDateFormat("yyyy-MM-dd_HH_mm_ss", Locale.ENGLISH).format(Date())
 
+    private val LAUNCH_END_BUTTON_CODE = 1
     private lateinit var binding: ActivityMainBinding
 
     private val activityOptions = mapOf(R.id.eatButton to "Eating",
@@ -51,12 +52,14 @@ class MainActivity : Activity(), SensorEventListener {
         // start Recording on app creation
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         mAccel = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-        currentTimeMillis = System.currentTimeMillis()
+        startTimeMillis = System.currentTimeMillis()
+
         createNewRawFile()
 
         // create Session file
-        sessionFilename = "Session.$currentTimeMillis.csv"    // file to save session information
+        sessionFilename = "Session.$startTimeReadable.csv"    // file to save session information
         fSession = this.openFileOutput(sessionFilename, Context.MODE_PRIVATE)
+        fRaw.write("File Start Time: $startTimeMillis\n".toByteArray())
         fSession.write("Event, Start Time, Stop Time\n".toByteArray())
 
         mAccel?.also { accel ->
@@ -64,31 +67,37 @@ class MainActivity : Activity(), SensorEventListener {
                 samplingPeriodMicroseconds, samplingPeriodMicroseconds)
         }
 
-        // get chosen activity from user - create onClickListener for each button and send corresponding string
+        // get chosen activity from user - create onClickListener for each button
         activityOptions.forEach { (button, chosenActivity) ->
             findViewById<Button>(button).setOnClickListener {
                 Log.i("0001", "Started $chosenActivity")
                 currentActivity = chosenActivity
                 // log start time to session file
-                val startTime = System.currentTimeMillis()
-                fSession.write("$chosenActivity, $startTime, ".toByteArray())
+                val time = System.currentTimeMillis()
+                fSession.write("$chosenActivity, $time, ".toByteArray())
                 // start end button activity
                 val endButtonIntent = Intent(this, EndActivityButton::class.java)
                 endButtonIntent.putExtra("FilenameKey", rawFilename)
                 endButtonIntent.putExtra("SamplingRateKey", "$samplingRateHertz")
-                startActivity(endButtonIntent)
+                startActivityForResult(endButtonIntent, LAUNCH_END_BUTTON_CODE)
             }
         }
-        // check if returning from EndActivityButton activity
-        val activityEnding: String? = intent.getStringExtra("EndActivityKey")
-        if (activityEnding != null){
-            // log end of activity
-            val stopTime = System.currentTimeMillis()
-            fSession.write("$stopTime\n".toByteArray())
-            currentActivity = "None"
-        }
-        else{
-            Log.i("0001", "activityEnding is null")
+    }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent){
+        // Receives result from the ChooseActivity activity, and calls beginActivity with that result
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == LAUNCH_END_BUTTON_CODE){
+            if (resultCode == Activity.RESULT_OK){
+                Log.i("0001", "Logging end activity")
+                val time = System.currentTimeMillis()
+                fSession.write("$time\n".toByteArray())
+                currentActivity = "None"
+                createNewRawFile()
+            }
+            else{
+                Log.i("0001", "error")
+            }
         }
     }
 
@@ -96,11 +105,16 @@ class MainActivity : Activity(), SensorEventListener {
         if (rawFileIndex != 0){
             fRaw.close()
         }
-        rawFilename = "$currentTimeMillis.$rawFileIndex.csv"       // file to save raw data
-
+        rawFilename = "$startTimeReadable.$rawFileIndex.csv"       // file to save raw data
         fRaw = this.openFileOutput(rawFilename, Context.MODE_PRIVATE)
-        fRaw.write("Recording Real Start Time: $currentTimeMillis\n".toByteArray())
-        fRaw.write("timestamp,acc_x,acc_y,acc_z\n".toByteArray())
+        if (rawFileIndex == 0){
+            fRaw.write("File Start Time: $startTimeMillis\n".toByteArray())
+        }
+        else{
+            val time = System.currentTimeMillis()
+            fRaw.write("File Start Time: $time\n".toByteArray())
+        }
+        fRaw.write("timestamp,acc_x,acc_y,acc_z,real time,activity\n".toByteArray())
         rawFileIndex++
     }
 
@@ -115,11 +129,21 @@ class MainActivity : Activity(), SensorEventListener {
                 time+","+
                 currentActivity+"\n").toByteArray())
     }
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        Log.i("0001", "Saved instance")
+//        outState.putString("RawFilename", rawFilename)
+//        outState.putInt("RawFileIndex", rawFileIndex)
+    }
 
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        Log.i("0001", "Restored instance")
+//        rawFilename = savedInstanceState.getString("RawFilename") ?: rawFilename
+//        rawFileIndex = savedInstanceState.getInt("RawFileIndex")
+    }
     override fun onDestroy() {
         super.onDestroy()
-        fSession.close()
-        fRaw.close()
         Log.i("0001", "DESTROYED")
     }
     override fun onStop() {
@@ -133,6 +157,7 @@ class MainActivity : Activity(), SensorEventListener {
     override fun onStart() {
         super.onStart()
         Log.i("0001", "STARTED")
+        // TODO open files
     }
     override fun onRestart() {
         super.onRestart()

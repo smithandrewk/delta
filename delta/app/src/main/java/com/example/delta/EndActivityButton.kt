@@ -2,7 +2,6 @@ package com.example.delta
 
 import android.app.Activity
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
@@ -23,9 +22,9 @@ class EndActivityButton : Activity() {
 
         // when button is clicked, go back to main activity
         findViewById<Button>(R.id.endActivityButton).setOnClickListener {
-            val mainIntent = Intent(this, MainActivity::class.java)
-            mainIntent.putExtra("EndActivityKey", "true")
-            startActivity(mainIntent)
+            val returnIntent = Intent()
+            setResult(Activity.RESULT_OK, returnIntent)
+            finish()
         }
 
     }
