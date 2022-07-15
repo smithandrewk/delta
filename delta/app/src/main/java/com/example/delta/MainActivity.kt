@@ -13,7 +13,9 @@ import android.widget.Button
 import android.widget.ToggleButton
 import androidx.wear.widget.CurvedTextView
 import com.example.delta.databinding.ActivityMainBinding
+import java.io.File
 import java.io.FileOutputStream
+import java.io.FileWriter
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -24,6 +26,7 @@ class MainActivity : Activity(), SensorEventListener {
     private val samplingPeriodMicroseconds = samplingPeriodSeconds * 1000000
     private var mAccel: Sensor? = null
 
+    private lateinit var dataFolderName: String
     private lateinit var fRaw: FileOutputStream
     private lateinit var rawFilename: String
     private lateinit var fSession: FileOutputStream
@@ -49,6 +52,10 @@ class MainActivity : Activity(), SensorEventListener {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // create folder for this session's files
+        dataFolderName = startTimeReadable
+        File(this.filesDir, dataFolderName).mkdir()
+
         // start Recording on app creation
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         mAccel = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
@@ -58,7 +65,7 @@ class MainActivity : Activity(), SensorEventListener {
 
         // create Session file
         sessionFilename = "Session.$startTimeReadable.csv"    // file to save session information
-        fSession = this.openFileOutput(sessionFilename, Context.MODE_PRIVATE)
+        fSession = FileOutputStream(File(this.filesDir, "$dataFolderName/$sessionFilename"))
         fSession.write("File Start Time: $startTimeMillis\n".toByteArray())
         fSession.write("Event, Start Time, Stop Time\n".toByteArray())
 
@@ -106,7 +113,8 @@ class MainActivity : Activity(), SensorEventListener {
             fRaw.close()
         }
         rawFilename = "$startTimeReadable.$rawFileIndex.csv"       // file to save raw data
-        fRaw = this.openFileOutput(rawFilename, Context.MODE_PRIVATE)
+        fRaw= FileOutputStream(File(this.filesDir, "$dataFolderName/$rawFilename"))
+
         if (rawFileIndex == 0){
             fRaw.write("File Start Time: $startTimeMillis\n".toByteArray())
         }
