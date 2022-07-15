@@ -66,8 +66,8 @@ class MainActivity : Activity(), SensorEventListener {
         // create Session file
         sessionFilename = "Session.$startTimeReadable.csv"    // file to save session information
         fSession = FileOutputStream(File(this.filesDir, "$dataFolderName/$sessionFilename"))
-        fSession.write("File Start Time: $startTimeMillis\n".toByteArray())
-        fSession.write("Event, Start Time, Stop Time\n".toByteArray())
+        writeToSessionFile("File Start Time: $startTimeMillis\n")
+        writeToSessionFile("Event, Start Time, Stop Time\n")
 
         mAccel?.also { accel ->
             sensorManager.registerListener(this, accel,
@@ -81,7 +81,8 @@ class MainActivity : Activity(), SensorEventListener {
                 currentActivity = chosenActivity
                 // log start time to session file
                 val time = System.currentTimeMillis()
-                fSession.write("$chosenActivity, $time, ".toByteArray())
+                writeToSessionFile("$chosenActivity, $time, ")
+
                 // start end button activity
                 val endButtonIntent = Intent(this, EndActivityButton::class.java)
                 endButtonIntent.putExtra("FilenameKey", rawFilename)
@@ -98,7 +99,7 @@ class MainActivity : Activity(), SensorEventListener {
             if (resultCode == Activity.RESULT_OK){
                 Log.i("0001", "Logging end activity")
                 val time = System.currentTimeMillis()
-                fSession.write("$time\n".toByteArray())
+                writeToSessionFile("$time\n")
                 currentActivity = "None"
                 createNewRawFile()
             }
@@ -113,29 +114,40 @@ class MainActivity : Activity(), SensorEventListener {
             fRaw.close()
         }
         rawFilename = "$startTimeReadable.$rawFileIndex.csv"       // file to save raw data
-        fRaw= FileOutputStream(File(this.filesDir, "$dataFolderName/$rawFilename"))
-
-        if (rawFileIndex == 0){
-            fRaw.write("File Start Time: $startTimeMillis\n".toByteArray())
+        fRaw = FileOutputStream(File(this.filesDir, "$dataFolderName/$rawFilename"))
+        fRaw.use { f ->
+            if (rawFileIndex == 0) {
+                f.write("File Start Time: $startTimeMillis\n".toByteArray())
+            }
+            else {
+                val time = System.currentTimeMillis()
+                f.write("File Start Time: $time\n".toByteArray())
+            }
+            f.write("timestamp,acc_x,acc_y,acc_z,real time,activity\n".toByteArray())
         }
-        else{
-            val time = System.currentTimeMillis()
-            fRaw.write("File Start Time: $time\n".toByteArray())
-        }
-        fRaw.write("timestamp,acc_x,acc_y,acc_z,real time,activity\n".toByteArray())
         rawFileIndex++
+    }
+
+    private fun writeToSessionFile(str: String){
+        fSession = FileOutputStream(File(this.filesDir, "$dataFolderName/$sessionFilename"), true)
+        fSession.use { f ->
+            f.write(str.toByteArray())
+        }
     }
 
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
 
     override fun onSensorChanged(event: SensorEvent) {
         val time = System.currentTimeMillis()
-        fRaw.write((event.timestamp.toString()+","+
-                event.values[0].toString()+","+
-                event.values[1].toString()+","+
-                event.values[2].toString()+","+
-                time+","+
-                currentActivity+"\n").toByteArray())
+        fRaw = FileOutputStream(File(this.filesDir, "$dataFolderName/$rawFilename"), true)
+        fRaw.use { f ->
+            f.write((event.timestamp.toString()+","+
+                    event.values[0].toString()+","+
+                    event.values[1].toString()+","+
+                    event.values[2].toString()+","+
+                    time+","+
+                    currentActivity+"\n").toByteArray())
+        }
     }
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
