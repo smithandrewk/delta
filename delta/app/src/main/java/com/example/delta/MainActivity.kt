@@ -10,12 +10,9 @@ import android.hardware.SensorManager
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
-import android.widget.ToggleButton
-import androidx.wear.widget.CurvedTextView
 import com.example.delta.databinding.ActivityMainBinding
 import java.io.File
 import java.io.FileOutputStream
-import java.io.FileWriter
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -91,26 +88,26 @@ class MainActivity : Activity(), SensorEventListener {
             }
         }
     }
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent){
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
         // Receives result from the ChooseActivity activity, and calls beginActivity with that result
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == LAUNCH_END_BUTTON_CODE){
-            if (resultCode == Activity.RESULT_OK){
+        if (requestCode == LAUNCH_END_BUTTON_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
                 Log.i("0001", "Logging end activity")
                 val time = System.currentTimeMillis()
                 writeToSessionFile("$time\n")
                 currentActivity = "None"
                 createNewRawFile()
             }
-            else{
+            else {
                 Log.i("0001", "error")
             }
         }
     }
 
-    private fun createNewRawFile(){
-        if (rawFileIndex != 0){
+    private fun createNewRawFile() {
+        if (rawFileIndex != 0) {
             fRaw.close()
         }
         rawFilename = "$startTimeReadable.$rawFileIndex.csv"       // file to save raw data
@@ -128,7 +125,7 @@ class MainActivity : Activity(), SensorEventListener {
         rawFileIndex++
     }
 
-    private fun writeToSessionFile(str: String){
+    private fun writeToSessionFile(str: String) {
         fSession = FileOutputStream(File(this.filesDir, "$dataFolderName/$sessionFilename"), true)
         fSession.use { f ->
             f.write(str.toByteArray())

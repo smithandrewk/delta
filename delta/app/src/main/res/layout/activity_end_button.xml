@@ -19,7 +19,7 @@
         android:paddingEnd="4dp"
         android:paddingStart="4dp"
         android:elevation="7dp"
-        android:visibility="invisible"/>
+        android:visibility="invisible" />
     <Button
         android:id="@+id/endActivityButton"
         android:layout_width="190dp"
