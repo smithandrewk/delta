@@ -141,7 +141,7 @@ class MainActivity : Activity(), SensorEventListener {
                     time+","+
                     currentActivity+"\n").toByteArray())
     }
-    
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         Log.i("0001", "Saved instance")
