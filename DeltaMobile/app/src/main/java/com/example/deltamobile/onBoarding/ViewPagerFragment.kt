@@ -18,7 +18,7 @@ class ViewPagerFragment: Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        val view = inflater.inflate(R.layout.fragment_view_pager_fragment, container, false)
+        val view = inflater.inflate(R.layout.boarding__frag_view_pager, container, false)
 
         val fragmentList = ArrayList<Fragment>()
         // add onboarding screens

@@ -6,12 +6,11 @@ import android.os.Bundle
 import android.widget.Button
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.recyclerviewapp.ItemAdapter
 
 /*
  This is the dashboard of the delta app
  */
-class HomeScreen : AppCompatActivity() ,ItemAdapter.OnItemClickListener{
+class HomeScreen : AppCompatActivity() , ItemAdapter.OnItemClickListener{
     private val listUpdates = getItemsList();
     // init the adapter class
     // where you pass data in
@@ -21,7 +20,7 @@ class HomeScreen : AppCompatActivity() ,ItemAdapter.OnItemClickListener{
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.homescreen)
+        setContentView(R.layout.homescreen__base)
 
         // get the recyclerview
         //

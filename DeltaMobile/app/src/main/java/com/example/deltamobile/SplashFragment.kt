@@ -25,7 +25,7 @@ class SplashFragment : Fragment() {
             }
         },WAIT_MS)
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_splash, container, false)
+        return inflater.inflate(R.layout.splash__fragment_splash, container, false)
     }
 
     // check if the user has completed boarding or not

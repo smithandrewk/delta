@@ -16,7 +16,7 @@ class Screen02 : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        val view = inflater.inflate(R.layout.fragment_screen02, container, false)
+        val view = inflater.inflate(R.layout.boarding__frag_screen02, container, false)
 
         val viewPager = activity?.findViewById<ViewPager2>(R.id.vpOnBoarding)
 

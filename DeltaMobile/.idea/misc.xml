@@ -3,10 +3,21 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="app/src/main/res/drawable/box.xml" value="0.267" />
         <entry key="app/src/main/res/layout/activity_dashboard.xml" value="0.26145833333333335" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.3134057971014493" />
         <entry key="app/src/main/res/layout/activity_main2.xml" value="0.3134057971014493" />
+        <entry key="app/src/main/res/layout/boarding__frag_screen01.xml" value="0.31875" />
+        <entry key="app/src/main/res/layout/boarding__frag_screen02.xml" value="0.2630208333333333" />
+        <entry key="app/src/main/res/layout/boarding__frag_screen03.xml" value="0.2630208333333333" />
+        <entry key="app/src/main/res/layout/boarding__frag_view_pager.xml" value="0.2630208333333333" />
         <entry key="app/src/main/res/layout/dashboard.xml" value="0.31875" />
+        <entry key="app/src/main/res/layout/dashboard__base.xml" value="0.2630208333333333" />
+        <entry key="app/src/main/res/layout/dashboard__frag_favorites.xml" value="0.2630208333333333" />
+        <entry key="app/src/main/res/layout/dashboard__frag_home.xml" value="0.2630208333333333" />
+        <entry key="app/src/main/res/layout/dashboard__frag_home__card_cell.xml" value="0.18" />
+        <entry key="app/src/main/res/layout/dashboard__frag_settings.xml" value="0.2630208333333333" />
+        <entry key="app/src/main/res/layout/dashboard__frag_stats.xml" value="0.2630208333333333" />
         <entry key="app/src/main/res/layout/fragment_favorites.xml" value="0.26145833333333335" />
         <entry key="app/src/main/res/layout/fragment_home.xml" value="0.15625" />
         <entry key="app/src/main/res/layout/fragment_home2.xml" value="0.26145833333333335" />
@@ -19,7 +30,10 @@
         <entry key="app/src/main/res/layout/fragment_view_pager_fragement.xml" value="0.26145833333333335" />
         <entry key="app/src/main/res/layout/fragment_view_pager_fragment.xml" value="0.26145833333333335" />
         <entry key="app/src/main/res/layout/homescreen.xml" value="0.26145833333333335" />
+        <entry key="app/src/main/res/layout/homescreen__base.xml" value="0.2630208333333333" />
+        <entry key="app/src/main/res/layout/homescreen__item_custom_row.xml" value="0.2630208333333333" />
         <entry key="app/src/main/res/layout/item_custom_row.xml" value="0.33" />
+        <entry key="app/src/main/res/layout/main_activity.xml" value="0.15625" />
         <entry key="app/src/main/res/layout/start_display.xml" value="0.15625" />
       </map>
     </option>

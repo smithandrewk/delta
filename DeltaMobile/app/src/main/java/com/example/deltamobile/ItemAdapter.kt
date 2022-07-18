@@ -1,4 +1,4 @@
-package com.recyclerviewapp
+package com.example.deltamobile
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -6,12 +6,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.example.deltamobile.R
-import com.example.deltamobile.UpdateItem
-import kotlinx.android.synthetic.main.item_custom_row.view.*
+import kotlinx.android.synthetic.main.homescreen__item_custom_row.view.*
 
 // adapter is responsible for pulling data into the recyclerview layouts
-class ItemAdapter(private val context:Context, private val itemList:List<UpdateItem>, private val listener:OnItemClickListener) :
+class ItemAdapter(private val context:Context, private val itemList:List<UpdateItem>, private val listener: OnItemClickListener) :
     RecyclerView.Adapter<ItemAdapter.ViewHolder>() {
 
     /**
@@ -22,7 +20,7 @@ class ItemAdapter(private val context:Context, private val itemList:List<UpdateI
      */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         // called as soon as view holder is visible / created in app
-        val itemView = LayoutInflater.from(parent.context).inflate(R.layout.item_custom_row,parent,false)
+        val itemView = LayoutInflater.from(parent.context).inflate(R.layout.homescreen__item_custom_row,parent,false)
         return ViewHolder(itemView)
     }
 

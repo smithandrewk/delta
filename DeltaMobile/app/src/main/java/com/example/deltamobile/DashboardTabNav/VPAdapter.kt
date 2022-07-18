@@ -17,8 +17,11 @@ class VPAdapter(fm: FragmentManager, behavior:Int):FragmentPagerAdapter(fm,behav
     }
 
     override fun getPageTitle(position:Int):String{
-        return this.arrlistFragTitles[position]
+        // return empty to only give icon
+//        return this.arrlistFragTitles[position]
+        return ""
     }
+
 
     // add frags from main activity to array list
     fun addFragment(fragment: Fragment,title:String){

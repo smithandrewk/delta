@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.navigation.fragment.findNavController
-import androidx.viewpager2.widget.ViewPager2
 import com.example.deltamobile.R
 
 class Screen03 : Fragment() {
@@ -17,7 +16,7 @@ class Screen03 : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        val view = inflater.inflate(R.layout.fragment_screen03, container, false)
+        val view = inflater.inflate(R.layout.boarding__frag_screen03, container, false)
 
         // go to home screen on last boarding
         //
