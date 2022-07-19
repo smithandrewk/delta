@@ -9,7 +9,11 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
 import android.util.Log
+import android.util.TypedValue
+import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.widget.Button
+import android.widget.ScrollView
 import com.example.delta.databinding.ActivityMainBinding
 import java.io.File
 import java.io.FileOutputStream
@@ -33,6 +37,8 @@ class MainActivity : Activity(), SensorEventListener {
 
     private var startTimeMillis = System.currentTimeMillis()
     private val startTimeReadable = SimpleDateFormat("yyyy-MM-dd_HH_mm_ss", Locale.ENGLISH).format(Date())
+
+    private var buttonWidth: Int = -1
 
     private val LAUNCH_END_BUTTON_CODE = 1
     private lateinit var binding: ActivityMainBinding
@@ -87,6 +93,34 @@ class MainActivity : Activity(), SensorEventListener {
                 startActivityForResult(endButtonIntent, LAUNCH_END_BUTTON_CODE)
             }
         }
+        var mainScrollView = findViewById<ScrollView>(R.id.MainScrollView)
+        mainScrollView.viewTreeObserver.addOnScrollChangedListener(
+            ViewTreeObserver.OnScrollChangedListener {
+                val scrollY: Int = mainScrollView.scrollY // For ScrollView
+                Log.i("0001", "ScrollView: $scrollY")
+                activityOptions.forEach { (button, chosenActivity) ->
+                    var buttonView = findViewById<Button>(button)
+                    var loc = IntArray(2)
+                    buttonView.getLocationOnScreen(loc)
+                    var buttonScrollY = loc[1]
+                    Log.i("0001", "$chosenActivity: $buttonScrollY")
+                    if (buttonScrollY < -60){
+                        val layoutParams: ViewGroup.LayoutParams = buttonView.layoutParams
+                        layoutParams.width = buttonWidth - 100
+                        buttonView.layoutParams = layoutParams
+                    }
+                    else if (buttonScrollY > 290) {
+                        val layoutParams: ViewGroup.LayoutParams = buttonView.layoutParams
+                        layoutParams.width = buttonWidth - 100
+                        buttonView.layoutParams = layoutParams
+                    }
+                    else {
+                        val layoutParams: ViewGroup.LayoutParams = buttonView.layoutParams
+                        layoutParams.width = buttonWidth
+                        buttonView.layoutParams = layoutParams
+                    }
+                }
+            })
     }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
         // Receives result from the ChooseActivity activity, and calls beginActivity with that result
@@ -178,5 +212,8 @@ class MainActivity : Activity(), SensorEventListener {
     override fun onResume() {
         super.onResume()
         Log.i("0001", "RESUMED")
+        if (buttonWidth == -1) {
+            buttonWidth = findViewById<Button>(R.id.eatButton).layoutParams.width
+        }
     }
 }
