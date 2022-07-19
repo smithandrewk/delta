@@ -6,7 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity"
-    tools:deviceIds="wear">
+    tools:deviceIds="wear"
+    android:background="@android:color/black">
 
 
     <ScrollView
@@ -27,6 +28,7 @@
 
             <Button
                 android:id="@+id/eatButton"
+                android:backgroundTint="@color/button_background"
                 android:layout_width="150dp"
                 android:layout_height="100dp"
                 android:layout_gravity="center"
@@ -35,10 +37,11 @@
                 android:text="Eating"
                 android:textAllCaps="false"
                 android:textSize="16sp"
-                android:textColor="#000000"/>
+                android:textColor="@color/button_text"/>
 
             <Button
                 android:id="@+id/drinkButton"
+                android:backgroundTint="@color/button_background"
                 android:layout_width="150dp"
                 android:layout_height="100dp"
                 android:layout_gravity="center"
@@ -47,10 +50,11 @@
                 android:text="Drinking"
                 android:textAllCaps="false"
                 android:textSize="16sp"
-                android:textColor="#000000" />
+                android:textColor="@color/button_text" />
 
             <Button
                 android:id="@+id/smokeButton"
+                android:backgroundTint="@color/button_background"
                 android:layout_width="150dp"
                 android:layout_height="100dp"
                 android:layout_gravity="center"
@@ -59,10 +63,11 @@
                 android:text="Smoking"
                 android:textAllCaps="false"
                 android:textSize="16sp"
-                android:textColor="#000000" />
+                android:textColor="@color/button_text" />
 
             <Button
                 android:id="@+id/otherButton"
+                android:backgroundTint="@color/button_background"
                 android:layout_width="150dp"
                 android:layout_height="100dp"
                 android:layout_gravity="center"
@@ -71,7 +76,7 @@
                 android:text="Other Activity"
                 android:textAllCaps="false"
                 android:textSize="16sp"
-                android:textColor="#000000" />
+                android:textColor="@color/button_text" />
         </LinearLayout>
     </ScrollView>
 
