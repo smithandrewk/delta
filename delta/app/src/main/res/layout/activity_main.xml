@@ -29,8 +29,8 @@
             <Button
                 android:id="@+id/eatButton"
                 android:backgroundTint="@color/button_background"
-                android:layout_width="150dp"
-                android:layout_height="100dp"
+                android:layout_width="@dimen/button_width"
+                android:layout_height="@dimen/button_height"
                 android:layout_gravity="center"
                 android:gravity="bottom|end"
                 android:drawableLeft="@drawable/ic_pizza_outline"
@@ -42,8 +42,8 @@
             <Button
                 android:id="@+id/drinkButton"
                 android:backgroundTint="@color/button_background"
-                android:layout_width="150dp"
-                android:layout_height="100dp"
+                android:layout_width="@dimen/button_width"
+                android:layout_height="@dimen/button_height"
                 android:layout_gravity="center"
                 android:gravity="bottom|end"
                 android:drawableLeft="@drawable/ic_cafe_outline"
@@ -55,8 +55,8 @@
             <Button
                 android:id="@+id/smokeButton"
                 android:backgroundTint="@color/button_background"
-                android:layout_width="150dp"
-                android:layout_height="100dp"
+                android:layout_width="@dimen/button_width"
+                android:layout_height="@dimen/button_height"
                 android:layout_gravity="center"
                 android:gravity="bottom|end"
                 android:drawableStart="@drawable/ic_smoking"
@@ -68,8 +68,8 @@
             <Button
                 android:id="@+id/otherButton"
                 android:backgroundTint="@color/button_background"
-                android:layout_width="150dp"
-                android:layout_height="100dp"
+                android:layout_width="@dimen/button_width"
+                android:layout_height="@dimen/button_height"
                 android:layout_gravity="center"
                 android:gravity="bottom|end"
                 android:drawableStart="@drawable/ic_three_dots"
