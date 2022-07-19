@@ -112,16 +112,14 @@ class MainActivity : Activity(), SensorEventListener {
         }
         rawFilename = "$startTimeReadable.$rawFileIndex.csv"       // file to save raw data
         fRaw = FileOutputStream(File(this.filesDir, "$dataFolderName/$rawFilename"))
-        fRaw.use { f ->
-            if (rawFileIndex == 0) {
-                f.write("File Start Time: $startTimeMillis\n".toByteArray())
-            }
-            else {
-                val time = System.currentTimeMillis()
-                f.write("File Start Time: $time\n".toByteArray())
-            }
-            f.write("timestamp,acc_x,acc_y,acc_z,real time,activity\n".toByteArray())
+        if (rawFileIndex == 0) {
+            fRaw.write("File Start Time: $startTimeMillis\n".toByteArray())
         }
+        else {
+            val time = System.currentTimeMillis()
+            fRaw.write("File Start Time: $time\n".toByteArray())
+        }
+        fRaw.write("timestamp,acc_x,acc_y,acc_z,real time,activity\n".toByteArray())
         rawFileIndex++
     }
 
@@ -136,16 +134,14 @@ class MainActivity : Activity(), SensorEventListener {
 
     override fun onSensorChanged(event: SensorEvent) {
         val time = System.currentTimeMillis()
-        fRaw = FileOutputStream(File(this.filesDir, "$dataFolderName/$rawFilename"), true)
-        fRaw.use { f ->
-            f.write((event.timestamp.toString()+","+
+        fRaw.write((event.timestamp.toString()+","+
                     event.values[0].toString()+","+
                     event.values[1].toString()+","+
                     event.values[2].toString()+","+
                     time+","+
                     currentActivity+"\n").toByteArray())
-        }
     }
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         Log.i("0001", "Saved instance")
