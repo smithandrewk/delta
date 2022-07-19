@@ -13,6 +13,13 @@ class Dashboard : AppCompatActivity() {
     private lateinit var vpPager: ViewPager
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        /*
+        NOTE:
+        May want to find out where the source of the intent that brought us here is from.
+        There are a few ways to do this, but I'd check out sending arguments with the intent.
+        See:
+        https://stackoverflow.com/questions/4789155/how-to-find-intent-source-in-android:w
+         */
         super.onCreate(savedInstanceState)
         setContentView(R.layout.dashboard__base)
 
@@ -21,9 +28,6 @@ class Dashboard : AppCompatActivity() {
         this.vpPager = findViewById(R.id.vpNavPager)
 
         this.tlTabs.setupWithViewPager(vpPager)
-
-
-
 
         var vpAdapter = VPAdapter(supportFragmentManager,FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT)
 

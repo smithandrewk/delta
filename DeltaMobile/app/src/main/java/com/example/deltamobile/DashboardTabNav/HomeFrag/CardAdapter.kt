@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.deltamobile.R
 import com.example.deltamobile.databinding.DashboardFragHomeCardCellBinding
@@ -21,14 +22,16 @@ class CardAdapter(private val context: Context, private val cardList:List<MyCard
         return cardList.size
     }
 
-    inner class ViewHolder(myCardView:View):RecyclerView.ViewHolder(myCardView),
-        View.OnClickListener{
+    inner class ViewHolder(myCardView:View)
+        :RecyclerView.ViewHolder(myCardView),View.OnClickListener{
+
             val tvTitle = myCardView.tvTitle;
             val imgCover = myCardView.imgCover;
             val tvDescription = myCardView.tvDescription;
+            val tvDate = myCardView.tvDate;
 
             init{
-                myCardView.setOnClickListener(this,)
+                myCardView.btnClicker.setOnClickListener(this,)
             }
             override fun onClick(v:View?){
                 val position = adapterPosition
@@ -45,8 +48,10 @@ class CardAdapter(private val context: Context, private val cardList:List<MyCard
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val card = cardList[position]
 
-        holder.tvTitle.text = card.text1
-        holder.tvDescription.text = card.text2
+        holder.tvTitle.text = card.cardTitle
+        holder.tvDate.text = card.cardDate
+        holder.tvDescription.text = card.cardDescription
         holder.imgCover.setImageResource(card.imgResource)
+
     }
 }

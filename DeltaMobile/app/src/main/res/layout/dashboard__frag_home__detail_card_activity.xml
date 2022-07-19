@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rlHomeFragDetail"
+    tools:context=".DashboardTabNav.HomeFrag.DashboardHomeFragDetailCardActivity">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cvCardView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:cardCornerRadius="15dp"
+        android:layout_height="match_parent"
+        app:cardCornerRadius="10dp"
         android:clickable="true"
         android:layout_margin="10dp"
         app:cardElevation="7dp">
@@ -19,11 +22,10 @@
             >
 
             <ImageView
-                android:id="@+id/imgCover"
-                android:layout_width="213dp"
-                android:layout_height="178dp"
-                android:layout_gravity="center"
                 android:layout_margin="10dp"
+                android:id="@+id/imgCover"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:adjustViewBounds="true"
                 android:contentDescription="Cover"
                 android:src="@drawable/ic_baseline_bluetooth_24" />
@@ -60,8 +62,8 @@
                 android:layout_margin="10dp"
                 android:id="@+id/btnClicker"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="click to open"
+                android:layout_height="wrap_content"
+                android:text="click to close"
                 />
 
 
@@ -69,6 +71,4 @@
 
     </androidx.cardview.widget.CardView>
 
-
-
-</LinearLayout>
+</RelativeLayout>
