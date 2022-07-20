@@ -26,6 +26,7 @@
     />
     <Button
         android:id="@+id/endActivityButton"
+        android:background="@drawable/circle_button"
         android:backgroundTint="@color/end_button"
         android:layout_width="190dp"
         android:layout_height="70dp"
