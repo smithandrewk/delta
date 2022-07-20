@@ -67,7 +67,7 @@ class EndActivityButton : Activity() {
         (cTimer as CountDownTimer).start()
     }
 
-    //cancel timer
+    // cancel timer
     private fun cancelTimer() {
         if (cTimer != null) cTimer!!.cancel()
     }
