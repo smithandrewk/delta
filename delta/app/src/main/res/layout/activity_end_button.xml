@@ -20,13 +20,10 @@
         android:paddingEnd="4dp"
         android:paddingStart="4dp"
         android:elevation="7dp"
-        android:indeterminate="true"
-        android:indeterminateTintMode="src_atop"
-        android:indeterminateTint="@color/end_button_text"
+        android:progressBackgroundTint="@color/end_button_text"
+        android:progressTint="@color/end_button_text"
         android:visibility="invisible"
-        />
-    <!-- round corner -->
-
+    />
     <Button
         android:id="@+id/endActivityButton"
         android:backgroundTint="@color/end_button"
