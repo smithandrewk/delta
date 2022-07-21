@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".onBoarding.screens.Screen01">
+
+    <ImageView
+        android:id="@+id/img01"
+        android:layout_width="259dp"
+        android:layout_height="245dp"
+        android:src="@drawable/ic_baseline_emoji_people_24"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.3" />
+
+
+    <TextView
+        android:id="@+id/tvNext01"
+        android:layout_width="141dp"
+        android:layout_height="47dp"
+        android:layout_marginBottom="84dp"
+        android:gravity="center"
+        android:text="Next"
+        android:textSize="32dp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvDescription01"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <TextView
+        android:id="@+id/tvBoarding01"
+        android:layout_width="257dp"
+        android:layout_height="61dp"
+        android:layout_marginBottom="252dp"
+        android:gravity="center"
+        android:text="Boarding One"
+        android:textSize="25dp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.506"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/img01" />
+
+    <TextView
+        android:id="@+id/tvSkip01"
+        android:layout_width="228dp"
+        android:layout_height="50dp"
+        android:layout_marginBottom="16dp"
+        android:gravity="center"
+        android:text="Skip"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvNext01"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <TextView
+        android:id="@+id/tvDescription01"
+        android:layout_width="251dp"
+        android:layout_height="114dp"
+        android:layout_marginBottom="132dp"
+        android:gravity="center"
+        android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.543"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvBoarding01"
+        app:layout_constraintVertical_bias="0.526" />
+</androidx.constraintlayout.widget.ConstraintLayout>

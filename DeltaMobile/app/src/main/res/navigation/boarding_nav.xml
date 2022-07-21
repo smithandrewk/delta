@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/my_nav"
+    app:startDestination="@id/splashFragment">
+
+    <fragment
+        android:id="@+id/splashFragment"
+        android:name="com.example.deltamobile.SplashFragment"
+        android:label="fragment_splash"
+        tools:layout="@layout/splash__fragment_splash" >
+        <action
+            android:id="@+id/action_splashFragment_to_viewPagerFragment"
+            app:destination="@id/viewPagerFragment" />
+        <action
+            android:id="@+id/action_splashFragment_to_welcomescreen"
+            app:destination="@id/welcomescreen" />
+        <action
+            android:id="@+id/action_splashFragment_to_dashboard"
+            app:destination="@id/dashboard" />
+    </fragment>
+    <fragment
+        android:id="@+id/viewPagerFragment"
+        android:name="com.example.deltamobile.onBoarding.ViewPagerFragment"
+        android:label="fragment_view_pager_fragement"
+        tools:layout="@layout/boarding__frag_view_pager" >
+        <action
+            android:id="@+id/action_viewPagerFragment_to_welcomescreen"
+            app:destination="@id/welcomescreen" />
+    </fragment>
+    <activity
+        android:id="@+id/welcomescreen"
+        android:name="com.example.deltamobile.WelcomeScreen"
+        android:label="welcoemscreen" />
+    <activity
+        android:id="@+id/dashboard"
+        android:name="com.example.deltamobile.Dashboard"
+        android:label="dashboard__base"
+        tools:layout="@layout/dashboard__base" />
+</navigation>

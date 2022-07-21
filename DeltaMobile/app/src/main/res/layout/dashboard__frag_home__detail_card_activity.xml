@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rlHomeFragDetail"
+    tools:context=".DashboardTabNav.HomeFrag.DashboardHomeFragDetailCardActivity">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cvCardView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:cardCornerRadius="10dp"
+        android:clickable="true"
+        android:layout_margin="10dp"
+        app:cardElevation="7dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            >
+
+            <ImageView
+                android:layout_margin="10dp"
+                android:id="@+id/imgCover"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:contentDescription="Cover"
+                android:src="@drawable/ic_baseline_bluetooth_24" />
+
+            <TextView
+                android:layout_margin="10dp"
+                android:id="@+id/tvTitle"
+                android:textColor="@color/black"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Title"
+                android:textSize="30sp"
+                android:textStyle="bold" />
+            <TextView
+                android:layout_margin="10dp"
+                android:id="@+id/tvDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Description"
+                android:textSize="15sp"
+                />
+            <TextView
+                android:layout_margin="10dp"
+                android:id="@+id/tvDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Date"
+                android:textSize="10sp"
+                />
+            <Button
+                android:layout_margin="10dp"
+                android:id="@+id/btnClicker"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="click to close"
+                />
+
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</RelativeLayout>

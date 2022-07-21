@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".DashboardTabNav.StatsFragment">
+
+    <TextView
+        android:id="@+id/tvStatsTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="121dp"
+        android:layout_marginTop="118dp"
+        android:layout_marginEnd="122dp"
+        android:layout_marginBottom="560dp"
+        android:gravity="center"
+        android:text="Stats Tab"
+        android:textColor="@color/black"
+        android:textSize="40dp" />
+
+    <Button
+        android:id="@+id/btnClicker"
+        android:layout_width="wrap_content"
+        android:layout_height="63dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="658dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="10dp"
+        android:text="SEND / RECEIVE DATA TEST" />
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/etInputData"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="-1dp"
+        android:layout_marginTop="539dp"
+        android:layout_marginEnd="-1dp"
+        android:layout_marginBottom="147dp"
+        android:hint="Input data here" />
+
+    <TextView
+        android:id="@+id/tvDictionaryEntry"
+        android:maxLines="5"
+        android:scrollbars="vertical"
+        android:layout_width="320dp"
+        android:layout_height="291dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="193dp"
+        android:layout_marginEnd="43dp"
+        android:layout_marginBottom="247dp"
+        android:text="TextView" />
+
+</RelativeLayout>
