@@ -64,7 +64,7 @@ class MainActivity : Activity(), SensorEventListener {
         sessionFilename = "Session.$startTimeReadable.csv"    // file to save session information
         fSession = FileOutputStream(File(this.filesDir, "$dataFolderName/$sessionFilename"))
         writeToSessionFile("File Start Time: $startTimeMillis\n")
-        writeToSessionFile("Event, Start Time, Stop Time\n")
+        writeToSessionFile("Event,Start Time,Stop Time\n")
 
         mAccel?.also { accel ->
             sensorManager.registerListener(this, accel,
@@ -78,7 +78,7 @@ class MainActivity : Activity(), SensorEventListener {
                 currentActivity = chosenActivity
                 // log start time to session file
                 val time = System.currentTimeMillis()
-                writeToSessionFile("$chosenActivity, $time, ")
+                writeToSessionFile("$chosenActivity,$time,")
 
                 // start end button activity
                 val endButtonIntent = Intent(this, EndActivityButton::class.java)
