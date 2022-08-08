@@ -15,6 +15,11 @@ val action__DELETE_CARD = "DELETE_CARD"
 ////
 // Class to hold data for cards
 //
+
+//
+// TODO:
+// Make a parent Card class, from which graph cards can inherit
+//
 data class MyCard(
     val imgResource:Int,
     val cardTitle:String,
