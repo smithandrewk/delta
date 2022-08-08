@@ -12,6 +12,9 @@ val intent__MYCARD_IMG_RES = "MYCARD_IMG_RES"
 val action__DETAIL_CARD = "DETAIL_CARD"
 val action__DELETE_CARD = "DELETE_CARD"
 
+////
+// Class to hold data for cards
+//
 data class MyCard(
     val imgResource:Int,
     val cardTitle:String,

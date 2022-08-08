@@ -4,8 +4,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 
+// Adapter for view pager
+//
 class VPAdapter(fm: FragmentManager, behavior:Int):FragmentPagerAdapter(fm,behavior){
+    // list of fragments
     private val arrlistFrags = ArrayList<Fragment>()
+    // list of fragment titles
     private val arrlistFragTitles = ArrayList<String>()
 
     override fun getCount(): Int {

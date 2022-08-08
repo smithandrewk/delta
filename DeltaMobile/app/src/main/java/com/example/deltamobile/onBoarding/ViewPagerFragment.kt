@@ -32,6 +32,7 @@ class ViewPagerFragment: Fragment() {
             lifecycle
         )
 
+        // attach the adapter
         view.findViewById<ViewPager2>(R.id.vpOnBoarding).adapter = adapter
 
         return view

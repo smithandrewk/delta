@@ -9,6 +9,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.deltamobile.R
 import kotlinx.android.synthetic.main.dashboard__frag_home__card_cell.view.*
 
+////
+// Adapter for Card object.
+// Card object is used in the home screen
+//
 class CardAdapter(private val context: Context, private val cardList:List<MyCard>,private val listener:OnMyCardClickListener)
     :RecyclerView.Adapter<CardAdapter.ViewHolder>(){
 
@@ -52,10 +56,14 @@ class CardAdapter(private val context: Context, private val cardList:List<MyCard
             }
 
     }
+
     interface OnMyCardClickListener{
         fun onMyCardClick(position:Int,action:String)
     }
 
+    ////
+    // Give each card the relevant data when bound to view holder
+    //
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val card = cardList[position]
 

@@ -41,8 +41,8 @@ class SplashFragment : Fragment() {
     // check if user has viewed updates or not
     //
     private fun onUpdateViewingFinished():Boolean{
-        val sharedPref = requireActivity().getSharedPreferences(spnameMAIN_ACTIVITY__UPDATE_RELEASED,Context.MODE_PRIVATE)
-        return sharedPref.getBoolean(spnameMAIN_ACTIVITY__UPDATE_RELEASED,false)
+        val sharedPref = requireActivity().getSharedPreferences(spnameMAIN_ACTIVITY__UPDATES_VIEWED,Context.MODE_PRIVATE)
+        return sharedPref.getBoolean(spnameMAIN_ACTIVITY__UPDATES_VIEWED,false)
     }
 
     // check if the user has completed boarding or not

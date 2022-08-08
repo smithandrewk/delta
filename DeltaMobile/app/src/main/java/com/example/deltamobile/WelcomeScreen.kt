@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
@@ -44,8 +45,12 @@ class WelcomeScreen : AppCompatActivity() , ItemAdapter.OnItemClickListener{
         // get started btn opens dashboard
         //
         btnGetStarted.setOnClickListener{
+
+            // go to dashboard page
             openDashboard()
         }
+
+        // attach adapter
         rvItem.adapter= this.itemAdapter
 
         // user has now viewed updates, so dont need to see this screen on reload
@@ -79,11 +84,13 @@ class WelcomeScreen : AppCompatActivity() , ItemAdapter.OnItemClickListener{
         }
         return list
     }
+    ////
+    // store shared pref value that states that the user has completed viewing of updates
+    //
     private fun onUpdateViewingFinished(){
-        // note that these
-        val sharedPref =getSharedPreferences(spnameMAIN_ACTIVITY__UPDATE_RELEASED, Context.MODE_PRIVATE)
+        val sharedPref =getSharedPreferences(spnameMAIN_ACTIVITY__UPDATES_VIEWED, Context.MODE_PRIVATE)
         val editor = sharedPref.edit()
-        editor.putBoolean(spnameMAIN_ACTIVITY__UPDATE_RELEASED,false)
+        editor.putBoolean(spnameMAIN_ACTIVITY__UPDATES_VIEWED,true)
         editor.apply()
     }
     ////
