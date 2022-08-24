@@ -1,6 +1,7 @@
 package com.example.deltamobile.DashboardTabNav
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -10,13 +11,19 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.deltamobile.DashboardTabNav.HomeFrag.*
 import com.example.deltamobile.R
+import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
+import com.github.mikephil.charting.utils.Utils
 import kotlinx.android.synthetic.main.dashboard__frag_home.*
+import kotlinx.android.synthetic.main.dashboard__frag_home__card_cell.view.*
 
 // home screen on dashboard
 //
 class HomeFragment : Fragment() ,CardAdapter.OnMyCardClickListener{
-    private val listCards = getCardsList();
-
+    private var listCards: ArrayList<MyCard> = ArrayList<MyCard>()
     private lateinit var cardAdapter: CardAdapter;
 
     /*
@@ -25,12 +32,20 @@ class HomeFragment : Fragment() ,CardAdapter.OnMyCardClickListener{
      */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        // create card objects
+        this.listCards = getCardsList();
+
+        // create card adapter
+        //
         cardAdapter = CardAdapter(this.requireContext(),listCards,this)
 
+        // create recycler view
         val rvRecycler:RecyclerView = this.rvRecycler
         val SPAN_COUNT = 2
+
         rvRecycler.layoutManager = GridLayoutManager(this.requireContext(),SPAN_COUNT)
         rvRecycler.adapter = this.cardAdapter
+
     }
 
     override fun onCreateView(
@@ -46,15 +61,49 @@ class HomeFragment : Fragment() ,CardAdapter.OnMyCardClickListener{
     private fun getCardsList():ArrayList<MyCard>{
         val list = ArrayList<MyCard>()
         for(i in 0 until 12){
-            val drawable = when(i%3){
-                0->R.drawable.ic_baseline_accessibility_24
-                1->R.drawable.ic_baseline_cloud_upload_24
-                else ->R.drawable.ic_baseline_bluetooth_24
-            }
-            val card= MyCard(drawable,"Card $i","Date $i","Description $i")
+            val drawable = getCardIcon(i);
+            val card= MyCard(drawable,"Card $i","Date $i","Description $i",getCardLineChart());
             list.add(card)
         }
         return list;
+    }
+    private fun getCardLineChart():LineChart{
+        Utils.init(context)
+        // return line chart for card
+        // atm hardcoded for same values
+        val x = listOf<Float>(1f,2f,3f,4f,5f,6f) // x axis data
+        val y = x.map{it*it};
+        var entryList = mutableListOf<Entry>()
+        for(i in x.indices){
+            entryList.add(
+                Entry(x[i],y[i])
+            )
+        }
+        // LineDataSet's list
+        val lineDataSets = mutableListOf<ILineDataSet>()
+        // put data in DataSet
+        val lineDataSet = LineDataSet(entryList,"y = x squared")
+        // format colors
+        lineDataSet.color = Color.BLUE
+        lineDataSets.add(lineDataSet)
+        val lineData = LineData(lineDataSets)
+        var lineChart = LineChart(this.context)
+        lineChart.data = lineData
+        lineChart.xAxis.apply{
+            isEnabled = true
+            textColor = Color.BLACK
+        }
+        return lineChart;
+    }
+
+    private fun getCardIcon(i:Int):Int{
+        // get the icon shown on card
+        val drawable = when(i%3){
+            0->R.drawable.ic_baseline_accessibility_24
+            1->R.drawable.ic_baseline_cloud_upload_24
+            else ->R.drawable.ic_baseline_bluetooth_24
+        }
+        return drawable
     }
 
     // add onclicks to the buttons

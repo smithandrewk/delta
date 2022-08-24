@@ -1,5 +1,7 @@
 package com.example.deltamobile.DashboardTabNav.HomeFrag
 
+import com.github.mikephil.charting.charts.LineChart
+
 // names for values to be sent by intents
 //
 val intent__MYCARD_TITLE = "MYCARD_TITLE"
@@ -20,4 +22,6 @@ data class MyCard(
     val cardTitle:String,
     val cardDate:String,
     val cardDescription:String,
+    // chart
+    val lineChart : LineChart
     )

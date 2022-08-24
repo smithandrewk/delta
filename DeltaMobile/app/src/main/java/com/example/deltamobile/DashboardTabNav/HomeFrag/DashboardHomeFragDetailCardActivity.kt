@@ -14,11 +14,11 @@ class DashboardHomeFragDetailCardActivity : AppCompatActivity() {
 
         // get values from intent
         //
-        val recieveIntent = intent;
-        tvTitle.text = recieveIntent.getStringExtra(intent__MYCARD_TITLE)
-        tvDescription.text = recieveIntent.getStringExtra(intent__MYCARD_DESCRIPTION)
-        tvDate.text = recieveIntent.getStringExtra(intent__MYCARD_DATE)
-        imgCover.setImageResource(recieveIntent.getIntExtra(intent__MYCARD_IMG_RES,0))
+        val receiveIntent = intent;
+        tvTitle.text = receiveIntent.getStringExtra(intent__MYCARD_TITLE)
+        tvDescription.text = receiveIntent.getStringExtra(intent__MYCARD_DESCRIPTION)
+        tvDate.text = receiveIntent.getStringExtra(intent__MYCARD_DATE)
+        imgCover.setImageResource(receiveIntent.getIntExtra(intent__MYCARD_IMG_RES,0))
 
 
         // on click go back to home frag

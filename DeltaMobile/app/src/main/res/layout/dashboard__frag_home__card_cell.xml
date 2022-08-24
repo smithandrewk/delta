@@ -69,6 +69,11 @@
                 android:text="Description"
                 android:textSize="15sp"
                 />
+            <com.github.mikephil.charting.charts.LineChart
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/lcLineChart"
+                />
             <TextView
                 android:layout_margin="10dp"
                 android:id="@+id/tvDate"

@@ -1,12 +1,17 @@
 package com.example.deltamobile.DashboardTabNav.HomeFrag
 
 import android.content.Context
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.deltamobile.R
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import kotlinx.android.synthetic.main.dashboard__frag_home__card_cell.view.*
 
 ////
@@ -34,8 +39,16 @@ class CardAdapter(private val context: Context, private val cardList:List<MyCard
             val imgCover = myCardView.imgCover;
             val tvDescription = myCardView.tvDescription;
             val tvDate = myCardView.tvDate;
+            val lineChart = myCardView.lcLineChart;
 
             init{
+                /*
+                IMPORTANT:
+                Must initialize any data structure here, or you will get
+                `Expecting member declaration`
+                 */
+
+
                 // set on click to detail card
                 myCardView.btnClicker.setOnClickListener{
                     this.onClick(this.itemView, action__DETAIL_CARD)
@@ -71,6 +84,8 @@ class CardAdapter(private val context: Context, private val cardList:List<MyCard
         holder.tvDate.text = card.cardDate
         holder.tvDescription.text = card.cardDescription
         holder.imgCover.setImageResource(card.imgResource)
-
+        // need to set the data = card data
+        holder.lineChart.data = card.lineChart.data
+        holder.lineChart.invalidate()
     }
 }
