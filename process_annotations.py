@@ -13,8 +13,10 @@ file_url = sys.argv[2]
 
 df = pd.read_csv(raw_file, header=None)
 
-current_activity = ""
-annotations = [{'Activity': df.loc[0][9], 'Start': df.loc[0][10]}]
+df[9].iloc[-1] = "NONE"   # ensure that the last activity ends
+
+current_activity = df.loc[0][9]
+annotations = [{'Activity': current_activity, 'Start': df.loc[0][10]}]
 
 for i,activity in enumerate(df[9]):
     if activity != current_activity:
