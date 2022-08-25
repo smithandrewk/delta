@@ -1,0 +1,19 @@
+<View>
+    <!-- Control tag for region labels -->
+    <TimeSeriesLabels name="label" toName="ts">
+        
+        
+        
+        
+        
+    <Label value="NONE" background="#FFA39E"/><Label value="Eating" background="#D4380D"/><Label value="Exercise" background="#FFC069"/><Label value="Medication" background="#FFA39E"/><Label value="Smoking" background="#D4380D"/></TimeSeriesLabels>
+
+    <!-- Object tag for time series data source -->
+    <TimeSeries name="ts" valueType="url" value="$timeseriesUrl" sep="," column="10" overviewChannels="velocity">
+
+        <Channel column="2" units="m/s^2" displayFormat=",.1f" strokeColor="#ff7f0e" legend="Acc X"/>
+        <Channel column="3" units="m/s^2" displayFormat=",.1f" strokeColor="#D4380D" legend="Acc Y"/>
+        <Channel column="4" units="m/s^2" displayFormat=",.1f" strokeColor="#FFC069" legend="Acc Z"/>
+
+    </TimeSeries>
+</View>
