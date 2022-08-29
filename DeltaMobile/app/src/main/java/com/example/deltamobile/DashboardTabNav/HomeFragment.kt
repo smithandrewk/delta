@@ -19,6 +19,7 @@ import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import com.github.mikephil.charting.utils.Utils
 import kotlinx.android.synthetic.main.dashboard__frag_home.*
 import kotlinx.android.synthetic.main.dashboard__frag_home__card_cell.view.*
+import kotlin.math.sin
 
 // home screen on dashboard
 //
@@ -59,30 +60,48 @@ class HomeFragment : Fragment() ,CardAdapter.OnMyCardClickListener{
     }
 
     private fun getCardsList():ArrayList<MyCard>{
+        // return a list of cards to populate the cards
+        //
         val list = ArrayList<MyCard>()
         for(i in 0 until 12){
             val drawable = getCardIcon(i);
-            val card= MyCard(drawable,"Card $i","Date $i","Description $i",getCardLineChart());
+            val card= MyCard(drawable,"Card $i","Date $i","Description $i",getCardLineChart(i));
             list.add(card)
         }
         return list;
     }
-    private fun getCardLineChart():LineChart{
+    private fun getCardLineChart(index:Int):LineChart{
         Utils.init(context)
+        var x = arrayListOf<Float>()
+        var y = arrayListOf<Float>()
+        if(index%3 == 0){
+            for(i in 0..9){
+                x.add((i.toFloat()+ 0F))
+                y.add(x.get(i)*x.get(i))
+            }
+        }else if(index%3 ==1){
+            for(i in 0..9){
+                x.add(i.toFloat()+0F)
+                y.add(x.get(i))
+            }
+        }else{
+            for(i in 0..9){
+                x.add(i.toFloat())
+                y.add(sin(x.get(i)))
+            }
+        }
         // return line chart for card
         // atm hardcoded for same values
-        val x = listOf<Float>(1f,2f,3f,4f,5f,6f) // x axis data
-        val y = x.map{it*it};
         var entryList = mutableListOf<Entry>()
-        for(i in x.indices){
+        for(i in 0 until x.size){
             entryList.add(
-                Entry(x[i],y[i])
+                Entry(x.get(i),y.get(i))
             )
         }
         // LineDataSet's list
         val lineDataSets = mutableListOf<ILineDataSet>()
         // put data in DataSet
-        val lineDataSet = LineDataSet(entryList,"y = x squared")
+        val lineDataSet = LineDataSet(entryList,"function of y and x")
         // format colors
         lineDataSet.color = Color.BLUE
         lineDataSets.add(lineDataSet)
