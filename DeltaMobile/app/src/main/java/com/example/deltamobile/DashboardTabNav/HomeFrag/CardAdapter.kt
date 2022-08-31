@@ -1,17 +1,11 @@
 package com.example.deltamobile.DashboardTabNav.HomeFrag
 
 import android.content.Context
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.deltamobile.R
-import com.github.mikephil.charting.data.Entry
-import com.github.mikephil.charting.data.LineData
-import com.github.mikephil.charting.data.LineDataSet
-import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import kotlinx.android.synthetic.main.dashboard__frag_home__card_cell.view.*
 
 ////
@@ -87,5 +81,11 @@ class CardAdapter(private val context: Context, private val cardList:List<MyCard
         // need to set the data = card data
         holder.lineChart.data = card.lineChart.data
         holder.lineChart.invalidate()
+
+        // customize chart
+        // see: https://stackoverflow.com/questions/30164862/mpandroidchart-remove-top-border-axis-since-v2
+        //
+        holder.lineChart.getDescription().setEnabled(false);
+        holder.lineChart.setDrawGridBackground(false);
     }
 }

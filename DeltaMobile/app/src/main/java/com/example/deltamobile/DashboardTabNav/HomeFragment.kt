@@ -161,6 +161,9 @@ class HomeFragment : Fragment() ,CardAdapter.OnMyCardClickListener{
         // enter detail card activity
         //
         val intent = Intent(this.context,DashboardHomeFragDetailCardActivity::class.java)
+        // put intent values in
+        // NOTE: In reality we should make use of some db and pull from there.
+        //
         intent.putExtra(intent__MYCARD_TITLE,myCard.cardTitle)
         intent.putExtra(intent__MYCARD_DESCRIPTION,myCard.cardDescription)
         intent.putExtra(intent__MYCARD_DATE,myCard.cardDate)

@@ -20,7 +20,6 @@ class DashboardHomeFragDetailCardActivity : AppCompatActivity() {
         tvDate.text = receiveIntent.getStringExtra(intent__MYCARD_DATE)
         imgCover.setImageResource(receiveIntent.getIntExtra(intent__MYCARD_IMG_RES,0))
 
-
         // on click go back to home frag
         //
         btnClicker.setOnClickListener{
