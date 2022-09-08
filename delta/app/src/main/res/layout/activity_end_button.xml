@@ -7,28 +7,13 @@
     tools:context=".EndActivityButton"
     android:background="@android:color/black">
 
-    <ProgressBar
-        android:id="@+id/progressBar"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="190dp"
-        android:layout_height="23dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.635"
-        android:paddingEnd="4dp"
-        android:paddingStart="4dp"
-        android:elevation="7dp"
-        android:progressBackgroundTint="@color/end_button_text"
-        android:progressTint="@color/end_button_text"
-        android:visibility="invisible"
-    />
     <Button
         android:id="@+id/endActivityButton"
+        android:background="@drawable/circle_button"
         android:backgroundTint="@color/end_button"
-        android:layout_width="190dp"
-        android:layout_height="70dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:elevation="7dp"
         android:text="Finish Activity"
         android:textColor="@color/end_button_text"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -36,7 +21,20 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
 
-    <view
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="130dp"
+        android:layout_height="130dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="invisible"
+        android:indeterminate="true"
+        android:indeterminateTint="@color/end_button_text"/>
+
+        <view
         android:id="@+id/filename"
         class="androidx.wear.widget.CurvedTextView"
         android:layout_width="wrap_content"

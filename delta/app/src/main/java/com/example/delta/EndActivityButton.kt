@@ -36,11 +36,10 @@ class EndActivityButton : Activity() {
 
         findViewById<Button>(R.id.endActivityButton).setOnTouchListener { _, event -> //when button is pressed
             if (event.action == MotionEvent.ACTION_DOWN) {
-                //show the progressBar
+                // show the progressBar
                 progressBar.visibility = View.VISIBLE
                 startTimer()
             } else if (event.action == MotionEvent.ACTION_UP) {
-                progressBar.progress = 0
                 progressBar.visibility = View.INVISIBLE
                 cancelTimer()
             }
@@ -51,13 +50,11 @@ class EndActivityButton : Activity() {
 
     //start timer function
     private fun startTimer() {
-        cTimer = object : CountDownTimer(2000, 20) {
+        cTimer = object : CountDownTimer(1400, 20) {
             override fun onTick(millisUntilFinished: Long) {
-                progressBar.progress = progressBar.progress + 1
             }
 
             override fun onFinish() {
-                progressBar.progress = 0
                 progressBar.visibility = View.INVISIBLE
                 val returnIntent = Intent()
                 setResult(Activity.RESULT_OK, returnIntent)
