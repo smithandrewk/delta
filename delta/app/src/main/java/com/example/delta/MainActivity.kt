@@ -31,7 +31,8 @@ class MainActivity : Activity(), SensorEventListener {
     private var rawFileIndex: Int = 0
     private var currentActivity: String = "None"
 
-    private var startTimeMillis = System.currentTimeMillis()
+    private var calendar = Calendar.getInstance()
+    private var startTimeMillis = calendar.timeInMillis
     private val startTimeReadable = SimpleDateFormat("yyyy-MM-dd_HH_mm_ss", Locale.ENGLISH).format(Date())
 
     private val LAUNCH_END_BUTTON_CODE = 1
@@ -56,7 +57,8 @@ class MainActivity : Activity(), SensorEventListener {
         // start Recording on app creation
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         mAccel = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-        startTimeMillis = System.currentTimeMillis()
+        calendar = Calendar.getInstance()
+        startTimeMillis = calendar.timeInMillis
 
         createNewRawFile()
 
@@ -77,7 +79,8 @@ class MainActivity : Activity(), SensorEventListener {
                 Log.i("0001", "Started $chosenActivity")
                 currentActivity = chosenActivity
                 // log start time to session file
-                val time = System.currentTimeMillis()
+                calendar = Calendar.getInstance()
+                val time = calendar.timeInMillis
                 writeToSessionFile("$chosenActivity,$time,")
 
                 // start end button activity
@@ -95,7 +98,8 @@ class MainActivity : Activity(), SensorEventListener {
         if (requestCode == LAUNCH_END_BUTTON_CODE) {
             if (resultCode == Activity.RESULT_OK) {
                 Log.i("0001", "Logging end activity")
-                val time = System.currentTimeMillis()
+                calendar = Calendar.getInstance()
+                val time = calendar.timeInMillis
                 writeToSessionFile("$time\n")
                 currentActivity = "None"
                 createNewRawFile()
@@ -116,7 +120,8 @@ class MainActivity : Activity(), SensorEventListener {
             fRaw.write("File Start Time: $startTimeMillis\n".toByteArray())
         }
         else {
-            val time = System.currentTimeMillis()
+            calendar = Calendar.getInstance()
+            val time = calendar.timeInMillis
             fRaw.write("File Start Time: $time\n".toByteArray())
         }
         fRaw.write("timestamp,acc_x,acc_y,acc_z,real time,activity\n".toByteArray())
@@ -133,7 +138,8 @@ class MainActivity : Activity(), SensorEventListener {
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
 
     override fun onSensorChanged(event: SensorEvent) {
-        val time = System.currentTimeMillis()
+        calendar = Calendar.getInstance()
+        val time = calendar.timeInMillis
         fRaw.write((event.timestamp.toString()+","+
                     event.values[0].toString()+","+
                     event.values[1].toString()+","+
