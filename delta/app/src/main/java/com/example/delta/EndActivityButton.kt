@@ -9,6 +9,7 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnTouchListener
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.Toast
@@ -23,6 +24,7 @@ class EndActivityButton : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_end_button)
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         // stuff to display file and sampling frequency
         val samplingRateHertz = intent.getStringExtra("SamplingRateKey")
