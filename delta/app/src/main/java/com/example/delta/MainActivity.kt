@@ -18,7 +18,7 @@ import java.util.*
 
 class MainActivity : Activity(), SensorEventListener {
     private lateinit var sensorManager: SensorManager
-    private val samplingRateHertz = 1
+    private val samplingRateHertz = 200
     private val samplingPeriodSeconds = 1/samplingRateHertz
     private val samplingPeriodMicroseconds = samplingPeriodSeconds * 1000000
     private var mAccel: Sensor? = null
