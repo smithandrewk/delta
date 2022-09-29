@@ -16,12 +16,14 @@ import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
-class MainActivity : Activity(), SensorEventListener {
-    private lateinit var sensorManager: SensorManager
-    private val samplingRateHertz = 200
-    private val samplingPeriodSeconds = 1/samplingRateHertz
-    private val samplingPeriodMicroseconds = samplingPeriodSeconds * 1000000
-    private var mAccel: Sensor? = null
+class MainActivity : Activity() {
+//    private lateinit var sensorManager: SensorManager
+//    private val samplingRateHertz = 200
+//    private val samplingPeriodSeconds = 1/samplingRateHertz
+//    private val samplingPeriodMicroseconds = samplingPeriodSeconds * 1000000
+//    private var mAccel: Sensor? = null
+
+    private lateinit var accelIntent: Intent
 
     private lateinit var dataFolderName: String
     private lateinit var fRaw: FileOutputStream
@@ -50,13 +52,17 @@ class MainActivity : Activity(), SensorEventListener {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // start service
+        accelIntent = Intent(applicationContext, AccelLoggerService::class.java)
+        startForegroundService(accelIntent)
+
         // create folder for this session's files
         dataFolderName = startTimeReadable
         File(this.filesDir, dataFolderName).mkdir()
 
         // start Recording on app creation
-        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        mAccel = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+//        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+//        mAccel = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
         calendar = Calendar.getInstance()
         startTimeMillis = calendar.timeInMillis
 
@@ -68,16 +74,19 @@ class MainActivity : Activity(), SensorEventListener {
         writeToSessionFile("File Start Time: $startTimeMillis\n")
         writeToSessionFile("Event,Start Time,Stop Time\n")
 
-        mAccel?.also { accel ->
-            sensorManager.registerListener(this, accel,
-                samplingPeriodMicroseconds, samplingPeriodMicroseconds)
-        }
+//        mAccel?.also { accel ->
+//            sensorManager.registerListener(this, accel,
+//                samplingPeriodMicroseconds, samplingPeriodMicroseconds)
+//        }
 
         // get chosen activity from user - create onClickListener for each button
         activityOptions.forEach { (button, chosenActivity) ->
             findViewById<Button>(button).setOnClickListener {
                 Log.i("0001", "Started $chosenActivity")
                 currentActivity = chosenActivity
+
+                sendBroadcast(Intent(getString(R.string.BROADCAST_CODE)).putExtra("ACTIVITY", chosenActivity))
+
                 // log start time to session file
                 calendar = Calendar.getInstance()
                 val time = calendar.timeInMillis
@@ -85,8 +94,8 @@ class MainActivity : Activity(), SensorEventListener {
 
                 // start end button activity
                 val endButtonIntent = Intent(this, EndActivityButton::class.java)
-                endButtonIntent.putExtra("FilenameKey", rawFilename)
-                endButtonIntent.putExtra("SamplingRateKey", "$samplingRateHertz")
+//                endButtonIntent.putExtra("FilenameKey", rawFilename)
+//                endButtonIntent.putExtra("SamplingRateKey", "$samplingRateHertz")
                 startActivityForResult(endButtonIntent, LAUNCH_END_BUTTON_CODE)
             }
         }
@@ -135,18 +144,18 @@ class MainActivity : Activity(), SensorEventListener {
         }
     }
 
-    override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
-
-    override fun onSensorChanged(event: SensorEvent) {
-        calendar = Calendar.getInstance()
-        val time = calendar.timeInMillis
-        fRaw.write((event.timestamp.toString()+","+
-                    event.values[0].toString()+","+
-                    event.values[1].toString()+","+
-                    event.values[2].toString()+","+
-                    time+","+
-                    currentActivity+"\n").toByteArray())
-    }
+//    override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
+//
+//    override fun onSensorChanged(event: SensorEvent) {
+//        calendar = Calendar.getInstance()
+//        val time = calendar.timeInMillis
+//        fRaw.write((event.timestamp.toString()+","+
+//                    event.values[0].toString()+","+
+//                    event.values[1].toString()+","+
+//                    event.values[2].toString()+","+
+//                    time+","+
+//                    currentActivity+"\n").toByteArray())
+//    }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
@@ -164,6 +173,7 @@ class MainActivity : Activity(), SensorEventListener {
     override fun onDestroy() {
         super.onDestroy()
         Log.i("0001", "DESTROYED")
+        stopService(accelIntent)
     }
     override fun onStop() {
         super.onStop()
