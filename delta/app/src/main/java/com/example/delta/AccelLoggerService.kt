@@ -11,17 +11,21 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.IBinder
 import android.util.Log
+import androidx.core.app.ActivityCompat.startActivityForResult
+import java.util.*
 
 
 class AccelLoggerService: Service(), SensorEventListener {
     private lateinit var activityChangeReceiver: ActivityChangeReceiver
     private lateinit var sensorManager: SensorManager
     private lateinit var sensor: Sensor
-    private val NOTIFICATION_CHANNEL_ID = "Channel_1"
     private val samplingRateHertz = 100
+    private val LAUNCH_END_BUTTON_CODE = 2
+    private lateinit var chosenActivity: String
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
+        chosenActivity = getString(R.string.NO_ACTIVITY)
 
         val intentFilter = IntentFilter(getString(R.string.BROADCAST_CODE))
         activityChangeReceiver = ActivityChangeReceiver()
@@ -44,14 +48,13 @@ class AccelLoggerService: Service(), SensorEventListener {
         var z = event.values[2]
         var time = event.timestamp
         Log.v("service", "time: $time    x: $x     y: $y    z: $z")
-
     }
     private fun createNotification(): Notification {
         // Create the NotificationChannel
         val channelName = "foreground_service_channel"
         val channelDescription = "Notifications for foreground service"
         val mChannel = NotificationChannel(
-            NOTIFICATION_CHANNEL_ID,
+            getString(R.string.NOTIFICATION_CHANNEL_1_ID),
             channelName,
             NotificationManager.IMPORTANCE_HIGH
         )
@@ -68,7 +71,7 @@ class AccelLoggerService: Service(), SensorEventListener {
                 )
             }
 
-        return Notification.Builder(this, NOTIFICATION_CHANNEL_ID)
+        return Notification.Builder(this, getString(R.string.NOTIFICATION_CHANNEL_1_ID))
             .setContentTitle("Delta")
             .setContentText("Accelerometer Recording")
             .setSmallIcon(R.drawable.ic_pizza_outline)
@@ -79,8 +82,15 @@ class AccelLoggerService: Service(), SensorEventListener {
     private inner class ActivityChangeReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
             if (intent.action == getString(R.string.BROADCAST_CODE)) {
-                // Do stuff - maybe update my view based on the changed DB contents
-                Log.i("0003", "${intent.getStringExtra("ACTIVITY")}")
+                val chosenActivity = intent.getStringExtra(getString(R.string.ACTIVITY))
+                if(chosenActivity == getString(R.string.NO_ACTIVITY)){
+                    Log.i("0003", "Ended $chosenActivity}")
+
+                }
+                else{
+                    Log.i("0003", "Started $chosenActivity}")
+                    
+                }
             }
         }
     }

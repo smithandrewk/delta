@@ -85,6 +85,7 @@ class MainActivity : Activity() {
                 Log.i("0001", "Started $chosenActivity")
                 currentActivity = chosenActivity
 
+                // tell service that new activity is starting
                 sendBroadcast(Intent(getString(R.string.BROADCAST_CODE)).putExtra("ACTIVITY", chosenActivity))
 
                 // log start time to session file
@@ -110,8 +111,14 @@ class MainActivity : Activity() {
                 calendar = Calendar.getInstance()
                 val time = calendar.timeInMillis
                 writeToSessionFile("$time\n")
-                currentActivity = "None"
+                currentActivity = getString(R.string.NO_ACTIVITY)
                 createNewRawFile()
+
+                val broadcastIntent = Intent(
+                    getString(R.string.BROADCAST_CODE)).putExtra(getString(R.string.ACTIVITY),
+                    getString(R.string.NO_ACTIVITY))
+                sendBroadcast(broadcastIntent)
+
             }
             else {
                 Log.i("0001", "error")
