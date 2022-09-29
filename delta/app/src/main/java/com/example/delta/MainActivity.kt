@@ -25,17 +25,17 @@ class MainActivity : Activity() {
 
     private lateinit var accelIntent: Intent
 
-    private lateinit var dataFolderName: String
-    private lateinit var fRaw: FileOutputStream
-    private lateinit var rawFilename: String
-    private lateinit var fSession: FileOutputStream
-    private lateinit var sessionFilename: String
-    private var rawFileIndex: Int = 0
-    private var currentActivity: String = "None"
-
-    private var calendar = Calendar.getInstance()
-    private var startTimeMillis = calendar.timeInMillis
-    private val startTimeReadable = SimpleDateFormat("yyyy-MM-dd_HH_mm_ss", Locale.ENGLISH).format(Date())
+//    private lateinit var dataFolderName: String
+//    private lateinit var fRaw: FileOutputStream
+//    private lateinit var rawFilename: String
+//    private lateinit var fSession: FileOutputStream
+//    private lateinit var sessionFilename: String
+//    private var rawFileIndex: Int = 0
+//    private var currentActivity: String = "None"
+//
+//    private var calendar = Calendar.getInstance()
+//    private var startTimeMillis = calendar.timeInMillis
+//    private val startTimeReadable = SimpleDateFormat("yyyy-MM-dd_HH_mm_ss", Locale.ENGLISH).format(Date())
 
     private val LAUNCH_END_BUTTON_CODE = 1
     private lateinit var binding: ActivityMainBinding
@@ -57,22 +57,22 @@ class MainActivity : Activity() {
         startForegroundService(accelIntent)
 
         // create folder for this session's files
-        dataFolderName = startTimeReadable
-        File(this.filesDir, dataFolderName).mkdir()
+//        dataFolderName = startTimeReadable
+//        File(this.filesDir, dataFolderName).mkdir()
 
         // start Recording on app creation
 //        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
 //        mAccel = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-        calendar = Calendar.getInstance()
-        startTimeMillis = calendar.timeInMillis
+//        calendar = Calendar.getInstance()
+//        startTimeMillis = calendar.timeInMillis
 
-        createNewRawFile()
+//        createNewRawFile()
 
         // create Session file
-        sessionFilename = "Session.$startTimeReadable.csv"    // file to save session information
-        fSession = FileOutputStream(File(this.filesDir, "$dataFolderName/$sessionFilename"))
-        writeToSessionFile("File Start Time: $startTimeMillis\n")
-        writeToSessionFile("Event,Start Time,Stop Time\n")
+//        sessionFilename = "Session.$startTimeReadable.csv"    // file to save session information
+//        fSession = FileOutputStream(File(this.filesDir, "$dataFolderName/$sessionFilename"))
+//        writeToSessionFile("File Start Time: $startTimeMillis\n")
+//        writeToSessionFile("Event,Start Time,Stop Time\n")
 
 //        mAccel?.also { accel ->
 //            sensorManager.registerListener(this, accel,
@@ -82,21 +82,19 @@ class MainActivity : Activity() {
         // get chosen activity from user - create onClickListener for each button
         activityOptions.forEach { (button, chosenActivity) ->
             findViewById<Button>(button).setOnClickListener {
-                Log.i("0001", "Started $chosenActivity")
-                currentActivity = chosenActivity
-
+                Log.i("0001", "Signalled Service - Started $chosenActivity")
                 // tell service that new activity is starting
-                sendBroadcast(Intent(getString(R.string.BROADCAST_CODE)).putExtra("ACTIVITY", chosenActivity))
 
-                // log start time to session file
-                calendar = Calendar.getInstance()
-                val time = calendar.timeInMillis
-                writeToSessionFile("$chosenActivity,$time,")
+                sendBroadcast(Intent(getString(R.string.BROADCAST_CODE)).putExtra(getString(R.string.ACTIVITY), chosenActivity))
+
+//                currentActivity = chosenActivity
+//                // log start time to session file
+//                calendar = Calendar.getInstance()
+//                val time = calendar.timeInMillis
+//                writeToSessionFile("$chosenActivity,$time,")
 
                 // start end button activity
                 val endButtonIntent = Intent(this, EndActivityButton::class.java)
-//                endButtonIntent.putExtra("FilenameKey", rawFilename)
-//                endButtonIntent.putExtra("SamplingRateKey", "$samplingRateHertz")
                 startActivityForResult(endButtonIntent, LAUNCH_END_BUTTON_CODE)
             }
         }
@@ -107,12 +105,12 @@ class MainActivity : Activity() {
 
         if (requestCode == LAUNCH_END_BUTTON_CODE) {
             if (resultCode == Activity.RESULT_OK) {
-                Log.i("0001", "Logging end activity")
-                calendar = Calendar.getInstance()
-                val time = calendar.timeInMillis
-                writeToSessionFile("$time\n")
-                currentActivity = getString(R.string.NO_ACTIVITY)
-                createNewRawFile()
+                Log.i("0001", "Signalled Service - End Activity")
+//                calendar = Calendar.getInstance()
+//                val time = calendar.timeInMillis
+//                writeToSessionFile("$time\n")
+//                currentActivity = getString(R.string.NO_ACTIVITY)
+//                createNewRawFile()
 
                 val broadcastIntent = Intent(
                     getString(R.string.BROADCAST_CODE)).putExtra(getString(R.string.ACTIVITY),
@@ -126,30 +124,30 @@ class MainActivity : Activity() {
         }
     }
 
-    private fun createNewRawFile() {
-        if (rawFileIndex != 0) {
-            fRaw.close()
-        }
-        rawFilename = "$startTimeReadable.$rawFileIndex.csv"       // file to save raw data
-        fRaw = FileOutputStream(File(this.filesDir, "$dataFolderName/$rawFilename"))
-        if (rawFileIndex == 0) {
-            fRaw.write("File Start Time: $startTimeMillis\n".toByteArray())
-        }
-        else {
-            calendar = Calendar.getInstance()
-            val time = calendar.timeInMillis
-            fRaw.write("File Start Time: $time\n".toByteArray())
-        }
-        fRaw.write("timestamp,acc_x,acc_y,acc_z,real time,activity\n".toByteArray())
-        rawFileIndex++
-    }
+//    private fun createNewRawFile() {
+//        if (rawFileIndex != 0) {
+//            fRaw.close()
+//        }
+//        rawFilename = "$startTimeReadable.$rawFileIndex.csv"       // file to save raw data
+//        fRaw = FileOutputStream(File(this.filesDir, "$dataFolderName/$rawFilename"))
+//        if (rawFileIndex == 0) {
+//            fRaw.write("File Start Time: $startTimeMillis\n".toByteArray())
+//        }
+//        else {
+//            calendar = Calendar.getInstance()
+//            val time = calendar.timeInMillis
+//            fRaw.write("File Start Time: $time\n".toByteArray())
+//        }
+//        fRaw.write("timestamp,acc_x,acc_y,acc_z,real time,activity\n".toByteArray())
+//        rawFileIndex++
+//    }
 
-    private fun writeToSessionFile(str: String) {
-        fSession = FileOutputStream(File(this.filesDir, "$dataFolderName/$sessionFilename"), true)
-        fSession.use { f ->
-            f.write(str.toByteArray())
-        }
-    }
+//    private fun writeToSessionFile(str: String) {
+//        fSession = FileOutputStream(File(this.filesDir, "$dataFolderName/$sessionFilename"), true)
+//        fSession.use { f ->
+//            f.write(str.toByteArray())
+//        }
+//    }
 
 //    override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
 //
