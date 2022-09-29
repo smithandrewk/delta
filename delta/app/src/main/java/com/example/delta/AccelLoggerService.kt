@@ -23,7 +23,6 @@ class AccelLoggerService: Service(), SensorEventListener {
     private lateinit var sensor: Sensor
     private val samplingRateHertz = 100
     private val LAUNCH_END_BUTTON_CODE = 2
-    private lateinit var chosenActivity: String
 
     private lateinit var dataFolderName: String
     private lateinit var fRaw: FileOutputStream
@@ -38,7 +37,7 @@ class AccelLoggerService: Service(), SensorEventListener {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
-        chosenActivity = getString(R.string.NO_ACTIVITY)
+        currentActivity = getString(R.string.NO_ACTIVITY)
         createFiles()
 
         val intentFilter = IntentFilter(getString(R.string.BROADCAST_CODE))
@@ -57,11 +56,13 @@ class AccelLoggerService: Service(), SensorEventListener {
     }
 
     override fun onSensorChanged(event: SensorEvent) {
-        var x = event.values[0]
-        var y = event.values[1]
-        var z = event.values[2]
-        var time = event.timestamp
-        Log.v("service", "time: $time    x: $x     y: $y    z: $z")
+        Log.v("0003", "Time: ${event.timestamp}    x: ${event.values[0]}     y: ${event.values[1]}    z: ${event.values[2]}")
+        fRaw.write((event.timestamp.toString()+","+
+                    event.values[0].toString()+","+
+                    event.values[1].toString()+","+
+                    event.values[2].toString()+","+
+                    Calendar.getInstance().timeInMillis+","+
+                    currentActivity+"\n").toByteArray())
     }
     private fun createNotification(): Notification {
         // Create the NotificationChannel
@@ -125,15 +126,15 @@ class AccelLoggerService: Service(), SensorEventListener {
     private inner class ActivityChangeReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
             if (intent.action == getString(R.string.BROADCAST_CODE)) {
-                val chosenActivity = intent.getStringExtra(getString(R.string.ACTIVITY))
-                if(chosenActivity == getString(R.string.NO_ACTIVITY)){
+                currentActivity = intent.getStringExtra(getString(R.string.ACTIVITY)).toString()
+                if(currentActivity == getString(R.string.NO_ACTIVITY)){
                     Log.i("0003", "Ended Activity")
                     writeToSessionFile("${Calendar.getInstance().timeInMillis}\n")
                     createNewRawFile()
                 }
                 else{
-                    Log.i("0003", "Started $chosenActivity")
-                    writeToSessionFile("$chosenActivity,${Calendar.getInstance().timeInMillis},")
+                    Log.i("0003", "Started $currentActivity")
+                    writeToSessionFile("$currentActivity,${Calendar.getInstance().timeInMillis},")
                 }
             }
         }
