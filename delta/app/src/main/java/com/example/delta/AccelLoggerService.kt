@@ -31,8 +31,6 @@ class AccelLoggerService: Service(), SensorEventListener {
     private lateinit var sessionFilename: String
     private var rawFileIndex: Int = 0
     private var currentActivity: String = "None"
-//    private var calendar = Calendar.getInstance()
-//    private var startTimeMillis = Calendar.getInstance().timeInMillis
     private val startTimeReadable = SimpleDateFormat("yyyy-MM-dd_HH_mm_ss", Locale.ENGLISH).format(Date())
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
