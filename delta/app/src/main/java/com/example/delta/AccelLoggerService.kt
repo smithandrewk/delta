@@ -86,19 +86,19 @@ class AccelLoggerService: Service(), SensorEventListener {
         notificationManager.createNotificationChannel(mChannel)
 
         // Create Notification
-        val pendingIntent: PendingIntent =
-            Intent(this, MainActivity::class.java).let { notificationIntent ->
-                PendingIntent.getActivity(
-                    this, 0, notificationIntent,
-                    PendingIntent.FLAG_IMMUTABLE
-                )
-            }
+//        val pendingIntent: PendingIntent =
+//            Intent(this, MainActivity::class.java).let { notificationIntent ->
+//                PendingIntent.getActivity(
+//                    this, 0, notificationIntent,
+//                    PendingIntent.FLAG_IMMUTABLE
+//                )
+//            }
         return Notification.Builder(this, getString(R.string.NOTIFICATION_CHANNEL_1_ID))
             .setContentTitle("Delta")
             .setContentText("Accelerometer Recording")
-            .setSmallIcon(R.drawable.ic_pizza_outline)
-            .setContentIntent(pendingIntent)
-            .setTicker("Ticker")
+            .setSmallIcon(R.drawable.ic_three_dots)
+            .setContentIntent(null)     // Don't open any activity when Notification is clicked
+            .setAutoCancel(false)       // Don't close notification when it's clicked
             .build()
     }
 
