@@ -29,6 +29,8 @@ class AccelLoggerService: Service(), SensorEventListener {
     private lateinit var fSession: FileOutputStream
     private lateinit var sessionFilename: String
     private var rawFileIndex: Int = 0
+    private var sampleIndex: Int = 0
+    private var lastTimestamp: Long = 0
     private var currentActivity: String = "None"
     private val startTimeReadable = SimpleDateFormat("yyyy-MM-dd_HH_mm_ss", Locale.ENGLISH).format(Date())
 
@@ -48,14 +50,24 @@ class AccelLoggerService: Service(), SensorEventListener {
     }
 
     override fun onSensorChanged(event: SensorEvent) {
-        // Log data on every event received from accelerometer
-        Log.v("0003", "Time: ${event.timestamp}    x: ${event.values[0]}     y: ${event.values[1]}    z: ${event.values[2]}")
-        fRaw.write((event.timestamp.toString()+","+
+        /*
+            We observed experimentally Ticwatch E samples at 100 Hz consistently for 9 hours
+            in our app. Therefore, we take every 5th value from onsensorchanged to approximate
+            20 Hz sampling rate.
+         */
+        if (sampleIndex == 5){
+            sampleIndex = 0
+//            var diff: Double = (event.timestamp - lastTimestamp).toDouble()/1000000000
+//            lastTimestamp = event.timestamp
+            Log.v("0003", "Time: ${event.timestamp}    x: ${event.values[0]}     y: ${event.values[1]}    z: ${event.values[2]}")
+            fRaw.write((event.timestamp.toString()+","+
                     event.values[0].toString()+","+
                     event.values[1].toString()+","+
                     event.values[2].toString()+","+
                     Calendar.getInstance().timeInMillis+","+
                     currentActivity+"\n").toByteArray())
+        }
+        sampleIndex++
     }
 
     private fun createBroadcastReceiver() {
@@ -125,7 +137,7 @@ class AccelLoggerService: Service(), SensorEventListener {
         }
         rawFilename = "$startTimeReadable.$rawFileIndex.csv"       // file to save raw data
         fRaw = FileOutputStream(File(this.filesDir, "$dataFolderName/$rawFilename"))
-            fRaw.write("File Start Time: ${Calendar.getInstance().timeInMillis}\n".toByteArray())
+        fRaw.write("File Start Time: ${Calendar.getInstance().timeInMillis}\n".toByteArray())
         fRaw.write("timestamp,acc_x,acc_y,acc_z,real time,activity\n".toByteArray())
         rawFileIndex++
     }
