@@ -10,7 +10,7 @@ import com.example.delta.databinding.ActivityMainBinding
 class MainActivity : Activity() {
     private lateinit var accelIntent: Intent
 
-    private val LAUNCH_END_BUTTON_CODE = 1
+    private val launchEndButtonCode = 1
     private lateinit var binding: ActivityMainBinding
 
     private val activityOptions = mapOf(R.id.eatButton to "Eating",
@@ -37,14 +37,14 @@ class MainActivity : Activity() {
 
                 // start EndActivityButton activity
                 val endButtonIntent = Intent(this, EndActivityButton::class.java)
-                startActivityForResult(endButtonIntent, LAUNCH_END_BUTTON_CODE)
+                startActivityForResult(endButtonIntent, launchEndButtonCode)
             }
         }
     }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
         // Receives result from the EndActivityButton activity, and notifies accelerometer service
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == LAUNCH_END_BUTTON_CODE) {
+        if (requestCode == launchEndButtonCode) {
             if (resultCode == Activity.RESULT_OK) {
                 Log.i("0001", "Signalled Service - End Activity")
                 // tell service that activity has ended
