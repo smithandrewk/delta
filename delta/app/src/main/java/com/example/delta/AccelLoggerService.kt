@@ -27,6 +27,7 @@ class AccelLoggerService: Service(), SensorEventListener {
     private val xBuffer: MutableList<MutableList<Double>> = mutableListOf()
     private val yBuffer: MutableList<MutableList<Double>> = mutableListOf()
     private val zBuffer: MutableList<MutableList<Double>> = mutableListOf()
+    private val timestampBuffer: MutableList<MutableList<String>> = mutableListOf()
     private lateinit var dataFolderName: String
     private lateinit var fRaw: FileOutputStream
     private lateinit var rawFilename: String
@@ -65,24 +66,30 @@ class AccelLoggerService: Service(), SensorEventListener {
             xBuffer.add(mutableListOf(event.values[0].toDouble()))
             yBuffer.add(mutableListOf(event.values[0].toDouble()))
             zBuffer.add(mutableListOf(event.values[0].toDouble()))
-            if(xBuffer.size > 99){
-                output = nHandler.forwardPropagate(Matrix((xBuffer+yBuffer+zBuffer).toMutableList()))
-                fRaw.write((event.timestamp.toString()+","+
-                        event.values[0].toString()+","+
-                        event.values[1].toString()+","+
-                        event.values[2].toString()+","+
-                        Calendar.getInstance().timeInMillis+","+
-                        currentActivity+","+output.toString()+"\n").toByteArray())
-                xBuffer.removeAt(0)
-                yBuffer.removeAt(0)
-                zBuffer.removeAt(0)
+            timestampBuffer.add(mutableListOf(
+                event.timestamp.toString(),
+                Calendar.getInstance().timeInMillis.toString()
+            ))
+            if(xBuffer.size > 199){
+                nHandler.processBatch(xBuffer, yBuffer, zBuffer, fRaw)
+
+//                output = nHandler.forwardPropagate(Matrix((xBuffer+yBuffer+zBuffer).toMutableList()))
+//                fRaw.write((event.timestamp.toString()+","+
+//                        event.values[0].toString()+","+
+//                        event.values[1].toString()+","+
+//                        event.values[2].toString()+","+
+//                        Calendar.getInstance().timeInMillis+","+
+//                        currentActivity+","+output.toString()+"\n").toByteArray())
+//                xBuffer.removeAt(0)
+//                yBuffer.removeAt(0)
+//                zBuffer.removeAt(0)
             }
-            Log.v("0003", "label: $output    Time: ${event.timestamp}    x: ${event.values[0]}     y: ${event.values[1]}    z: ${event.values[2]}")
-            output = if(output >= .85){
-                1.0
-            } else {
-                0.0
-            }
+////            Log.v("0003", "label: $output    Time: ${event.timestamp}    x: ${event.values[0]}     y: ${event.values[1]}    z: ${event.values[2]}")
+//            output = if(output >= .85){
+//                1.0
+//            } else {
+//                0.0
+//            }
         }
         sampleIndex++
     }
