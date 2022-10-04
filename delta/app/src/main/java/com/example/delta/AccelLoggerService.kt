@@ -27,7 +27,7 @@ class AccelLoggerService: Service(), SensorEventListener {
     private val xBuffer: MutableList<MutableList<Double>> = mutableListOf()
     private val yBuffer: MutableList<MutableList<Double>> = mutableListOf()
     private val zBuffer: MutableList<MutableList<Double>> = mutableListOf()
-    private val timestampBuffer: MutableList<MutableList<String>> = mutableListOf()
+    private val extrasBuffer: MutableList<MutableList<String>> = mutableListOf()
     private lateinit var dataFolderName: String
     private lateinit var fRaw: FileOutputStream
     private lateinit var rawFilename: String
@@ -66,12 +66,13 @@ class AccelLoggerService: Service(), SensorEventListener {
             xBuffer.add(mutableListOf(event.values[0].toDouble()))
             yBuffer.add(mutableListOf(event.values[0].toDouble()))
             zBuffer.add(mutableListOf(event.values[0].toDouble()))
-            timestampBuffer.add(mutableListOf(
+            extrasBuffer.add(mutableListOf(
                 event.timestamp.toString(),
-                Calendar.getInstance().timeInMillis.toString()
+                Calendar.getInstance().timeInMillis.toString(),
+                currentActivity
             ))
             if(xBuffer.size > 199){
-                nHandler.processBatch(timestampBuffer, xBuffer, yBuffer, zBuffer, fRaw)
+                nHandler.processBatch(extrasBuffer, xBuffer, yBuffer, zBuffer, fRaw)
 
 //                output = nHandler.forwardPropagate(Matrix((xBuffer+yBuffer+zBuffer).toMutableList()))
 //                fRaw.write((event.timestamp.toString()+","+
@@ -84,6 +85,7 @@ class AccelLoggerService: Service(), SensorEventListener {
 //                yBuffer.removeAt(0)
 //                zBuffer.removeAt(0)
             }
+            Log.i("0001","x: ${xBuffer.size}     y: ${yBuffer.size}    z: ${zBuffer.size}")
 ////            Log.v("0003", "label: $output    Time: ${event.timestamp}    x: ${event.values[0]}     y: ${event.values[1]}    z: ${event.values[2]}")
 //            output = if(output >= .85){
 //                1.0

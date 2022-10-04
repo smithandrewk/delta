@@ -22,14 +22,14 @@ class NeuralHandler (name: String,inputToHiddenWeightsAndBiasesString: String,hi
         inputRanges = Matrix(inputRangesString)
     }
 
-    fun processBatch(timestampBuffer: MutableList<MutableList<String>>,
+    fun processBatch(extrasBuffer: MutableList<MutableList<String>>,
                      xBuffer: MutableList<MutableList<Double>>,
                      yBuffer: MutableList<MutableList<Double>>,
                      zBuffer: MutableList<MutableList<Double>>,
                      fRaw: FileOutputStream) {
         /*
-            timestampBuffer: 2x200 timestamps with each row:
-                            [SensorEvent timestamp (ns), Calendar timestamp (ms)]
+            extrasBuffer: 3x200 timestamps and activity with each row:
+                            [SensorEvent timestamp (ns), Calendar timestamp (ms), current activity]
             xBuffer:    1x200 x-axis accelerometer data values
             yBuffer:    1x200 y-axis accelerometer data values
             zBuffer:    1x200 z-axis accelerometer data values
@@ -48,19 +48,24 @@ class NeuralHandler (name: String,inputToHiddenWeightsAndBiasesString: String,hi
 
         var i = 0
         while(i < bufferSize){
-            outputs[i] = forwardPropagate()
-        }
+            val output = forwardPropagate(
+                Matrix((xBuffer.slice(i until i+100)+
+                        yBuffer.slice(i until i+100)+
+                        zBuffer.slice(i until i+100)).toMutableList()))
 
-        // Write to file
-        for(i in 0 until bufferSize){
-            Log.i("0004-${Calendar.getInstance().timeInMillis}","label: none    Time: ${timestampBuffer[i][0]}      TimeMs: ${timestampBuffer[i][1]}       x: ${xBuffer[i]}     y: ${yBuffer[i]}    z: ${zBuffer[i]}")
-//            fRaw.write((timestampBuffer[0]+","+
-//                        event.values[0].toString()+","+
-//                        event.values[1].toString()+","+
-//                        event.values[2].toString()+","+
-//                        Calendar.getInstance().timeInMillis+","+
-//                        currentActivity+","+output.toString()+"\n").toByteArray())
+            fRaw.write((extrasBuffer[i][0]+","+
+                        xBuffer[i][0]+","+
+                        yBuffer[i][0]+","+
+                        zBuffer[i][0]+","+
+                        extrasBuffer[i][1]+","+
+                        extrasBuffer[i][2]+","+
+                        output.toString()+"\n").toByteArray())
         }
+        // clear buffer
+        xBuffer.removeAll(xBuffer.slice(0 until bufferSize))
+        yBuffer.removeAll(xBuffer.slice(0 until bufferSize))
+        zBuffer.removeAll(xBuffer.slice(0 until bufferSize))
+
     }
     fun forwardPropagate(input: Matrix): Double {
         /*
