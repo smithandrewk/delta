@@ -71,7 +71,7 @@ class AccelLoggerService: Service(), SensorEventListener {
                 Calendar.getInstance().timeInMillis.toString()
             ))
             if(xBuffer.size > 199){
-                nHandler.processBatch(xBuffer, yBuffer, zBuffer, fRaw)
+                nHandler.processBatch(timestampBuffer, xBuffer, yBuffer, zBuffer, fRaw)
 
 //                output = nHandler.forwardPropagate(Matrix((xBuffer+yBuffer+zBuffer).toMutableList()))
 //                fRaw.write((event.timestamp.toString()+","+

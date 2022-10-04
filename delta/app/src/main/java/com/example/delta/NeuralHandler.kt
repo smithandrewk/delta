@@ -5,6 +5,7 @@ import com.example.delta.Matrix.Companion.logSigmoid
 import com.example.delta.Matrix.Companion.minMaxNorm
 import com.example.delta.Matrix.Companion.tanSigmoid
 import java.io.FileOutputStream
+import java.util.*
 
 
 class NeuralHandler (name: String,inputToHiddenWeightsAndBiasesString: String,hiddenToOutputWeightsAndBiasesString: String,inputRangesString:String){
@@ -21,11 +22,14 @@ class NeuralHandler (name: String,inputToHiddenWeightsAndBiasesString: String,hi
         inputRanges = Matrix(inputRangesString)
     }
 
-    fun processBatch(xBuffer: MutableList<MutableList<Double>>,
+    fun processBatch(timestampBuffer: MutableList<MutableList<String>>,
+                     xBuffer: MutableList<MutableList<Double>>,
                      yBuffer: MutableList<MutableList<Double>>,
                      zBuffer: MutableList<MutableList<Double>>,
                      fRaw: FileOutputStream) {
         /*
+            timestampBuffer: 2x200 timestamps with each row:
+                            [SensorEvent timestamp (ns), Calendar timestamp (ms)]
             xBuffer:    1x200 x-axis accelerometer data values
             yBuffer:    1x200 y-axis accelerometer data values
             zBuffer:    1x200 z-axis accelerometer data values
@@ -35,22 +39,28 @@ class NeuralHandler (name: String,inputToHiddenWeightsAndBiasesString: String,hi
             then writes the data points and ANN outputs to a file
         */
         val bufferSize = 200
-        if (xBuffer.size != bufferSize || yBuffer.size != bufferSize || zBuffer.size != bufferSize){
-            throw java.lang.IllegalArgumentException("Buffer size should be 200")
-        }
-//        // Run ANN on windows
-//        var outputs: MutableList<Double> = mutableListOf()  // list of outputs for each window
-//        var i = 0
-//        while(i < 99){
-//            forwardPropagate()
+        Log.i("0004","x: ${xBuffer.size}     y: ${yBuffer.size}    z: ${zBuffer.size}")
+//        if (xBuffer.size != bufferSize || yBuffer.size != bufferSize || zBuffer.size != bufferSize){
+//            throw java.lang.IllegalArgumentException("Buffer size should be 200")
 //        }
+//        // Run ANN on windows
+        var outputs: MutableList<Double> = mutableListOf()  // list of outputs for each window
+
+        var i = 0
+        while(i < bufferSize){
+            outputs[i] = forwardPropagate()
+        }
 
         // Write to file
-        for(i in 0..bufferSize){
-            Log.i("0004","label: none    Time: ${}    x: ${event.values[0]}     y: ${event.values[1]}    z: ${event.values[2]}")
+        for(i in 0 until bufferSize){
+            Log.i("0004-${Calendar.getInstance().timeInMillis}","label: none    Time: ${timestampBuffer[i][0]}      TimeMs: ${timestampBuffer[i][1]}       x: ${xBuffer[i]}     y: ${yBuffer[i]}    z: ${zBuffer[i]}")
+//            fRaw.write((timestampBuffer[0]+","+
+//                        event.values[0].toString()+","+
+//                        event.values[1].toString()+","+
+//                        event.values[2].toString()+","+
+//                        Calendar.getInstance().timeInMillis+","+
+//                        currentActivity+","+output.toString()+"\n").toByteArray())
         }
-
-
     }
     fun forwardPropagate(input: Matrix): Double {
         /*
