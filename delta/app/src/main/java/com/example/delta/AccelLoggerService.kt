@@ -24,10 +24,10 @@ class AccelLoggerService: Service(), SensorEventListener {
     private lateinit var sensor: Sensor
     private val samplingRateHertz = 100
 
-    private val xBuffer: MutableList<MutableList<Double>> = mutableListOf()
-    private val yBuffer: MutableList<MutableList<Double>> = mutableListOf()
-    private val zBuffer: MutableList<MutableList<Double>> = mutableListOf()
-    private val extrasBuffer: MutableList<MutableList<String>> = mutableListOf()
+    private var xBuffer: MutableList<MutableList<Double>> = mutableListOf()
+    private var yBuffer: MutableList<MutableList<Double>> = mutableListOf()
+    private var zBuffer: MutableList<MutableList<Double>> = mutableListOf()
+    private var extrasBuffer: MutableList<MutableList<String>> = mutableListOf()
     private lateinit var dataFolderName: String
     private lateinit var fRaw: FileOutputStream
     private lateinit var rawFilename: String
@@ -74,19 +74,14 @@ class AccelLoggerService: Service(), SensorEventListener {
             if(xBuffer.size > 199){
                 nHandler.processBatch(extrasBuffer, xBuffer, yBuffer, zBuffer, fRaw)
 
-//                output = nHandler.forwardPropagate(Matrix((xBuffer+yBuffer+zBuffer).toMutableList()))
-//                fRaw.write((event.timestamp.toString()+","+
-//                        event.values[0].toString()+","+
-//                        event.values[1].toString()+","+
-//                        event.values[2].toString()+","+
-//                        Calendar.getInstance().timeInMillis+","+
-//                        currentActivity+","+output.toString()+"\n").toByteArray())
-//                xBuffer.removeAt(0)
-//                yBuffer.removeAt(0)
-//                zBuffer.removeAt(0)
+                // clear buffer
+                xBuffer = xBuffer.slice(100 until 200) as MutableList<MutableList<Double>>
+                yBuffer = yBuffer.slice(100 until 200) as MutableList<MutableList<Double>>
+                zBuffer = zBuffer.slice(100 until 200) as MutableList<MutableList<Double>>
+                extrasBuffer = extrasBuffer.slice(100 until 200)  as MutableList<MutableList<String>>
             }
-            Log.i("0001","x: ${xBuffer.size}     y: ${yBuffer.size}    z: ${zBuffer.size}")
-            Log.v("0003", "label: $output    Time: ${event.timestamp}    x: ${event.values[0]}     y: ${event.values[1]}    z: ${event.values[2]}")
+            Log.i("0003","x: ${xBuffer.size}     y: ${yBuffer.size}    z: ${zBuffer.size}, extras: ${extrasBuffer.size}")
+            Log.v("0003", "Time: ${event.timestamp}    x: ${event.values[0]}     y: ${event.values[1]}    z: ${event.values[2]}, activity: $currentActivity")
 //            output = if(output >= .85){
 //                1.0
 //            } else {

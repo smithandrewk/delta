@@ -35,22 +35,23 @@ class NeuralHandler (name: String,inputToHiddenWeightsAndBiasesString: String,hi
             zBuffer:    1x200 z-axis accelerometer data values
             fRaw:       File output stream to write accelerometer raw data
 
-            This function calls forwardPropagate for each of the 100 windows in the input matrix and
-            then writes the data points and ANN outputs to a file
+            This function calls forwardPropagate for each of the 100 windows [0-100...99-199] in the
+            input matrix and then writes the data points and ANN outputs to a file
+            It then removes the first 99 data points so that the buffers are of size 100
         */
-        val bufferSize = 200
-        Log.i("0004","x: ${xBuffer.size}     y: ${yBuffer.size}    z: ${zBuffer.size}")
+
+        val numWindows  = 100
+        val windowSize = 100
+        Log.i("0004","x: ${xBuffer.size}     y: ${yBuffer.size}    z: ${zBuffer.size}, extras: ${extrasBuffer.size}")
 
         // Run ANN on windows
-        var outputs: MutableList<Double> = mutableListOf()  // list of outputs for each window
-
+        Log.i("0004", "${extrasBuffer[0]}")
         var i = 0
-        while(i < bufferSize){
-            var output = 0
-//            val output = forwardPropagate(
-//                Matrix((xBuffer.slice(i until i+100)+
-//                        yBuffer.slice(i until i+100)+
-//                        zBuffer.slice(i until i+100)).toMutableList()))
+        while(i < numWindows){
+            val output = forwardPropagate(
+                Matrix((xBuffer.slice(i until i+windowSize)+
+                        yBuffer.slice(i until i+windowSize)+
+                        zBuffer.slice(i until i+windowSize)).toMutableList()))
 
             fRaw.write((extrasBuffer[i][0]+","+
                         xBuffer[i][0]+","+
@@ -61,11 +62,6 @@ class NeuralHandler (name: String,inputToHiddenWeightsAndBiasesString: String,hi
                         output.toString()+"\n").toByteArray())
             i++
         }
-        // clear buffer
-        xBuffer.removeAll(xBuffer.slice(0 until bufferSize-1))
-        yBuffer.removeAll(yBuffer.slice(0 until bufferSize-1))
-        zBuffer.removeAll(zBuffer.slice(0 until bufferSize-1))
-
     }
     fun forwardPropagate(input: Matrix): Double {
         /*
