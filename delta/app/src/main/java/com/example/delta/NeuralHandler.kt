@@ -40,18 +40,17 @@ class NeuralHandler (name: String,inputToHiddenWeightsAndBiasesString: String,hi
         */
         val bufferSize = 200
         Log.i("0004","x: ${xBuffer.size}     y: ${yBuffer.size}    z: ${zBuffer.size}")
-//        if (xBuffer.size != bufferSize || yBuffer.size != bufferSize || zBuffer.size != bufferSize){
-//            throw java.lang.IllegalArgumentException("Buffer size should be 200")
-//        }
-//        // Run ANN on windows
+
+        // Run ANN on windows
         var outputs: MutableList<Double> = mutableListOf()  // list of outputs for each window
 
         var i = 0
         while(i < bufferSize){
-            val output = forwardPropagate(
-                Matrix((xBuffer.slice(i until i+100)+
-                        yBuffer.slice(i until i+100)+
-                        zBuffer.slice(i until i+100)).toMutableList()))
+            var output = 0
+//            val output = forwardPropagate(
+//                Matrix((xBuffer.slice(i until i+100)+
+//                        yBuffer.slice(i until i+100)+
+//                        zBuffer.slice(i until i+100)).toMutableList()))
 
             fRaw.write((extrasBuffer[i][0]+","+
                         xBuffer[i][0]+","+
@@ -60,11 +59,12 @@ class NeuralHandler (name: String,inputToHiddenWeightsAndBiasesString: String,hi
                         extrasBuffer[i][1]+","+
                         extrasBuffer[i][2]+","+
                         output.toString()+"\n").toByteArray())
+            i++
         }
         // clear buffer
-        xBuffer.removeAll(xBuffer.slice(0 until bufferSize))
-        yBuffer.removeAll(xBuffer.slice(0 until bufferSize))
-        zBuffer.removeAll(xBuffer.slice(0 until bufferSize))
+        xBuffer.removeAll(xBuffer.slice(0 until bufferSize-1))
+        yBuffer.removeAll(yBuffer.slice(0 until bufferSize-1))
+        zBuffer.removeAll(zBuffer.slice(0 until bufferSize-1))
 
     }
     fun forwardPropagate(input: Matrix): Double {

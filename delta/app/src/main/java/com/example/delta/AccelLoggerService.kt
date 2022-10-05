@@ -86,7 +86,7 @@ class AccelLoggerService: Service(), SensorEventListener {
 //                zBuffer.removeAt(0)
             }
             Log.i("0001","x: ${xBuffer.size}     y: ${yBuffer.size}    z: ${zBuffer.size}")
-////            Log.v("0003", "label: $output    Time: ${event.timestamp}    x: ${event.values[0]}     y: ${event.values[1]}    z: ${event.values[2]}")
+            Log.v("0003", "label: $output    Time: ${event.timestamp}    x: ${event.values[0]}     y: ${event.values[1]}    z: ${event.values[2]}")
 //            output = if(output >= .85){
 //                1.0
 //            } else {
