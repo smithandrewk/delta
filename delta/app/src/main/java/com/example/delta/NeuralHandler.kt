@@ -48,10 +48,15 @@ class NeuralHandler (name: String,inputToHiddenWeightsAndBiasesString: String,hi
         Log.i("0004", "${extrasBuffer[0]}")
         var i = 0
         while(i < numWindows){
-            val output = forwardPropagate(
+            var output = forwardPropagate(
                 Matrix((xBuffer.slice(i until i+windowSize)+
                         yBuffer.slice(i until i+windowSize)+
                         zBuffer.slice(i until i+windowSize)).toMutableList()))
+            output = if(output >= .85){
+                1.0
+            } else {
+                0.0
+            }
 
             fRaw.write((extrasBuffer[i][0]+","+
                         xBuffer[i][0]+","+
