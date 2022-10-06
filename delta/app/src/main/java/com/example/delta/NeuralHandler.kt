@@ -8,12 +8,18 @@ import java.io.FileOutputStream
 import java.util.*
 
 
-class NeuralHandler (name: String,inputToHiddenWeightsAndBiasesString: String,hiddenToOutputWeightsAndBiasesString: String,inputRangesString:String){
+class NeuralHandler (name: String,
+                     inputToHiddenWeightsAndBiasesString: String,
+                     hiddenToOutputWeightsAndBiasesString: String,
+                     inputRangesString:String,
+                     numWindows: Int){
     val mName = name.uppercase()
 
     private var inputToHiddenWeightsAndBiases: Matrix
     private var hiddenToOutputWeightsAndBiases: Matrix
     private var inputRanges: Matrix
+    private var numWindows: Int = numWindows
+    private val windowSize = 100
 
     init{
         Log.d("0010","Initializing Neural Handler...")
@@ -40,12 +46,9 @@ class NeuralHandler (name: String,inputToHiddenWeightsAndBiasesString: String,hi
             It then removes the first 99 data points so that the buffers are of size 100
         */
 
-        val numWindows  = 100
-        val windowSize = 100
         Log.i("0004","x: ${xBuffer.size}     y: ${yBuffer.size}    z: ${zBuffer.size}, extras: ${extrasBuffer.size}")
 
         // Run ANN on windows
-        Log.i("0004", "${extrasBuffer[0]}")
         var i = 0
         while(i < numWindows){
             var output = forwardPropagate(

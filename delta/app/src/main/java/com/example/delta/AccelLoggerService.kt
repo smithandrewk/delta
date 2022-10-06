@@ -24,6 +24,10 @@ class AccelLoggerService: Service(), SensorEventListener {
     private lateinit var sensor: Sensor
     private val samplingRateHertz = 100
 
+    private val numWindows = 100
+    private val windowUpperLim = numWindows + 99
+    private val windowRange: IntRange = numWindows..windowUpperLim
+
     private var xBuffer: MutableList<MutableList<Double>> = mutableListOf()
     private var yBuffer: MutableList<MutableList<Double>> = mutableListOf()
     private var zBuffer: MutableList<MutableList<Double>> = mutableListOf()
@@ -35,7 +39,6 @@ class AccelLoggerService: Service(), SensorEventListener {
     private lateinit var sessionFilename: String
     private lateinit var nHandler: NeuralHandler
     private var rawFileIndex: Int = 0
-    private var output: Double = 0.0
     private var sampleIndex: Int = 0
     private var currentActivity: String = "None"
     private val startTimeReadable = SimpleDateFormat("yyyy-MM-dd_HH_mm_ss", Locale.ENGLISH).format(Date())
@@ -71,14 +74,14 @@ class AccelLoggerService: Service(), SensorEventListener {
                 Calendar.getInstance().timeInMillis.toString(),
                 currentActivity
             ))
-            if(xBuffer.size > 199){
+            if(xBuffer.size > windowUpperLim){
                 nHandler.processBatch(extrasBuffer, xBuffer, yBuffer, zBuffer, fRaw)
 
                 // clear buffer
-                xBuffer = xBuffer.slice(100 until 200) as MutableList<MutableList<Double>>
-                yBuffer = yBuffer.slice(100 until 200) as MutableList<MutableList<Double>>
-                zBuffer = zBuffer.slice(100 until 200) as MutableList<MutableList<Double>>
-                extrasBuffer = extrasBuffer.slice(100 until 200)  as MutableList<MutableList<String>>
+                xBuffer = xBuffer.slice(windowRange) as MutableList<MutableList<Double>>
+                yBuffer = yBuffer.slice(windowRange) as MutableList<MutableList<Double>>
+                zBuffer = zBuffer.slice(windowRange) as MutableList<MutableList<Double>>
+                extrasBuffer = extrasBuffer.slice(windowRange)  as MutableList<MutableList<String>>
             }
             Log.i("0003","x: ${xBuffer.size}     y: ${yBuffer.size}    z: ${zBuffer.size}, extras: ${extrasBuffer.size}")
             Log.v("0003", "Time: ${event.timestamp}    x: ${event.values[0]}     y: ${event.values[1]}    z: ${event.values[2]}, activity: $currentActivity")
@@ -112,7 +115,12 @@ class AccelLoggerService: Service(), SensorEventListener {
         ins = resources.openRawResource(R.raw.input_ranges)
         val inputRangesString = ins.bufferedReader().use { it.readText() }
         ins.close()
-        return NeuralHandler("andrew",inputToHiddenWeightsAndBiasesString,hiddenToOutputWeightsAndBiasesString,inputRangesString)
+        return NeuralHandler(
+            "andrew",
+            inputToHiddenWeightsAndBiasesString,
+            hiddenToOutputWeightsAndBiasesString,
+            inputRangesString,
+            numWindows)
     }
 
     private fun createNotification(): Notification {
