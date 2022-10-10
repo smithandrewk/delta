@@ -12,13 +12,12 @@ class NeuralHandler (name: String,
                      inputToHiddenWeightsAndBiasesString: String,
                      hiddenToOutputWeightsAndBiasesString: String,
                      inputRangesString:String,
-                     numWindows: Int){
+                     private var numWindows: Int){
     val mName = name.uppercase()
 
     private var inputToHiddenWeightsAndBiases: Matrix
     private var hiddenToOutputWeightsAndBiases: Matrix
     private var inputRanges: Matrix
-    private var numWindows: Int = numWindows
     private val windowSize = 100
 
     init{
@@ -26,6 +25,9 @@ class NeuralHandler (name: String,
         inputToHiddenWeightsAndBiases = Matrix(inputToHiddenWeightsAndBiasesString)
         hiddenToOutputWeightsAndBiases = Matrix(hiddenToOutputWeightsAndBiasesString)
         inputRanges = Matrix(inputRangesString)
+        if (numWindows < 1) {
+            throw IllegalArgumentException("Number of Windows Batched must be 1 or greater")
+        }
     }
 
     fun processBatch(extrasBuffer: MutableList<MutableList<String>>,
@@ -41,9 +43,9 @@ class NeuralHandler (name: String,
             zBuffer:    1x200 z-axis accelerometer data values
             fRaw:       File output stream to write accelerometer raw data
 
-            This function calls forwardPropagate for each of the 100 windows [0-100...99-199] in the
-            input matrix and then writes the data points and ANN outputs to a file
-            It then removes the first 99 data points so that the buffers are of size 100
+            This function calls forwardPropagate for each of the windows
+            (for 100 windows: [0-100...99-199] in the input matrix and then writes the data points
+            and ANN outputs to a file
         */
 
         Log.i("0004","x: ${xBuffer.size}     y: ${yBuffer.size}    z: ${zBuffer.size}, extras: ${extrasBuffer.size}")

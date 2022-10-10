@@ -24,7 +24,7 @@ class AccelLoggerService: Service(), SensorEventListener {
     private lateinit var sensor: Sensor
     private val samplingRateHertz = 100
 
-    private val numWindowsBatched = 0
+    private val numWindowsBatched = 1
     private val windowUpperLim = numWindowsBatched + 99
     private val windowRange: IntRange = numWindowsBatched..windowUpperLim
 
