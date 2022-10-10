@@ -24,9 +24,14 @@ class AccelLoggerService: Service(), SensorEventListener {
     private lateinit var sensor: Sensor
     private val samplingRateHertz = 100
 
-    private val xBuffer: MutableList<MutableList<Double>> = mutableListOf()
-    private val yBuffer: MutableList<MutableList<Double>> = mutableListOf()
-    private val zBuffer: MutableList<MutableList<Double>> = mutableListOf()
+    private val numWindowsBatched = 1
+    private val windowUpperLim = numWindowsBatched + 99
+    private val windowRange: IntRange = numWindowsBatched..windowUpperLim
+
+    private var xBuffer: MutableList<MutableList<Double>> = mutableListOf()
+    private var yBuffer: MutableList<MutableList<Double>> = mutableListOf()
+    private var zBuffer: MutableList<MutableList<Double>> = mutableListOf()
+    private var extrasBuffer: MutableList<MutableList<String>> = mutableListOf()
     private lateinit var dataFolderName: String
     private lateinit var fRaw: FileOutputStream
     private lateinit var rawFilename: String
@@ -34,7 +39,6 @@ class AccelLoggerService: Service(), SensorEventListener {
     private lateinit var sessionFilename: String
     private lateinit var nHandler: NeuralHandler
     private var rawFileIndex: Int = 0
-    private var output: Double = 0.0
     private var sampleIndex: Int = 0
     private var currentActivity: String = "None"
     private val startTimeReadable = SimpleDateFormat("yyyy-MM-dd_HH_mm_ss", Locale.ENGLISH).format(Date())
@@ -65,24 +69,22 @@ class AccelLoggerService: Service(), SensorEventListener {
             xBuffer.add(mutableListOf(event.values[0].toDouble()))
             yBuffer.add(mutableListOf(event.values[0].toDouble()))
             zBuffer.add(mutableListOf(event.values[0].toDouble()))
-            if(xBuffer.size > 99){
-                output = nHandler.forwardPropagate(Matrix((xBuffer+yBuffer+zBuffer).toMutableList()))
-                fRaw.write((event.timestamp.toString()+","+
-                        event.values[0].toString()+","+
-                        event.values[1].toString()+","+
-                        event.values[2].toString()+","+
-                        Calendar.getInstance().timeInMillis+","+
-                        currentActivity+","+output.toString()+"\n").toByteArray())
-                xBuffer.removeAt(0)
-                yBuffer.removeAt(0)
-                zBuffer.removeAt(0)
+            extrasBuffer.add(mutableListOf(
+                event.timestamp.toString(),
+                Calendar.getInstance().timeInMillis.toString(),
+                currentActivity
+            ))
+            if(xBuffer.size > windowUpperLim){
+                nHandler.processBatch(extrasBuffer, xBuffer, yBuffer, zBuffer, fRaw)
+
+                // clear buffer
+                xBuffer = xBuffer.slice(windowRange) as MutableList<MutableList<Double>>
+                yBuffer = yBuffer.slice(windowRange) as MutableList<MutableList<Double>>
+                zBuffer = zBuffer.slice(windowRange) as MutableList<MutableList<Double>>
+                extrasBuffer = extrasBuffer.slice(windowRange)  as MutableList<MutableList<String>>
             }
-            Log.v("0003", "label: $output    Time: ${event.timestamp}    x: ${event.values[0]}     y: ${event.values[1]}    z: ${event.values[2]}")
-            output = if(output >= .85){
-                1.0
-            } else {
-                0.0
-            }
+            Log.i("0003","x: ${xBuffer.size}     y: ${yBuffer.size}    z: ${zBuffer.size}, extras: ${extrasBuffer.size}")
+            Log.v("0003", "Time: ${event.timestamp}    x: ${event.values[0]}     y: ${event.values[1]}    z: ${event.values[2]}, activity: $currentActivity")
         }
         sampleIndex++
     }
@@ -113,7 +115,12 @@ class AccelLoggerService: Service(), SensorEventListener {
         ins = resources.openRawResource(R.raw.input_ranges)
         val inputRangesString = ins.bufferedReader().use { it.readText() }
         ins.close()
-        return NeuralHandler("andrew",inputToHiddenWeightsAndBiasesString,hiddenToOutputWeightsAndBiasesString,inputRangesString)
+        return NeuralHandler(
+            "andrew",
+            inputToHiddenWeightsAndBiasesString,
+            hiddenToOutputWeightsAndBiasesString,
+            inputRangesString,
+            numWindowsBatched)
     }
 
     private fun createNotification(): Notification {
@@ -130,13 +137,6 @@ class AccelLoggerService: Service(), SensorEventListener {
         notificationManager.createNotificationChannel(mChannel)
 
         // Create Notification
-//        val pendingIntent: PendingIntent =
-//            Intent(this, MainActivity::class.java).let { notificationIntent ->
-//                PendingIntent.getActivity(
-//                    this, 0, notificationIntent,
-//                    PendingIntent.FLAG_IMMUTABLE
-//                )
-//            }
         return Notification.Builder(this, getString(R.string.NOTIFICATION_CHANNEL_1_ID))
             .setContentTitle("Delta")
             .setContentText("Accelerometer Recording")
@@ -159,6 +159,11 @@ class AccelLoggerService: Service(), SensorEventListener {
         fSession = FileOutputStream(File(this.filesDir, "$dataFolderName/$sessionFilename"))
         writeToSessionFile("File Start Time: ${Calendar.getInstance().timeInMillis}\n")
         writeToSessionFile("Event,Start Time,Stop Time\n")
+
+        val fInfo = FileOutputStream(File(this.filesDir, "$dataFolderName/Info.txt"))
+        fInfo.use { f ->
+            f.write("Number of Windows in each Batch: $numWindowsBatched".toByteArray())
+        }
     }
 
     private fun createNewRawFile() {

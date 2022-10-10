@@ -26,14 +26,6 @@ class EndActivityButton : Activity() {
         setContentView(R.layout.activity_end_button)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
-        // stuff to display file and sampling frequency
-        val samplingRateHertz = intent.getStringExtra("SamplingRateKey")
-        val filename = intent.getStringExtra("FilenameKey")
-        val xmlSamplingFrequency: CurvedTextView = findViewById(R.id.samplingFrequency)
-        val xmlFilename: CurvedTextView = findViewById(R.id.filename)
-        xmlSamplingFrequency.text = "$samplingRateHertz Hz"
-        xmlFilename.text = filename
-
         progressBar = findViewById(R.id.progressBar)
 
         findViewById<Button>(R.id.endActivityButton).setOnTouchListener { _, event -> //when button is pressed
