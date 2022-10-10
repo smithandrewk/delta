@@ -24,9 +24,9 @@ class AccelLoggerService: Service(), SensorEventListener {
     private lateinit var sensor: Sensor
     private val samplingRateHertz = 100
 
-    private val numWindows = 100
-    private val windowUpperLim = numWindows + 99
-    private val windowRange: IntRange = numWindows..windowUpperLim
+    private val numWindowsBatched = 0
+    private val windowUpperLim = numWindowsBatched + 99
+    private val windowRange: IntRange = numWindowsBatched..windowUpperLim
 
     private var xBuffer: MutableList<MutableList<Double>> = mutableListOf()
     private var yBuffer: MutableList<MutableList<Double>> = mutableListOf()
@@ -120,7 +120,7 @@ class AccelLoggerService: Service(), SensorEventListener {
             inputToHiddenWeightsAndBiasesString,
             hiddenToOutputWeightsAndBiasesString,
             inputRangesString,
-            numWindows)
+            numWindowsBatched)
     }
 
     private fun createNotification(): Notification {
@@ -137,13 +137,6 @@ class AccelLoggerService: Service(), SensorEventListener {
         notificationManager.createNotificationChannel(mChannel)
 
         // Create Notification
-//        val pendingIntent: PendingIntent =
-//            Intent(this, MainActivity::class.java).let { notificationIntent ->
-//                PendingIntent.getActivity(
-//                    this, 0, notificationIntent,
-//                    PendingIntent.FLAG_IMMUTABLE
-//                )
-//            }
         return Notification.Builder(this, getString(R.string.NOTIFICATION_CHANNEL_1_ID))
             .setContentTitle("Delta")
             .setContentText("Accelerometer Recording")
@@ -166,6 +159,11 @@ class AccelLoggerService: Service(), SensorEventListener {
         fSession = FileOutputStream(File(this.filesDir, "$dataFolderName/$sessionFilename"))
         writeToSessionFile("File Start Time: ${Calendar.getInstance().timeInMillis}\n")
         writeToSessionFile("Event,Start Time,Stop Time\n")
+
+        val fInfo = FileOutputStream(File(this.filesDir, "$dataFolderName/Info.txt"))
+        fInfo.use { f ->
+            f.write("Number of Windows in each Batch: $numWindowsBatched".toByteArray())
+        }
     }
 
     private fun createNewRawFile() {
