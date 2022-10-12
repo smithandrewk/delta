@@ -1,11 +1,16 @@
 package com.example.delta
 
 import android.app.Activity
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.Toast
 import com.example.delta.databinding.ActivityMainBinding
+import java.util.*
 
 class MainActivity : Activity() {
     private lateinit var accelIntent: Intent
@@ -17,6 +22,9 @@ class MainActivity : Activity() {
                                         R.id.drinkButton to "Drinking",
                                         R.id.smokeButton to "Smoking",
                                         R.id.otherButton to "Other")
+
+    private val activitiesCount = mutableMapOf("Smoking" to 0)
+    private lateinit var activityDetectedReceiver: MainActivity.ActivityDetectedReceiver
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,13 +41,16 @@ class MainActivity : Activity() {
             findViewById<Button>(button).setOnClickListener {
                 Log.i("0001", "Signalled Service - Started $chosenActivity")
                 // tell service that new activity is starting
-                sendBroadcast(Intent(getString(R.string.BROADCAST_CODE)).putExtra(getString(R.string.ACTIVITY), chosenActivity))
+                sendBroadcast(Intent(getString(R.string.ACTIVITY_CHANGE_BROADCAST_CODE))
+                    .putExtra(getString(R.string.ACTIVITY), chosenActivity))
 
                 // start EndActivityButton activity
                 val endButtonIntent = Intent(this, EndActivityButton::class.java)
                 startActivityForResult(endButtonIntent, launchEndButtonCode)
             }
         }
+
+        createBroadcastReceiver()
     }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
         // Receives result from the EndActivityButton activity, and notifies accelerometer service
@@ -48,13 +59,35 @@ class MainActivity : Activity() {
             if (resultCode == Activity.RESULT_OK) {
                 Log.i("0001", "Signalled Service - End Activity")
                 // tell service that activity has ended
-                sendBroadcast(Intent(
-                    getString(R.string.BROADCAST_CODE)).putExtra(getString(R.string.ACTIVITY),
-                    getString(R.string.NO_ACTIVITY)))
-//                sendBroadcast(broadcastIntent)
+                sendBroadcast(Intent(getString(R.string.ACTIVITY_CHANGE_BROADCAST_CODE))
+                    .putExtra(getString(R.string.ACTIVITY), getString(R.string.NO_ACTIVITY)))
             }
             else {
                 Log.i("0001", "Error Receiving Activity Result")
+            }
+        }
+    }
+    private fun createBroadcastReceiver() {
+        // Create and register instance of broadcast receiver to receive signals from MainActivity
+        activityDetectedReceiver = ActivityDetectedReceiver()
+        registerReceiver(activityDetectedReceiver,
+            IntentFilter(getString(R.string.ACTIVITY_DETECTED_BROADCAST_CODE))
+        )
+    }
+    private inner class ActivityDetectedReceiver : BroadcastReceiver() {
+        // Inner class to define the broadcast receiver
+        // This Broadcast Receiver receives signals from MainActivity when user presses buttons
+        override fun onReceive(context: Context?, intent: Intent) {
+            if (intent.action == getString(R.string.ACTIVITY_DETECTED_BROADCAST_CODE)) {
+                val detectedActivity = intent.getStringArrayListExtra(getString(R.string.ACTIVITY))
+
+                if (detectedActivity != null) {
+                    for(activity in detectedActivity){
+                        Log.i("0001", "Detected: $activity")
+                        Toast.makeText(applicationContext, activity, Toast.LENGTH_SHORT).show()
+                    }
+                }
+
             }
         }
     }
@@ -63,6 +96,7 @@ class MainActivity : Activity() {
         Log.i("0001", "DESTROYED")
         // When app is destroyed, stop the service
         stopService(accelIntent)
+        unregisterReceiver(activityDetectedReceiver)
     }
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)

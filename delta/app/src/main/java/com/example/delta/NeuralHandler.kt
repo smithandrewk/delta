@@ -34,7 +34,7 @@ class NeuralHandler (name: String,
                      xBuffer: MutableList<MutableList<Double>>,
                      yBuffer: MutableList<MutableList<Double>>,
                      zBuffer: MutableList<MutableList<Double>>,
-                     fRaw: FileOutputStream) {
+                     fRaw: FileOutputStream) : MutableSet<String> {
         /*
             extrasBuffer: 3x200 timestamps and activity with each row:
                             [SensorEvent timestamp (ns), Calendar timestamp (ms), current activity]
@@ -49,19 +49,28 @@ class NeuralHandler (name: String,
         */
 
         Log.i("0004","x: ${xBuffer.size}     y: ${yBuffer.size}    z: ${zBuffer.size}, extras: ${extrasBuffer.size}")
+        val activitiesDetected: MutableSet<String> = mutableSetOf()
+        var smokingOutput: Double
 
         // Run ANN on windows
         var i = 0
         while(i < numWindows){
-            var output = forwardPropagate(
+            smokingOutput = forwardPropagate(
                 Matrix((xBuffer.slice(i until i+windowSize)+
                         yBuffer.slice(i until i+windowSize)+
                         zBuffer.slice(i until i+windowSize)).toMutableList()))
-            output = if(output >= .85){
-                1.0
-            } else {
-                0.0
+            if (smokingOutput >= 0.85){
+                smokingOutput = 1.0
+                activitiesDetected.add("Smoking")
             }
+            else{
+                smokingOutput = 0.0
+            }
+//            output = if(output >= .85){
+//                1.0
+//            } else {
+//                0.0
+//            }
 
             fRaw.write((extrasBuffer[i][0]+","+
                         xBuffer[i][0]+","+
@@ -69,9 +78,10 @@ class NeuralHandler (name: String,
                         zBuffer[i][0]+","+
                         extrasBuffer[i][1]+","+
                         extrasBuffer[i][2]+","+
-                        output.toString()+"\n").toByteArray())
+                        smokingOutput.toString()+"\n").toByteArray())
             i++
         }
+        return activitiesDetected
     }
     fun forwardPropagate(input: Matrix): Double {
         /*
