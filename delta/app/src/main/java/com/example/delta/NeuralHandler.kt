@@ -2,10 +2,8 @@ package com.example.delta
 
 import android.util.Log
 import com.example.delta.Matrix.Companion.logSigmoid
-import com.example.delta.Matrix.Companion.minMaxNorm
 import com.example.delta.Matrix.Companion.tanSigmoid
 import java.io.FileOutputStream
-import java.util.*
 
 
 class NeuralHandler (name: String,
@@ -73,7 +71,7 @@ class NeuralHandler (name: String,
             i++
         }
     }
-    fun forwardPropagate(input: Matrix): Double {
+    private fun forwardPropagate(input: Matrix): Double {
         /*
             input : three-axis accelerometer values from smartwatch sampled at 20 Hz for 5 seconds.
                     i.e. the input is (1x300) where the first 100 values are x accelerometer
@@ -88,5 +86,13 @@ class NeuralHandler (name: String,
         var hiddenOutput = tanSigmoid(inputToHiddenWeightsAndBiases * normedInput)
         hiddenOutput.addOneToFront()
         return logSigmoid(hiddenToOutputWeightsAndBiases * hiddenOutput)[0][0]
+    }
+    private fun minMaxNorm(input: Matrix): Matrix {
+
+        var output = input.copy()
+        for (i in 0 until input.getRowSize()) {
+            output[i][0] = (1-(-1))*((input[i][0] - inputRanges[i][0]) / (inputRanges[i][1] - inputRanges[i][0]))-1
+        }
+        return output
     }
 }
