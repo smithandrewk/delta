@@ -1,6 +1,7 @@
 package com.example.delta
 
 import android.app.Activity
+import android.app.Application
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -25,12 +26,14 @@ class MainActivity : Activity() {
 
     private val activitiesCount = mutableMapOf("Smoking" to 0)
     private lateinit var activityDetectedReceiver: MainActivity.ActivityDetectedReceiver
+    private lateinit var mApp: Application
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.i("0001", "CREATED")
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        mApp = this.applicationContext as Application
 
         // start service to record accelerometer data
         accelIntent = Intent(applicationContext, AccelLoggerService::class.java)
@@ -85,6 +88,8 @@ class MainActivity : Activity() {
                     for(activity in detectedActivity){
                         Log.i("0001", "Detected: $activity")
                         Toast.makeText(applicationContext, activity, Toast.LENGTH_SHORT).show()
+
+                        // TODO start activity (use snackbar) if user says yes (and not in activity now)
                     }
                 }
 

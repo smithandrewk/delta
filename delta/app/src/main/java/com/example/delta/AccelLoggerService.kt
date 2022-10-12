@@ -25,7 +25,7 @@ class AccelLoggerService: Service(), SensorEventListener {
     private lateinit var sensor: Sensor
     private val samplingRateHertz = 100
 
-    private val numWindowsBatched = 1
+    private val numWindowsBatched = 100
     private val windowUpperLim = numWindowsBatched + 99
     private val windowRange: IntRange = numWindowsBatched..windowUpperLim
 
@@ -78,25 +78,28 @@ class AccelLoggerService: Service(), SensorEventListener {
                 currentActivity
             ))
             if(xBuffer.size > windowUpperLim){
-                activitiesDetected = nHandler.processBatch(extrasBuffer, xBuffer, yBuffer, zBuffer, fRaw)
-
-                // clear buffer
-                xBuffer = xBuffer.slice(windowRange) as MutableList<MutableList<Double>>
-                yBuffer = yBuffer.slice(windowRange) as MutableList<MutableList<Double>>
-                zBuffer = zBuffer.slice(windowRange) as MutableList<MutableList<Double>>
-                extrasBuffer = extrasBuffer.slice(windowRange)  as MutableList<MutableList<String>>
-
-                if(activitiesDetected.size > 0){
-                    Log.i("0003", "Broadcast: ${activitiesDetected.elementAt(0)}")
-                    sendBroadcast(Intent(getString(R.string.ACTIVITY_DETECTED_BROADCAST_CODE))
-                        .putStringArrayListExtra(getString(R.string.ACTIVITY),
-                                                 ArrayList(activitiesDetected)))
-                }
+                processBatch()
             }
             Log.i("0003","x: ${xBuffer.size}     y: ${yBuffer.size}    z: ${zBuffer.size}, extras: ${extrasBuffer.size}")
             Log.v("0003", "Time: ${event.timestamp}    x: ${event.values[0]}     y: ${event.values[1]}    z: ${event.values[2]}, activity: $currentActivity")
         }
         sampleIndex++
+    }
+    private fun processBatch(){
+        activitiesDetected = nHandler.processBatch(extrasBuffer, xBuffer, yBuffer, zBuffer, fRaw)
+
+        // clear buffer
+        xBuffer = xBuffer.slice(windowRange) as MutableList<MutableList<Double>>
+        yBuffer = yBuffer.slice(windowRange) as MutableList<MutableList<Double>>
+        zBuffer = zBuffer.slice(windowRange) as MutableList<MutableList<Double>>
+        extrasBuffer = extrasBuffer.slice(windowRange)  as MutableList<MutableList<String>>
+
+        if(activitiesDetected.size > 0){
+            Log.i("0003", "Broadcast: ${activitiesDetected.elementAt(0)}")
+            sendBroadcast(Intent(getString(R.string.ACTIVITY_DETECTED_BROADCAST_CODE))
+                .putStringArrayListExtra(getString(R.string.ACTIVITY),
+                    ArrayList(activitiesDetected)))
+        }
     }
 
     private fun createBroadcastReceiver() {
