@@ -144,7 +144,7 @@ class AccelLoggerService: Service(), SensorEventListener {
         val mChannel = NotificationChannel(
             getString(R.string.NOTIFICATION_CHANNEL_1_ID),
             channelName,
-            NotificationManager.IMPORTANCE_HIGH
+            NotificationManager.IMPORTANCE_LOW
         )
         mChannel.description = channelDescription
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager

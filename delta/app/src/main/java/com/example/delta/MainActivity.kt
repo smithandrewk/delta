@@ -1,7 +1,6 @@
 package com.example.delta
 
-import android.app.Activity
-import android.app.Application
+import android.app.*
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -41,16 +40,7 @@ class MainActivity : Activity() {
 
         // get chosen activity from user - create onClickListener for each button
         activityOptions.forEach { (button, chosenActivity) ->
-            findViewById<Button>(button).setOnClickListener {
-                Log.i("0001", "Signalled Service - Started $chosenActivity")
-                // tell service that new activity is starting
-                sendBroadcast(Intent(getString(R.string.ACTIVITY_CHANGE_BROADCAST_CODE))
-                    .putExtra(getString(R.string.ACTIVITY), chosenActivity))
-
-                // start EndActivityButton activity
-                val endButtonIntent = Intent(this, EndActivityButton::class.java)
-                startActivityForResult(endButtonIntent, launchEndButtonCode)
-            }
+            findViewById<Button>(button).setOnClickListener { startNewActivity(chosenActivity) }
         }
 
         createBroadcastReceiver()
@@ -70,6 +60,16 @@ class MainActivity : Activity() {
             }
         }
     }
+    private fun startNewActivity(chosenActivity: String){
+        Log.i("0001", "Signalled Service - Started $chosenActivity")
+        // tell service that new activity is starting
+        sendBroadcast(Intent(getString(R.string.ACTIVITY_CHANGE_BROADCAST_CODE))
+            .putExtra(getString(R.string.ACTIVITY), chosenActivity))
+
+        // start EndActivityButton activity
+        val endButtonIntent = Intent(this, EndActivityButton::class.java)
+        startActivityForResult(endButtonIntent, launchEndButtonCode)
+    }
     private fun createBroadcastReceiver() {
         // Create and register instance of broadcast receiver to receive signals from MainActivity
         activityDetectedReceiver = ActivityDetectedReceiver()
@@ -79,13 +79,13 @@ class MainActivity : Activity() {
     }
     private inner class ActivityDetectedReceiver : BroadcastReceiver() {
         // Inner class to define the broadcast receiver
-        // This Broadcast Receiver receives signals from MainActivity when user presses buttons
+        // This Broadcast Receiver receives signals from AccelLoggerService when smoking is detected
         override fun onReceive(context: Context?, intent: Intent) {
             if (intent.action == getString(R.string.ACTIVITY_DETECTED_BROADCAST_CODE)) {
                 val detectedActivity = intent.getStringArrayListExtra(getString(R.string.ACTIVITY))
 
                 if (detectedActivity != null) {
-                    for(activity in detectedActivity){
+                    for(activity in detectedActivity){ //TODO check that app is in MainActivity
                         Log.i("0001", "Detected: $activity")
                         Toast.makeText(applicationContext, activity, Toast.LENGTH_SHORT).show()
 
@@ -93,6 +93,19 @@ class MainActivity : Activity() {
                     }
                 }
 
+            }
+        }
+    }
+    private inner class ActivityConfirmedReceiver : BroadcastReceiver() {
+        // Inner class to define the broadcast receiver
+        // This Broadcast Receiver receives response of user to confirm detected activity from notification
+        override fun onReceive(context: Context?, intent: Intent) {
+            if (intent.action == getString(R.string.ACTIVITY_RESPONSE_BROADCAST_CODE)) {
+                val activityResponse = intent.getBooleanExtra(getString(R.string.ACTIVITY_RESPONSE), false)
+                Log.i("0001", "$activityResponse")
+                if(activityResponse){
+                    // TODO start EndActivitiyButton
+                }
             }
         }
     }
