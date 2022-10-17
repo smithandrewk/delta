@@ -25,6 +25,7 @@ class MainActivity : Activity() {
 
     private val activitiesCount = mutableMapOf("Smoking" to 0)
     private lateinit var activityDetectedReceiver: MainActivity.ActivityDetectedReceiver
+    private lateinit var activityConfirmedReceiver: MainActivity.ActivityConfirmedReceiver
     private lateinit var mApp: Application
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,6 +77,10 @@ class MainActivity : Activity() {
         registerReceiver(activityDetectedReceiver,
             IntentFilter(getString(R.string.ACTIVITY_DETECTED_BROADCAST_CODE))
         )
+        activityConfirmedReceiver = ActivityConfirmedReceiver()
+        registerReceiver(activityConfirmedReceiver,
+            IntentFilter(getString(R.string.ACTIVITY_RESPONSE_BROADCAST_CODE))
+        )
     }
     private inner class ActivityDetectedReceiver : BroadcastReceiver() {
         // Inner class to define the broadcast receiver
@@ -88,8 +93,30 @@ class MainActivity : Activity() {
                     for(activity in detectedActivity){ //TODO check that app is in MainActivity
                         Log.i("0001", "Detected: $activity")
                         Toast.makeText(applicationContext, activity, Toast.LENGTH_SHORT).show()
+                        val mChannel = NotificationChannel(
+                            getString(R.string.NOTIFICATION_CHANNEL_2_ID),
+                            "activity_alert_channel",
+                            NotificationManager.IMPORTANCE_HIGH
+                        )
+                        mChannel.description = "Channel to display notifications about detecting activities"
+                        var notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                        notificationManager.createNotificationChannel(mChannel)
 
-                        // TODO start activity (use snackbar) if user says yes (and not in activity now)
+//                        val smokingConfirmedIntent = Intent(this@MainActivity, ActivityConfirmedReceiver::class.java).apply {
+//                            action = getString(R.string.ACTIVITY_RESPONSE_BROADCAST_CODE)
+//                            putExtra("smoking_confirmed_id", 0)
+//                        }
+//                        val smokingConfirmedPendingIntent: PendingIntent =
+//                            PendingIntent.getBroadcast(this@MainActivity, 0, smokingConfirmedIntent, 0)
+
+                        val builder = Notification.Builder(this@MainActivity, getString(R.string.NOTIFICATION_CHANNEL_2_ID))
+                        .setContentTitle("Delta")
+                            .setContentText("Are you smoking?")
+                            .setSmallIcon(R.drawable.ic_smoking)
+                            .setContentIntent(null)     // Don't open any activity when Notification is clicked
+//                            .addAction(0, "Yes", smokingConfirmedPendingIntent)
+                        notificationManager.notify(1234, builder.build())
+                    // TODO start activity (use snackbar) if user says yes (and not in activity now)
                     }
                 }
 
@@ -102,9 +129,9 @@ class MainActivity : Activity() {
         override fun onReceive(context: Context?, intent: Intent) {
             if (intent.action == getString(R.string.ACTIVITY_RESPONSE_BROADCAST_CODE)) {
                 val activityResponse = intent.getBooleanExtra(getString(R.string.ACTIVITY_RESPONSE), false)
-                Log.i("0001", "$activityResponse")
+                Log.i("0001", "Response: $activityResponse")
                 if(activityResponse){
-                    // TODO start EndActivitiyButton
+                    // TODO start EndActivityButton
                 }
             }
         }
@@ -115,6 +142,7 @@ class MainActivity : Activity() {
         // When app is destroyed, stop the service
         stopService(accelIntent)
         unregisterReceiver(activityDetectedReceiver)
+        unregisterReceiver(activityConfirmedReceiver)
     }
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)

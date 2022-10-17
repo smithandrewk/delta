@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="NOTIFICATION_CHANNEL_1_ID">Channel_1</string>
+    <string name="NOTIFICATION_CHANNEL_2_ID">Channel_2</string>
     <string name="ACTIVITY_CHANGE_BROADCAST_CODE">delta_activity_changed_broadcast_code</string>
     <string name="ACTIVITY">endActivityButton_intent_code</string>
     <string name="NO_ACTIVITY">None</string>
     <string name="ACTIVITY_DETECTED_BROADCAST_CODE">delta_activity_detection_code</string>
-    <string name="ACTIVITY_RESPONSE_BROADCAST_CODE">delta_activity_detection_code</string>
+    <string name="ACTIVITY_RESPONSE_BROADCAST_CODE">delta_activity_response_code</string>
     <string name="ACTIVITY_RESPONSE">notificationResponse_intent_code</string>
 
 </resources>

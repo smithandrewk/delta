@@ -20,6 +20,8 @@ class NeuralHandler (name: String,
     private var inputRanges: Matrix
     private val windowSize = 100
 
+    private var temp = true
+
     init{
         Log.d("0010","Initializing Neural Handler...")
         inputToHiddenWeightsAndBiases = Matrix(inputToHiddenWeightsAndBiasesString)
@@ -59,9 +61,10 @@ class NeuralHandler (name: String,
                 Matrix((xBuffer.slice(i until i+windowSize)+
                         yBuffer.slice(i until i+windowSize)+
                         zBuffer.slice(i until i+windowSize)).toMutableList()))
-            if (smokingOutput >= 0.85){
+            if (smokingOutput >= 0.85 || temp){
                 smokingOutput = 1.0
                 activitiesDetected.add("Smoking")
+                temp = false
             }
             else{
                 smokingOutput = 0.0
