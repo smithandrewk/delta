@@ -1,15 +1,14 @@
 package com.example.delta
 
 import android.app.*
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import com.example.delta.databinding.ActivityMainBinding
-import java.util.*
+import com.example.delta.receivers.ActionDetectedReceiver
+import com.example.delta.receivers.ActionConfirmedReceiver
 
 class MainActivity : Activity() {
     private lateinit var accelIntent: Intent
@@ -24,7 +23,7 @@ class MainActivity : Activity() {
 
     private val activitiesCount = mutableMapOf("Smoking" to 0)
     private lateinit var activityDetectedReceiver: ActionDetectedReceiver
-    private lateinit var activityConfirmedReceiver: MainActivity.ActivityConfirmedReceiver
+    private lateinit var activityConfirmedReceiver: ActionConfirmedReceiver
     private lateinit var mApp: Application
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,23 +75,10 @@ class MainActivity : Activity() {
         registerReceiver(activityDetectedReceiver,
             IntentFilter(getString(R.string.ACTIVITY_DETECTED_BROADCAST_CODE))
         )
-        activityConfirmedReceiver = ActivityConfirmedReceiver()
+        activityConfirmedReceiver = ActionConfirmedReceiver()
         registerReceiver(activityConfirmedReceiver,
             IntentFilter(getString(R.string.ACTIVITY_RESPONSE_BROADCAST_CODE))
         )
-    }
-    private inner class ActivityConfirmedReceiver : BroadcastReceiver() {
-        // Inner class to define the broadcast receiver
-        // This Broadcast Receiver receives response of user to confirm detected activity from notification
-        override fun onReceive(context: Context?, intent: Intent) {
-            if (intent.action == getString(R.string.ACTIVITY_RESPONSE_BROADCAST_CODE)) {
-                val activityResponse = intent.getBooleanExtra(getString(R.string.ACTIVITY_RESPONSE), false)
-                Log.i("0001", "Response: $activityResponse")
-                if(activityResponse){
-                    // TODO start EndActivityButton
-                }
-            }
-        }
     }
     override fun onDestroy() {
         super.onDestroy()

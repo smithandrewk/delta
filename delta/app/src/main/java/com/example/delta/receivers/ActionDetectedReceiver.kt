@@ -1,4 +1,4 @@
-package com.example.delta
+package com.example.delta.receivers
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -8,7 +8,9 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import androidx.core.content.ContextCompat.getSystemService
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationCompat.Action.SEMANTIC_ACTION_THUMBS_UP
+import com.example.delta.R
 
 
 class ActionDetectedReceiver : BroadcastReceiver() {
@@ -20,7 +22,7 @@ class ActionDetectedReceiver : BroadcastReceiver() {
 
             if (detectedActivity != null) {
                 for(activity in detectedActivity){ //TODO check that app is in MainActivity
-                    Log.i("0001", "Detected: $activity")
+                    Log.i("ActionDetectedReceiver", "Detected: $activity")
                     val mChannel = NotificationChannel(
                         context.getString(R.string.NOTIFICATION_CHANNEL_2_ID),
                         "activity_alert_channel",
@@ -34,15 +36,18 @@ class ActionDetectedReceiver : BroadcastReceiver() {
 //                        action = context.getString(R.string.ACTIVITY_RESPONSE_BROADCAST_CODE)
 //                        putExtra("smoking_confirmed_id", 0)
 //                    }
-//                    val smokingConfirmedPendingIntent: PendingIntent =
-//                        PendingIntent.getBroadcast(context, 0, smokingConfirmedIntent, 0)
+                    val smokingConfirmedPintent: PendingIntent =
+                        PendingIntent.getBroadcast(context,
+                            0,
+                            Intent(context.getString(R.string.ACTIVITY_DETECTED_BROADCAST_CODE)),
+                            0)
 
-                    val builder = Notification.Builder(context, context.getString(R.string.NOTIFICATION_CHANNEL_2_ID))
+                    val builder = NotificationCompat.Builder(context, context.getString(R.string.NOTIFICATION_CHANNEL_2_ID))
                         .setContentTitle("Delta")
                         .setContentText("Are you smoking?")
                         .setSmallIcon(R.drawable.ic_smoking)
                         .setContentIntent(null)     // Don't open any activity when Notification is clicked
-//                        .addAction(0, "Yes", smokingConfirmedPendingIntent)
+                        .addAction(SEMANTIC_ACTION_THUMBS_UP, "Yes", smokingConfirmedPintent)
                     notificationManager.notify(1234, builder.build())
                     // TODO start activity (use snackbar) if user says yes (and not in activity now)
                 }

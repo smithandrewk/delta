@@ -80,7 +80,7 @@ class AccelLoggerService: Service(), SensorEventListener {
             if(xBuffer.size > windowUpperLim){
                 processBatch()
             }
-            Log.i("0003","x: ${xBuffer.size}     y: ${yBuffer.size}    z: ${zBuffer.size}, extras: ${extrasBuffer.size}")
+            Log.v("0003","x: ${xBuffer.size}     y: ${yBuffer.size}    z: ${zBuffer.size}, extras: ${extrasBuffer.size}")
             Log.v("0003", "Time: ${event.timestamp}    x: ${event.values[0]}     y: ${event.values[1]}    z: ${event.values[2]}, activity: $currentActivity")
         }
         sampleIndex++
