@@ -92,7 +92,7 @@ class MainActivity : Activity() {
                 if (detectedActivity != null) {
                     for(activity in detectedActivity){ //TODO check that app is in MainActivity
                         Log.i("0001", "Detected: $activity")
-                        Toast.makeText(applicationContext, activity, Toast.LENGTH_SHORT).show()
+//                        Toast.makeText(applicationContext, activity, Toast.LENGTH_SHORT).show()
                         val mChannel = NotificationChannel(
                             getString(R.string.NOTIFICATION_CHANNEL_2_ID),
                             "activity_alert_channel",

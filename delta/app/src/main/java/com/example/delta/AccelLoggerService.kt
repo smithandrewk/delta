@@ -225,8 +225,8 @@ class AccelLoggerService: Service(), SensorEventListener {
         super.onDestroy()
         // Unregister Accelerometer Listener and Broadcast Receiver
         Log.i("0003", "DESTROYED")
-        sensorManager.unregisterListener(this)
         unregisterReceiver(activityChangeReceiver)
+        sensorManager.unregisterListener(this)
     }
 
     override fun onBind(intent: Intent?): IBinder? {
