@@ -13,6 +13,7 @@ import android.os.IBinder
 import android.util.Log
 import java.io.File
 import java.io.FileOutputStream
+import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -23,12 +24,22 @@ class AccelLoggerService: Service(), SensorEventListener {
     private lateinit var sensor: Sensor
     private val samplingRateHertz = 100
 
+    private val numWindowsBatched = 1
+    private val windowUpperLim = numWindowsBatched + 99
+    private val windowRange: IntRange = numWindowsBatched..windowUpperLim
+
+    private var xBuffer: MutableList<MutableList<Double>> = mutableListOf()
+    private var yBuffer: MutableList<MutableList<Double>> = mutableListOf()
+    private var zBuffer: MutableList<MutableList<Double>> = mutableListOf()
+    private var extrasBuffer: MutableList<MutableList<String>> = mutableListOf()
     private lateinit var dataFolderName: String
     private lateinit var fRaw: FileOutputStream
     private lateinit var rawFilename: String
     private lateinit var fSession: FileOutputStream
     private lateinit var sessionFilename: String
+    private lateinit var nHandler: NeuralHandler
     private var rawFileIndex: Int = 0
+    private var sampleIndex: Int = 0
     private var currentActivity: String = "None"
     private val startTimeReadable = SimpleDateFormat("yyyy-MM-dd_HH_mm_ss", Locale.ENGLISH).format(Date())
 
@@ -40,7 +51,7 @@ class AccelLoggerService: Service(), SensorEventListener {
         createFiles()
         createBroadcastReceiver()
         createAccelerometerListener()
-
+        nHandler = getNeuralHandler()
         // Start Service as foreground
         startForeground(1, createNotification())
 
@@ -48,14 +59,34 @@ class AccelLoggerService: Service(), SensorEventListener {
     }
 
     override fun onSensorChanged(event: SensorEvent) {
-        // Log data on every event received from accelerometer
-        Log.v("0003", "Time: ${event.timestamp}    x: ${event.values[0]}     y: ${event.values[1]}    z: ${event.values[2]}")
-        fRaw.write((event.timestamp.toString()+","+
-                    event.values[0].toString()+","+
-                    event.values[1].toString()+","+
-                    event.values[2].toString()+","+
-                    Calendar.getInstance().timeInMillis+","+
-                    currentActivity+"\n").toByteArray())
+        /*
+            We observed experimentally Ticwatch E samples at 100 Hz consistently for 9 hours
+            in our app. Therefore, we take every 5th value from onsensorchanged to approximate
+            20 Hz sampling rate.
+         */
+        if (sampleIndex == 5){
+            sampleIndex = 0
+            xBuffer.add(mutableListOf(event.values[0].toDouble()))
+            yBuffer.add(mutableListOf(event.values[0].toDouble()))
+            zBuffer.add(mutableListOf(event.values[0].toDouble()))
+            extrasBuffer.add(mutableListOf(
+                event.timestamp.toString(),
+                Calendar.getInstance().timeInMillis.toString(),
+                currentActivity
+            ))
+            if(xBuffer.size > windowUpperLim){
+                nHandler.processBatch(extrasBuffer, xBuffer, yBuffer, zBuffer, fRaw)
+
+                // clear buffer
+                xBuffer = xBuffer.slice(windowRange) as MutableList<MutableList<Double>>
+                yBuffer = yBuffer.slice(windowRange) as MutableList<MutableList<Double>>
+                zBuffer = zBuffer.slice(windowRange) as MutableList<MutableList<Double>>
+                extrasBuffer = extrasBuffer.slice(windowRange)  as MutableList<MutableList<String>>
+            }
+            Log.i("0003","x: ${xBuffer.size}     y: ${yBuffer.size}    z: ${zBuffer.size}, extras: ${extrasBuffer.size}")
+            Log.v("0003", "Time: ${event.timestamp}    x: ${event.values[0]}     y: ${event.values[1]}    z: ${event.values[2]}, activity: $currentActivity")
+        }
+        sampleIndex++
     }
 
     private fun createBroadcastReceiver() {
@@ -72,6 +103,26 @@ class AccelLoggerService: Service(), SensorEventListener {
         sensorManager.registerListener(this, sensor, samplingPeriodMicroseconds)
     }
 
+    private fun getNeuralHandler(): NeuralHandler{
+        // Load ANN weights and input ranges
+        // TODO: Can we move loading the weights to the NeuralHandler class?
+        var ins: InputStream = resources.openRawResource(R.raw.input_to_hidden_weights_and_biases)
+        val inputToHiddenWeightsAndBiasesString = ins.bufferedReader().use { it.readText() }
+        ins.close()
+        ins = resources.openRawResource(R.raw.hidden_to_output_weights_and_biases)
+        val hiddenToOutputWeightsAndBiasesString = ins.bufferedReader().use { it.readText() }
+        ins.close()
+        ins = resources.openRawResource(R.raw.input_ranges)
+        val inputRangesString = ins.bufferedReader().use { it.readText() }
+        ins.close()
+        return NeuralHandler(
+            "andrew",
+            inputToHiddenWeightsAndBiasesString,
+            hiddenToOutputWeightsAndBiasesString,
+            inputRangesString,
+            numWindowsBatched)
+    }
+
     private fun createNotification(): Notification {
         // Create the NotificationChannel
         val channelName = "foreground_service_channel"
@@ -86,13 +137,6 @@ class AccelLoggerService: Service(), SensorEventListener {
         notificationManager.createNotificationChannel(mChannel)
 
         // Create Notification
-//        val pendingIntent: PendingIntent =
-//            Intent(this, MainActivity::class.java).let { notificationIntent ->
-//                PendingIntent.getActivity(
-//                    this, 0, notificationIntent,
-//                    PendingIntent.FLAG_IMMUTABLE
-//                )
-//            }
         return Notification.Builder(this, getString(R.string.NOTIFICATION_CHANNEL_1_ID))
             .setContentTitle("Delta")
             .setContentText("Accelerometer Recording")
@@ -115,6 +159,11 @@ class AccelLoggerService: Service(), SensorEventListener {
         fSession = FileOutputStream(File(this.filesDir, "$dataFolderName/$sessionFilename"))
         writeToSessionFile("File Start Time: ${Calendar.getInstance().timeInMillis}\n")
         writeToSessionFile("Event,Start Time,Stop Time\n")
+
+        val fInfo = FileOutputStream(File(this.filesDir, "$dataFolderName/Info.txt"))
+        fInfo.use { f ->
+            f.write("Number of Windows in each Batch: $numWindowsBatched".toByteArray())
+        }
     }
 
     private fun createNewRawFile() {
@@ -125,8 +174,8 @@ class AccelLoggerService: Service(), SensorEventListener {
         }
         rawFilename = "$startTimeReadable.$rawFileIndex.csv"       // file to save raw data
         fRaw = FileOutputStream(File(this.filesDir, "$dataFolderName/$rawFilename"))
-            fRaw.write("File Start Time: ${Calendar.getInstance().timeInMillis}\n".toByteArray())
-        fRaw.write("timestamp,acc_x,acc_y,acc_z,real time,activity\n".toByteArray())
+        fRaw.write("File Start Time: ${Calendar.getInstance().timeInMillis}\n".toByteArray())
+        fRaw.write("timestamp,acc_x,acc_y,acc_z,real time,activity,label\n".toByteArray())
         rawFileIndex++
     }
 
