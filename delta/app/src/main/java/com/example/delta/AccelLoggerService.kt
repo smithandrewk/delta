@@ -154,7 +154,7 @@ class AccelLoggerService: Service(), SensorEventListener {
         return Notification.Builder(this, getString(R.string.NOTIFICATION_CHANNEL_1_ID))
             .setContentTitle("Delta")
             .setContentText("Accelerometer Recording")
-            .setSmallIcon(R.drawable.ic_three_dots)
+            .setSmallIcon(R.drawable.ic_activity)
             .setContentIntent(null)     // Don't open any activity when Notification is clicked
             .setAutoCancel(false)       // Don't close notification when it's clicked
             .build()

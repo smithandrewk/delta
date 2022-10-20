@@ -4,14 +4,16 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="app/src/main/res/drawable/activity.xml" value="0.1865" />
+        <entry key="app/src/main/res/drawable/app_icon.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/circle_buttom.xml" value="0.189" />
         <entry key="app/src/main/res/drawable/circle_button.xml" value="0.189" />
         <entry key="app/src/main/res/drawable/ic_activity.xml" value="0.1" />
-        <entry key="app/src/main/res/drawable/ic_cafe_outline.xml" value="0.3575" />
+        <entry key="app/src/main/res/drawable/ic_cafe_outline.xml" value="0.12" />
         <entry key="app/src/main/res/drawable/ic_food.xml" value="0.343" />
         <entry key="app/src/main/res/drawable/ic_pizza_outline.xml" value="0.3575" />
         <entry key="app/src/main/res/drawable/ic_smoking.xml" value="0.19" />
         <entry key="app/src/main/res/drawable/ic_three_dots.xml" value="0.19" />
+        <entry key="app/src/main/res/drawable/progress_bar_bg.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/rounded_rect.xml" value="0.3565" />
         <entry key="app/src/main/res/layout/activity_end_button.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.43462017434620176" />
