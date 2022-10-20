@@ -66,11 +66,6 @@ class NeuralHandler (name: String,
             else{
                 smokingOutput = 0.0
             }
-//            output = if(output >= .85){
-//                1.0
-//            } else {
-//                0.0
-//            }
 
             fRaw.write((extrasBuffer[i][0]+","+
                         xBuffer[i][0]+","+
