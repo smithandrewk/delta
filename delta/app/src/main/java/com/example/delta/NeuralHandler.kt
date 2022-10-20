@@ -34,7 +34,7 @@ class NeuralHandler (name: String,
                      xBuffer: MutableList<MutableList<Double>>,
                      yBuffer: MutableList<MutableList<Double>>,
                      zBuffer: MutableList<MutableList<Double>>,
-                     fRaw: FileOutputStream) : MutableSet<String> {
+                     fRaw: FileOutputStream) : Boolean {
         /*
             extrasBuffer: 3x200 timestamps and activity with each row:
                             [SensorEvent timestamp (ns), Calendar timestamp (ms), current activity]
@@ -49,7 +49,7 @@ class NeuralHandler (name: String,
         */
 
         Log.i("0004","x: ${xBuffer.size}     y: ${yBuffer.size}    z: ${zBuffer.size}, extras: ${extrasBuffer.size}")
-        val activitiesDetected: MutableSet<String> = mutableSetOf()
+        var actionDetected = false
         var smokingOutput: Double
 
         // Run ANN on windows
@@ -61,7 +61,7 @@ class NeuralHandler (name: String,
                         zBuffer.slice(i until i+windowSize)).toMutableList()))
             if (smokingOutput >= 0.85){
                 smokingOutput = 1.0
-                activitiesDetected.add("Smoking")
+                actionDetected = true
             }
             else{
                 smokingOutput = 0.0
@@ -81,7 +81,7 @@ class NeuralHandler (name: String,
                         smokingOutput.toString()+"\n").toByteArray())
             i++
         }
-        return activitiesDetected
+        return actionDetected
     }
     fun forwardPropagate(input: Matrix): Double {
         /*

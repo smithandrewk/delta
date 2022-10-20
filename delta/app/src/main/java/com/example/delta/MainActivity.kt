@@ -7,7 +7,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import com.example.delta.databinding.ActivityMainBinding
-import com.example.delta.receivers.ActionDetectedReceiver
+//import com.example.delta.receivers.ActionDetectedReceiver
 import com.example.delta.receivers.ActionConfirmedReceiver
 
 class MainActivity : Activity() {
@@ -22,7 +22,7 @@ class MainActivity : Activity() {
                                         R.id.otherButton to "Other")
 
     private val activitiesCount = mutableMapOf("Smoking" to 0)
-    private lateinit var activityDetectedReceiver: ActionDetectedReceiver
+//    private lateinit var activityDetectedReceiver: ActionDetectedReceiver
     private lateinit var activityConfirmedReceiver: ActionConfirmedReceiver
     private lateinit var mApp: Application
 
@@ -42,7 +42,7 @@ class MainActivity : Activity() {
             findViewById<Button>(button).setOnClickListener { startNewActivity(chosenActivity) }
         }
 
-        createBroadcastReceiver()
+//        createBroadcastReceiver()
     }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
         // Receives result from the EndActivityButton activity, and notifies accelerometer service
@@ -69,23 +69,23 @@ class MainActivity : Activity() {
         val endButtonIntent = Intent(this, EndActivityButton::class.java)
         startActivityForResult(endButtonIntent, launchEndButtonCode)
     }
-    private fun createBroadcastReceiver() {
-        // Create and register instance of broadcast receiver to receive signals from MainActivity
-        activityDetectedReceiver = ActionDetectedReceiver()
-        registerReceiver(activityDetectedReceiver,
-            IntentFilter(getString(R.string.ACTIVITY_DETECTED_BROADCAST_CODE))
-        )
-        activityConfirmedReceiver = ActionConfirmedReceiver()
-        registerReceiver(activityConfirmedReceiver,
-            IntentFilter(getString(R.string.ACTIVITY_RESPONSE_BROADCAST_CODE))
-        )
-    }
+//    private fun createBroadcastReceiver() {
+//        // Create and register instance of broadcast receiver to receive signals from MainActivity
+//        activityDetectedReceiver = ActionDetectedReceiver()
+//        registerReceiver(activityDetectedReceiver,
+//            IntentFilter(getString(R.string.ACTIVITY_DETECTED_BROADCAST_CODE))
+//        )
+//        activityConfirmedReceiver = ActionConfirmedReceiver()
+//        registerReceiver(activityConfirmedReceiver,
+//            IntentFilter(getString(R.string.ACTIVITY_RESPONSE_BROADCAST_CODE))
+//        )
+//    }
     override fun onDestroy() {
         super.onDestroy()
         Log.i("0001", "DESTROYED")
         // When app is destroyed, stop the service
         stopService(accelIntent)
-        unregisterReceiver(activityDetectedReceiver)
+//        unregisterReceiver(activityDetectedReceiver)
         unregisterReceiver(activityConfirmedReceiver)
     }
     override fun onSaveInstanceState(outState: Bundle) {

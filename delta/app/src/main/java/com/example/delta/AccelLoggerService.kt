@@ -44,8 +44,6 @@ class AccelLoggerService: Service(), SensorEventListener {
     private var currentActivity: String = "None"
     private val startTimeReadable = SimpleDateFormat("yyyy-MM-dd_HH_mm_ss", Locale.ENGLISH).format(Date())
 
-    private var activitiesDetected: MutableSet<String> = mutableSetOf()
-
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
         Log.i("0003", "Starting Accelerometer Service")
@@ -86,7 +84,7 @@ class AccelLoggerService: Service(), SensorEventListener {
         sampleIndex++
     }
     private fun processBatch(){
-        activitiesDetected = nHandler.processBatch(extrasBuffer, xBuffer, yBuffer, zBuffer, fRaw)
+        val actionDetected = nHandler.processBatch(extrasBuffer, xBuffer, yBuffer, zBuffer, fRaw)
 
         // clear buffer
         xBuffer = xBuffer.slice(windowRange) as MutableList<MutableList<Double>>
@@ -94,11 +92,8 @@ class AccelLoggerService: Service(), SensorEventListener {
         zBuffer = zBuffer.slice(windowRange) as MutableList<MutableList<Double>>
         extrasBuffer = extrasBuffer.slice(windowRange)  as MutableList<MutableList<String>>
 
-        if(activitiesDetected.size > 0){
-            Log.i("0003", "Broadcast: ${activitiesDetected.elementAt(0)}")
-            sendBroadcast(Intent(getString(R.string.ACTIVITY_DETECTED_BROADCAST_CODE))
-                .putStringArrayListExtra(getString(R.string.ACTIVITY),
-                    ArrayList(activitiesDetected)))
+        if(actionDetected){
+            sendBroadcast(Intent(getString(R.string.ACTION_DETECTED_BROADCAST_CODE)))
         }
     }
 

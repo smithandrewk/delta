@@ -5,7 +5,7 @@
     <string name="ACTIVITY_CHANGE_BROADCAST_CODE">delta_activity_changed_broadcast_code</string>
     <string name="ACTIVITY">endActivityButton_intent_code</string>
     <string name="NO_ACTIVITY">None</string>
-    <string name="ACTIVITY_DETECTED_BROADCAST_CODE">delta_activity_detection_code</string>
+    <string name="ACTION_DETECTED_BROADCAST_CODE">delta_activity_detection_code</string>
     <string name="ACTIVITY_RESPONSE_BROADCAST_CODE">delta_activity_response_code</string>
     <string name="ACTIVITY_RESPONSE">notificationResponse_intent_code</string>
 
