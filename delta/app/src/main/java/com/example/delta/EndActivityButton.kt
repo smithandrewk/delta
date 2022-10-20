@@ -15,6 +15,8 @@ import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.wear.widget.CurvedTextView
+import java.io.File
+import java.io.FileOutputStream
 import java.util.*
 
 
@@ -22,6 +24,10 @@ class EndActivityButton : Activity() {
     private var cTimer: CountDownTimer? = null
     private lateinit var progressBar: ProgressBar
     private lateinit var activityDetectedReceiver: ActionDetectedReceiver
+
+    private lateinit var dataFolderName: String
+    private lateinit var fPuffs: FileOutputStream
+    private lateinit var puffsFilename: String
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,6 +53,8 @@ class EndActivityButton : Activity() {
         registerReceiver(activityDetectedReceiver,
             IntentFilter(getString(R.string.ACTION_DETECTED_BROADCAST_CODE))
         )
+
+        createFile(intent)
 
     }
 
@@ -85,15 +93,18 @@ class EndActivityButton : Activity() {
                             // for our positive button
                             DialogInterface.BUTTON_POSITIVE -> {
                                 // on below line we are displaying a toast message.
-                                Toast.makeText(this@EndActivityButton, "Yes clicked", Toast.LENGTH_SHORT)
-                                    .show()
+                                Log.i("0002", "Smoking Confirmed")
+                                // Write result to file
+                                fPuffs.write("${Calendar.getInstance().timeInMillis}, 1\n".toByteArray())
                             }
 
                             // on below line we are setting click listener
                             // for our negative button.
                             DialogInterface.BUTTON_NEGATIVE -> {
                                 // on below line we are dismissing our dialog box.
+                                Log.i("0002", "Smoking Rejected")
                                 dialog.dismiss()
+                                fPuffs.write("${Calendar.getInstance().timeInMillis}, -1\n".toByteArray())
                             }
                         }
                     }
@@ -112,13 +123,19 @@ class EndActivityButton : Activity() {
                     // show to display our dialog.
                     .show()
 
-                // TODO timer to dismiss dialog if no response
-                // TODO write response to a file
+                // TODO timer to dismiss dialog if no response (response = 0)
             }
         }
     }
+    private fun createFile(intent: Intent){
+        dataFolderName = intent.getStringExtra("StartTime") as String
+        puffsFilename = "puffs-$dataFolderName.csv"
+        fPuffs = FileOutputStream(File(this.filesDir, "$dataFolderName/$puffsFilename"))
+        fPuffs.write("real time,response\n".toByteArray())
+    }
     override fun onDestroy() {
         super.onDestroy()
+        fPuffs.close()
         unregisterReceiver(activityDetectedReceiver)
         Log.i("0002", "DESTROYED")
     }

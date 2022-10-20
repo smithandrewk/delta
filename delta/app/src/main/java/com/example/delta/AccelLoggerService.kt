@@ -42,11 +42,12 @@ class AccelLoggerService: Service(), SensorEventListener {
     private var rawFileIndex: Int = 0
     private var sampleIndex: Int = 0
     private var currentActivity: String = "None"
-    private val startTimeReadable = SimpleDateFormat("yyyy-MM-dd_HH_mm_ss", Locale.ENGLISH).format(Date())
+    private lateinit var startTimeReadable: String
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
         Log.i("0003", "Starting Accelerometer Service")
+        startTimeReadable = intent?.getStringExtra("StartTime").toString()
 
         // Setup Service Components
         createFiles()

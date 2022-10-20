@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import com.example.delta.databinding.ActivityMainBinding
+import java.text.SimpleDateFormat
+import java.util.*
 
 class MainActivity : Activity() {
     private lateinit var accelIntent: Intent
@@ -18,6 +20,9 @@ class MainActivity : Activity() {
                                         R.id.smokeButton to "Smoking",
                                         R.id.otherButton to "Other")
 
+    private val appStartTimeReadable = SimpleDateFormat("yyyy-MM-dd_HH_mm_ss", Locale.ENGLISH).format(Date())
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.i("0001", "CREATED")
@@ -26,6 +31,7 @@ class MainActivity : Activity() {
 
         // start service to record accelerometer data
         accelIntent = Intent(applicationContext, AccelLoggerService::class.java)
+            .putExtra("StartTime", appStartTimeReadable)
         startForegroundService(accelIntent)
 
         // get chosen activity from user - create onClickListener for each button
@@ -56,6 +62,7 @@ class MainActivity : Activity() {
 
         // start EndActivityButton activity
         val endButtonIntent = Intent(this, EndActivityButton::class.java)
+            .putExtra("StartTime", appStartTimeReadable)
         startActivityForResult(endButtonIntent, launchEndButtonCode)
     }
     override fun onDestroy() {
