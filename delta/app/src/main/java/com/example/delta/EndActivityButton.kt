@@ -29,6 +29,9 @@ class EndActivityButton : Activity() {
     private lateinit var fPuffs: FileOutputStream
     private lateinit var puffsFilename: String
     private lateinit var vibrator: Vibrator
+    private var dialogSendTime: Long = 0
+    private var isADialogActive: Boolean = false
+    private lateinit var currentDialog: DialogInterface
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,39 +82,31 @@ class EndActivityButton : Activity() {
     private fun cancelTimer() {
         if (cTimer != null) cTimer!!.cancel()
     }
-    private fun showDialog() {
-        val dialog = Dialog(this)
-        val myLayout: View = layoutInflater.inflate(R.layout.dialog_layout, null)
-        val positiveButton = myLayout.findViewById<Button>(R.id.yes_button)
-        positiveButton.setOnClickListener { v: View? ->
-            dialog.dismiss()
-        }
-        val negativeButton = myLayout.findViewById<Button>(R.id.no_button)
-        negativeButton.setOnClickListener { v: View? ->
-            dialog.dismiss()
-        }
-        dialog.setContentView(myLayout)
-        dialog.show()
-    }
+
     private inner class ActionDetectedReceiver : BroadcastReceiver() {
         // Inner class to define the broadcast receiver
         // This Broadcast Receiver receives signals from MainActivity when user presses buttons
         override fun onReceive(context: Context, intent: Intent) {
-
             if (intent.action == context.getString(R.string.ACTION_DETECTED_BROADCAST_CODE)) {
                 vibrator.vibrate(100)
+                dialogSendTime = Calendar.getInstance().timeInMillis
+                if(isADialogActive){
+                    currentDialog.dismiss()
+                    isADialogActive = false
+                }
                 Log.i("Action Detected Receiver", "Received")
                 val dialogClickListener =
                     DialogInterface.OnClickListener { dialog, which ->
-
+                        currentDialog = dialog
                         when (which) {
                             // on below line we are setting a click listener
-                            // for our positive button
-                            DialogInterface.BUTTON_POSITIVE -> {
+                            // for our positive button                            DialogInterface.BUTTON_POSITIVE -> {
                                 // on below line we are displaying a toast message.
                                 Log.i("0002", "Smoking Confirmed")
                                 // Write result to file
-                                fPuffs.write("${Calendar.getInstance().timeInMillis}, 1\n".toByteArray())
+                                dialog.dismiss()
+                                isADialogActive = false
+                                fPuffs.write("${dialogSendTime}, 1\n".toByteArray())
                             }
 
                             // on below line we are setting click listener
@@ -120,25 +115,26 @@ class EndActivityButton : Activity() {
                                 // on below line we are dismissing our dialog box.
                                 Log.i("0002", "Smoking Rejected")
                                 dialog.dismiss()
-                                fPuffs.write("${Calendar.getInstance().timeInMillis}, -1\n".toByteArray())
+                                isADialogActive = false
+                                fPuffs.write("${dialogSendTime}, -1\n".toByteArray())
                             }
                         }
                     }
                 // on below line we are creating a builder variable for our alert dialog
                 val builder: AlertDialog.Builder = AlertDialog.Builder(this@EndActivityButton)
-                builder.setView(R.layout.dialog_layout).setPositiveButton("YES",dialogClickListener)
-                // on below line we are setting message for our dialog box.
-//                builder.setMessage("Puff ?")
-//                    // on below line we are setting positive
-//                    // button and setting text to it.
-//                    .setPositiveButton("Yes", dialogClickListener)
-//                    // on below line we are setting negative button
-//                    // and setting text to it.
-//                    .setNegativeButton("No", dialogClickListener)
-//                    // on below line we are calling
-//                    // show to display our dialog.
-//                    .show()
+//                 on below line we are setting message for our dialog box.
 
+                builder.setMessage("Puff ?")
+                    // on below line we are setting positive
+                    // button and setting text to it.
+                    .setPositiveButton("Yes", dialogClickListener)
+                    // on below line we are setting negative button
+                    // and setting text to it.
+                    .setNegativeButton("No", dialogClickListener)
+                    // on below line we are calling
+                    // show to display our dialog.
+                    .show()
+                isADialogActive = true
                 // TODO timer to dismiss dialog if no response (response = 0)
             }
         }
