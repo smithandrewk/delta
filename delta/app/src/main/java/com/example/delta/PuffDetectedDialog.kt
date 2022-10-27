@@ -25,6 +25,7 @@ class PuffDetectedDialog : DialogFragment() {
                         // on below line we are displaying a toast message.
                         Log.i("0005", "Smoking Confirmed")
                         (activity as EndActivityButton).onPositiveDialog()
+                        dialog.dismiss()
                     }
 
                     // on below line we are setting click listener
@@ -51,8 +52,5 @@ class PuffDetectedDialog : DialogFragment() {
             // show to display our dialog.
             .setView(R.layout.dialog_layout)
         return builder.create()
-    }
-    fun dismissWithNoResponse(){
-
     }
 }
