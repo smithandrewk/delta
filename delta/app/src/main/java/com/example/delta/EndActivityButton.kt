@@ -91,13 +91,15 @@ class EndActivityButton : FragmentActivity() {
             if (intent.action == context.getString(R.string.ACTION_DETECTED_BROADCAST_CODE)) {
                 vibrator.vibrate(100)
                 Log.i("0002", "Smoking Detected")
-                dialogSendTime = Calendar.getInstance().timeInMillis
 
                 if(isADialogActive){
+                    fPuffs.write("${dialogSendTime}, 0\n".toByteArray())
                     currentDialog.dismiss()
                     isADialogActive = false
                 }
-                PuffDetectedDialog().show(this@EndActivityButton.supportFragmentManager, "PuffDetectedDialogueTransactionTag")
+                dialogSendTime = Calendar.getInstance().timeInMillis
+                currentDialog = PuffDetectedDialog()
+                currentDialog.show(this@EndActivityButton.supportFragmentManager, "PuffDetectedDialogueTransactionTag")
                 isADialogActive = true
                 // TODO timer to dismiss dialog if no response (response = 0)
             }

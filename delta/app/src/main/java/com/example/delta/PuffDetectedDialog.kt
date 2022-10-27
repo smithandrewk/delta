@@ -52,4 +52,7 @@ class PuffDetectedDialog : DialogFragment() {
             .setView(R.layout.dialog_layout)
         return builder.create()
     }
+    fun dismissWithNoResponse(){
+
+    }
 }
