@@ -14,7 +14,6 @@ import java.util.*
 class PuffDetectedDialog : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        // TODO getArguments to get fPuffs
 
         val dialogClickListener =
             DialogInterface.OnClickListener { dialog, which ->
@@ -24,18 +23,17 @@ class PuffDetectedDialog : DialogFragment() {
                     // for our positive button
                     DialogInterface.BUTTON_POSITIVE -> {
                         // on below line we are displaying a toast message.
-                        Log.i("0002", "Smoking Confirmed")
-                        // Write result to file
-//                        fPuffs.write("${Calendar.getInstance().timeInMillis}, 1\n".toByteArray())
+                        Log.i("0005", "Smoking Confirmed")
+                        (activity as EndActivityButton).onPositiveDialog()
                     }
 
                     // on below line we are setting click listener
                     // for our negative button.
                     DialogInterface.BUTTON_NEGATIVE -> {
                         // on below line we are dismissing our dialog box.
-                        Log.i("0002", "Smoking Rejected")
+                        Log.i("0005", "Smoking Rejected")
+                        (activity as EndActivityButton).onNegativeDialog()
                         dialog.dismiss()
-//                        fPuffs.write("${Calendar.getInstance().timeInMillis}, -1\n".toByteArray())
                     }
                 }
             }
