@@ -15,12 +15,13 @@ import android.view.WindowManager
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ProgressBar
+import androidx.fragment.app.FragmentActivity
 import java.io.File
 import java.io.FileOutputStream
 import java.util.*
 
 
-class EndActivityButton : Activity() {
+class EndActivityButton : FragmentActivity() {
     private var cTimer: CountDownTimer? = null
     private lateinit var progressBar: ProgressBar
     private lateinit var activityDetectedReceiver: ActionDetectedReceiver
@@ -89,52 +90,54 @@ class EndActivityButton : Activity() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == context.getString(R.string.ACTION_DETECTED_BROADCAST_CODE)) {
                 vibrator.vibrate(100)
-                dialogSendTime = Calendar.getInstance().timeInMillis
-                if(isADialogActive){
-                    currentDialog.dismiss()
-                    isADialogActive = false
-                }
-                Log.i("Action Detected Receiver", "Received")
-                val dialogClickListener =
-                    DialogInterface.OnClickListener { dialog, which ->
-                        currentDialog = dialog
-                        when (which) {
-                            // on below line we are setting a click listener
-                            // for our positive button                            DialogInterface.BUTTON_POSITIVE -> {
-                                // on below line we are displaying a toast message.
-                                Log.i("0002", "Smoking Confirmed")
-                                // Write result to file
-                                dialog.dismiss()
-                                isADialogActive = false
-                                fPuffs.write("${dialogSendTime}, 1\n".toByteArray())
-                            }
-
-                            // on below line we are setting click listener
-                            // for our negative button.
-                            DialogInterface.BUTTON_NEGATIVE -> {
-                                // on below line we are dismissing our dialog box.
-                                Log.i("0002", "Smoking Rejected")
-                                dialog.dismiss()
-                                isADialogActive = false
-                                fPuffs.write("${dialogSendTime}, -1\n".toByteArray())
-                            }
-                        }
-                    }
-                // on below line we are creating a builder variable for our alert dialog
-                val builder: AlertDialog.Builder = AlertDialog.Builder(this@EndActivityButton)
-//                 on below line we are setting message for our dialog box.
-
-                builder.setMessage("Puff ?")
-                    // on below line we are setting positive
-                    // button and setting text to it.
-                    .setPositiveButton("Yes", dialogClickListener)
-                    // on below line we are setting negative button
-                    // and setting text to it.
-                    .setNegativeButton("No", dialogClickListener)
-                    // on below line we are calling
-                    // show to display our dialog.
-                    .show()
-                isADialogActive = true
+                Log.i("0002", "Smoking Detected")
+                PuffDetectedDialog().show(this@EndActivityButton.supportFragmentManager, "tag")
+//                dialogSendTime = Calendar.getInstance().timeInMillis
+//                if(isADialogActive){
+//                    currentDialog.dismiss()
+//                    isADialogActive = false
+//                }
+//                Log.i("Action Detected Receiver", "Received")
+//                val dialogClickListener =
+//                    DialogInterface.OnClickListener { dialog, which ->
+//                        currentDialog = dialog
+//                        when (which) {
+//                            // on below line we are setting a click listener
+//                            // for our positive button                            DialogInterface.BUTTON_POSITIVE -> {
+//                                // on below line we are displaying a toast message.
+//                                Log.i("0002", "Smoking Confirmed")
+//                                // Write result to file
+//                                dialog.dismiss()
+//                                isADialogActive = false
+//                                fPuffs.write("${dialogSendTime}, 1\n".toByteArray())
+//                            }
+//
+//                            // on below line we are setting click listener
+//                            // for our negative button.
+//                            DialogInterface.BUTTON_NEGATIVE -> {
+//                                // on below line we are dismissing our dialog box.
+//                                Log.i("0002", "Smoking Rejected")
+//                                dialog.dismiss()
+//                                isADialogActive = false
+//                                fPuffs.write("${dialogSendTime}, -1\n".toByteArray())
+//                            }
+//                        }
+//                    }
+//                // on below line we are creating a builder variable for our alert dialog
+//                val builder: AlertDialog.Builder = AlertDialog.Builder(this@EndActivityButton)
+////                 on below line we are setting message for our dialog box.
+//
+//                builder.setMessage("Puff ?")
+//                    // on below line we are setting positive
+//                    // button and setting text to it.
+//                    .setPositiveButton("Yes", dialogClickListener)
+//                    // on below line we are setting negative button
+//                    // and setting text to it.
+//                    .setNegativeButton("No", dialogClickListener)
+//                    // on below line we are calling
+//                    // show to display our dialog.
+//                    .show()
+//                isADialogActive = true
                 // TODO timer to dismiss dialog if no response (response = 0)
             }
         }
