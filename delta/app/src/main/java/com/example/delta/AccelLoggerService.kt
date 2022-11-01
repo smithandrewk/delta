@@ -9,6 +9,7 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
 import java.io.File
@@ -41,11 +42,12 @@ class AccelLoggerService: Service(), SensorEventListener {
     private var rawFileIndex: Int = 0
     private var sampleIndex: Int = 0
     private var currentActivity: String = "None"
-    private val startTimeReadable = SimpleDateFormat("yyyy-MM-dd_HH_mm_ss", Locale.ENGLISH).format(Date())
+    private lateinit var startTimeReadable: String
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
         Log.i("0003", "Starting Accelerometer Service")
+        startTimeReadable = intent?.getStringExtra("StartTime").toString()
 
         // Setup Service Components
         createFiles()
@@ -67,32 +69,40 @@ class AccelLoggerService: Service(), SensorEventListener {
         if (sampleIndex == 5){
             sampleIndex = 0
             xBuffer.add(mutableListOf(event.values[0].toDouble()))
-            yBuffer.add(mutableListOf(event.values[0].toDouble()))
-            zBuffer.add(mutableListOf(event.values[0].toDouble()))
+            yBuffer.add(mutableListOf(event.values[1].toDouble()))
+            zBuffer.add(mutableListOf(event.values[2].toDouble()))
             extrasBuffer.add(mutableListOf(
                 event.timestamp.toString(),
                 Calendar.getInstance().timeInMillis.toString(),
                 currentActivity
             ))
             if(xBuffer.size > windowUpperLim){
-                nHandler.processBatch(extrasBuffer, xBuffer, yBuffer, zBuffer, fRaw)
-
-                // clear buffer
-                xBuffer = xBuffer.slice(windowRange) as MutableList<MutableList<Double>>
-                yBuffer = yBuffer.slice(windowRange) as MutableList<MutableList<Double>>
-                zBuffer = zBuffer.slice(windowRange) as MutableList<MutableList<Double>>
-                extrasBuffer = extrasBuffer.slice(windowRange)  as MutableList<MutableList<String>>
+                processBatch()
             }
-            Log.i("0003","x: ${xBuffer.size}     y: ${yBuffer.size}    z: ${zBuffer.size}, extras: ${extrasBuffer.size}")
+            Log.v("0003","x: ${xBuffer.size}     y: ${yBuffer.size}    z: ${zBuffer.size}, extras: ${extrasBuffer.size}")
             Log.v("0003", "Time: ${event.timestamp}    x: ${event.values[0]}     y: ${event.values[1]}    z: ${event.values[2]}, activity: $currentActivity")
         }
         sampleIndex++
+    }
+    private fun processBatch(){
+        val actionDetected = nHandler.processBatch(extrasBuffer, xBuffer, yBuffer, zBuffer, fRaw)
+
+        // clear buffer
+        xBuffer = xBuffer.slice(windowRange) as MutableList<MutableList<Double>>
+        yBuffer = yBuffer.slice(windowRange) as MutableList<MutableList<Double>>
+        zBuffer = zBuffer.slice(windowRange) as MutableList<MutableList<Double>>
+        extrasBuffer = extrasBuffer.slice(windowRange)  as MutableList<MutableList<String>>
+
+//        if(actionDetected){
+//            sendBroadcast(Intent(getString(R.string.ACTION_DETECTED_BROADCAST_CODE)))
+//        }
     }
 
     private fun createBroadcastReceiver() {
         // Create and register instance of broadcast receiver to receive signals from MainActivity
         activityChangeReceiver = ActivityChangeReceiver()
-        registerReceiver(activityChangeReceiver, IntentFilter(getString(R.string.BROADCAST_CODE)))
+        registerReceiver(activityChangeReceiver,
+                         IntentFilter(getString(R.string.ACTIVITY_CHANGE_BROADCAST_CODE)))
     }
 
     private fun createAccelerometerListener() {
@@ -120,7 +130,7 @@ class AccelLoggerService: Service(), SensorEventListener {
             inputToHiddenWeightsAndBiasesString,
             hiddenToOutputWeightsAndBiasesString,
             inputRangesString,
-            numWindowsBatched)
+            numWindowsBatched,applicationContext)
     }
 
     private fun createNotification(): Notification {
@@ -130,7 +140,7 @@ class AccelLoggerService: Service(), SensorEventListener {
         val mChannel = NotificationChannel(
             getString(R.string.NOTIFICATION_CHANNEL_1_ID),
             channelName,
-            NotificationManager.IMPORTANCE_HIGH
+            NotificationManager.IMPORTANCE_LOW
         )
         mChannel.description = channelDescription
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
@@ -140,7 +150,7 @@ class AccelLoggerService: Service(), SensorEventListener {
         return Notification.Builder(this, getString(R.string.NOTIFICATION_CHANNEL_1_ID))
             .setContentTitle("Delta")
             .setContentText("Accelerometer Recording")
-            .setSmallIcon(R.drawable.ic_three_dots)
+            .setSmallIcon(R.drawable.ic_activity)
             .setContentIntent(null)     // Don't open any activity when Notification is clicked
             .setAutoCancel(false)       // Don't close notification when it's clicked
             .build()
@@ -175,7 +185,7 @@ class AccelLoggerService: Service(), SensorEventListener {
         rawFilename = "$startTimeReadable.$rawFileIndex.csv"       // file to save raw data
         fRaw = FileOutputStream(File(this.filesDir, "$dataFolderName/$rawFilename"))
         fRaw.write("File Start Time: ${Calendar.getInstance().timeInMillis}\n".toByteArray())
-        fRaw.write("timestamp,acc_x,acc_y,acc_z,real time,activity,label\n".toByteArray())
+        fRaw.write("timestamp,acc_x,acc_y,acc_z,real time,activity,label,state\n".toByteArray())
         rawFileIndex++
     }
 
@@ -192,7 +202,7 @@ class AccelLoggerService: Service(), SensorEventListener {
         // Inner class to define the broadcast receiver
         // This Broadcast Receiver receives signals from MainActivity when user presses buttons
         override fun onReceive(context: Context?, intent: Intent) {
-            if (intent.action == getString(R.string.BROADCAST_CODE)) {
+            if (intent.action == getString(R.string.ACTIVITY_CHANGE_BROADCAST_CODE)) {
                 currentActivity = intent.getStringExtra(getString(R.string.ACTIVITY)).toString()
                 if(currentActivity == getString(R.string.NO_ACTIVITY)){
                     Log.i("0003", "Ended Activity")
@@ -211,8 +221,8 @@ class AccelLoggerService: Service(), SensorEventListener {
         super.onDestroy()
         // Unregister Accelerometer Listener and Broadcast Receiver
         Log.i("0003", "DESTROYED")
-        sensorManager.unregisterListener(this)
         unregisterReceiver(activityChangeReceiver)
+        sensorManager.unregisterListener(this)
     }
 
     override fun onBind(intent: Intent?): IBinder? {

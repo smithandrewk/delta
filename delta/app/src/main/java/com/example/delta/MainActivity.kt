@@ -1,11 +1,13 @@
 package com.example.delta
 
-import android.app.Activity
+import android.app.*
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import com.example.delta.databinding.ActivityMainBinding
+import java.text.SimpleDateFormat
+import java.util.*
 
 class MainActivity : Activity() {
     private lateinit var accelIntent: Intent
@@ -18,6 +20,9 @@ class MainActivity : Activity() {
                                         R.id.smokeButton to "Smoking",
                                         R.id.otherButton to "Other")
 
+    private val appStartTimeReadable = SimpleDateFormat("yyyy-MM-dd_HH_mm_ss", Locale.ENGLISH).format(Date())
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.i("0001", "CREATED")
@@ -26,19 +31,12 @@ class MainActivity : Activity() {
 
         // start service to record accelerometer data
         accelIntent = Intent(applicationContext, AccelLoggerService::class.java)
+            .putExtra("StartTime", appStartTimeReadable)
         startForegroundService(accelIntent)
 
         // get chosen activity from user - create onClickListener for each button
         activityOptions.forEach { (button, chosenActivity) ->
-            findViewById<Button>(button).setOnClickListener {
-                Log.i("0001", "Signalled Service - Started $chosenActivity")
-                // tell service that new activity is starting
-                sendBroadcast(Intent(getString(R.string.BROADCAST_CODE)).putExtra(getString(R.string.ACTIVITY), chosenActivity))
-
-                // start EndActivityButton activity
-                val endButtonIntent = Intent(this, EndActivityButton::class.java)
-                startActivityForResult(endButtonIntent, launchEndButtonCode)
-            }
+            findViewById<Button>(button).setOnClickListener { startNewActivity(chosenActivity) }
         }
     }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
@@ -48,15 +46,24 @@ class MainActivity : Activity() {
             if (resultCode == Activity.RESULT_OK) {
                 Log.i("0001", "Signalled Service - End Activity")
                 // tell service that activity has ended
-                sendBroadcast(Intent(
-                    getString(R.string.BROADCAST_CODE)).putExtra(getString(R.string.ACTIVITY),
-                    getString(R.string.NO_ACTIVITY)))
-//                sendBroadcast(broadcastIntent)
+                sendBroadcast(Intent(getString(R.string.ACTIVITY_CHANGE_BROADCAST_CODE))
+                    .putExtra(getString(R.string.ACTIVITY), getString(R.string.NO_ACTIVITY)))
             }
             else {
                 Log.i("0001", "Error Receiving Activity Result")
             }
         }
+    }
+    private fun startNewActivity(chosenActivity: String){
+        Log.i("0001", "Signalled Service - Started $chosenActivity")
+        // tell service that new activity is starting
+        sendBroadcast(Intent(getString(R.string.ACTIVITY_CHANGE_BROADCAST_CODE))
+            .putExtra(getString(R.string.ACTIVITY), chosenActivity))
+
+        // start EndActivityButton activity
+        val endButtonIntent = Intent(this, EndActivityButton::class.java)
+            .putExtra("StartTime", appStartTimeReadable)
+        startActivityForResult(endButtonIntent, launchEndButtonCode)
     }
     override fun onDestroy() {
         super.onDestroy()

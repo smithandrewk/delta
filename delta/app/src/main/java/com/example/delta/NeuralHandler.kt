@@ -1,6 +1,17 @@
 package com.example.delta
 
+import android.content.Context
+import android.content.Context.VIBRATOR_MANAGER_SERVICE
+import android.content.Context.VIBRATOR_SERVICE
+import android.content.Intent
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
+import android.provider.Settings.Global.getString
 import android.util.Log
+import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat.getSystemService
 import com.example.delta.Matrix.Companion.logSigmoid
 import com.example.delta.Matrix.Companion.minMaxNorm
 import com.example.delta.Matrix.Companion.tanSigmoid
@@ -12,13 +23,17 @@ class NeuralHandler (name: String,
                      inputToHiddenWeightsAndBiasesString: String,
                      hiddenToOutputWeightsAndBiasesString: String,
                      inputRangesString:String,
-                     private var numWindows: Int){
+                     private var numWindows: Int, applicationContext: Context){
     val mName = name.uppercase()
 
     private var inputToHiddenWeightsAndBiases: Matrix
     private var hiddenToOutputWeightsAndBiases: Matrix
     private var inputRanges: Matrix
     private val windowSize = 100
+    private var state = 0
+    private var currentPuffLength = 0
+    private var currentInterPuffIntervalLength = 0
+    private val applicationContext = applicationContext
 
     init{
         Log.d("0010","Initializing Neural Handler...")
@@ -34,7 +49,7 @@ class NeuralHandler (name: String,
                      xBuffer: MutableList<MutableList<Double>>,
                      yBuffer: MutableList<MutableList<Double>>,
                      zBuffer: MutableList<MutableList<Double>>,
-                     fRaw: FileOutputStream) {
+                     fRaw: FileOutputStream) : Boolean {
         /*
             extrasBuffer: 3x200 timestamps and activity with each row:
                             [SensorEvent timestamp (ns), Calendar timestamp (ms), current activity]
@@ -48,19 +63,80 @@ class NeuralHandler (name: String,
             and ANN outputs to a file
         */
 
-        Log.i("0004","x: ${xBuffer.size}     y: ${yBuffer.size}    z: ${zBuffer.size}, extras: ${extrasBuffer.size}")
+        Log.v("0004","x: ${xBuffer.size}     y: ${yBuffer.size}    z: ${zBuffer.size}, extras: ${extrasBuffer.size}")
+        var actionDetected = false
+        var smokingOutput: Double
 
         // Run ANN on windows
         var i = 0
         while(i < numWindows){
-            var output = forwardPropagate(
+            smokingOutput = forwardPropagate(
                 Matrix((xBuffer.slice(i until i+windowSize)+
                         yBuffer.slice(i until i+windowSize)+
                         zBuffer.slice(i until i+windowSize)).toMutableList()))
-            output = if(output >= .85){
-                1.0
-            } else {
-                0.0
+            if (smokingOutput >= 0.85){
+                smokingOutput = 1.0
+                actionDetected = true
+            }
+            else{
+                smokingOutput = 0.0
+            }
+            // puff counter
+            if (state == 0 && smokingOutput == 0.0){
+                // no action
+            } else if (state == 0 && smokingOutput == 1.0){
+                // starting validating puff length
+                state = 1
+                currentPuffLength ++
+            } else if (state == 1 && smokingOutput == 1.0){
+                // continuing not yet valid length puff
+                currentPuffLength ++
+                if (currentPuffLength > 14) {
+                    // valid puff length!
+                    state = 2
+                }
+            } else if (state == 1 && smokingOutput == 0.0){
+                // never was a puff, begin validating end
+                state = 3
+                currentInterPuffIntervalLength ++
+            } else if (state == 2 && smokingOutput == 1.0){
+                // continuing already valid puff
+                currentPuffLength ++
+            } else if (state == 2 && smokingOutput == 0.0){
+                // ending already valid puff length
+                state = 4 // begin validating inter puff interval
+                currentInterPuffIntervalLength ++
+            } else if (state == 3 && smokingOutput == 0.0) {
+                currentInterPuffIntervalLength ++
+                if (currentInterPuffIntervalLength > 49){
+                    // valid interpuff
+                    state = 0
+                    currentPuffLength = 0
+                    currentInterPuffIntervalLength = 0
+                }
+            } else if (state == 3 && smokingOutput == 1.0){
+                // was validating interpuff for puff that wasn't valid
+                currentPuffLength ++
+                currentInterPuffIntervalLength = 0
+                if (currentPuffLength > 14) {
+                    // valid puff length!
+                    state = 2
+                }
+                state = 1
+            } else if (state == 4 && smokingOutput == 0.0) {
+                currentInterPuffIntervalLength ++
+                if (currentInterPuffIntervalLength > 49){
+                    // valid interpuff for valid puff
+                    state = 0
+                    currentPuffLength = 0
+                    currentInterPuffIntervalLength = 0
+                    applicationContext.sendBroadcast(Intent("delta_activity_detection_code"))
+                }
+            } else if (state == 4 && smokingOutput == 1.0){
+                // back into puff for already valid puff
+                currentInterPuffIntervalLength = 0
+                currentPuffLength ++
+                state = 2
             }
 
             fRaw.write((extrasBuffer[i][0]+","+
@@ -69,9 +145,11 @@ class NeuralHandler (name: String,
                         zBuffer[i][0]+","+
                         extrasBuffer[i][1]+","+
                         extrasBuffer[i][2]+","+
-                        output.toString()+"\n").toByteArray())
+                        smokingOutput.toString()+","+
+                        state.toString()+"\n").toByteArray())
             i++
         }
+        return actionDetected
     }
     fun forwardPropagate(input: Matrix): Double {
         /*
