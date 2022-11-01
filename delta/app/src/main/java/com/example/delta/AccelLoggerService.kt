@@ -69,8 +69,8 @@ class AccelLoggerService: Service(), SensorEventListener {
         if (sampleIndex == 5){
             sampleIndex = 0
             xBuffer.add(mutableListOf(event.values[0].toDouble()))
-            yBuffer.add(mutableListOf(event.values[0].toDouble()))
-            zBuffer.add(mutableListOf(event.values[0].toDouble()))
+            yBuffer.add(mutableListOf(event.values[1].toDouble()))
+            zBuffer.add(mutableListOf(event.values[2].toDouble()))
             extrasBuffer.add(mutableListOf(
                 event.timestamp.toString(),
                 Calendar.getInstance().timeInMillis.toString(),

@@ -63,7 +63,7 @@ class NeuralHandler (name: String,
             and ANN outputs to a file
         */
 
-        Log.i("0004","x: ${xBuffer.size}     y: ${yBuffer.size}    z: ${zBuffer.size}, extras: ${extrasBuffer.size}")
+        Log.v("0004","x: ${xBuffer.size}     y: ${yBuffer.size}    z: ${zBuffer.size}, extras: ${extrasBuffer.size}")
         var actionDetected = false
         var smokingOutput: Double
 
