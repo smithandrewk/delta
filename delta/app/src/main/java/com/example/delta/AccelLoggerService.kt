@@ -25,7 +25,7 @@ class AccelLoggerService: Service(), SensorEventListener {
     private lateinit var sensor: Sensor
     private val samplingRateHertz = 100
 
-    private val numWindowsBatched = 100
+    private val numWindowsBatched = 1
     private val windowUpperLim = numWindowsBatched + 99
     private val windowRange: IntRange = numWindowsBatched..windowUpperLim
 
@@ -69,8 +69,8 @@ class AccelLoggerService: Service(), SensorEventListener {
         if (sampleIndex == 5){
             sampleIndex = 0
             xBuffer.add(mutableListOf(event.values[0].toDouble()))
-            yBuffer.add(mutableListOf(event.values[0].toDouble()))
-            zBuffer.add(mutableListOf(event.values[0].toDouble()))
+            yBuffer.add(mutableListOf(event.values[1].toDouble()))
+            zBuffer.add(mutableListOf(event.values[2].toDouble()))
             extrasBuffer.add(mutableListOf(
                 event.timestamp.toString(),
                 Calendar.getInstance().timeInMillis.toString(),
@@ -93,9 +93,9 @@ class AccelLoggerService: Service(), SensorEventListener {
         zBuffer = zBuffer.slice(windowRange) as MutableList<MutableList<Double>>
         extrasBuffer = extrasBuffer.slice(windowRange)  as MutableList<MutableList<String>>
 
-        if(actionDetected){
-            sendBroadcast(Intent(getString(R.string.ACTION_DETECTED_BROADCAST_CODE)))
-        }
+//        if(actionDetected){
+//            sendBroadcast(Intent(getString(R.string.ACTION_DETECTED_BROADCAST_CODE)))
+//        }
     }
 
     private fun createBroadcastReceiver() {
@@ -130,7 +130,7 @@ class AccelLoggerService: Service(), SensorEventListener {
             inputToHiddenWeightsAndBiasesString,
             hiddenToOutputWeightsAndBiasesString,
             inputRangesString,
-            numWindowsBatched)
+            numWindowsBatched,applicationContext)
     }
 
     private fun createNotification(): Notification {
@@ -185,7 +185,7 @@ class AccelLoggerService: Service(), SensorEventListener {
         rawFilename = "$startTimeReadable.$rawFileIndex.csv"       // file to save raw data
         fRaw = FileOutputStream(File(this.filesDir, "$dataFolderName/$rawFilename"))
         fRaw.write("File Start Time: ${Calendar.getInstance().timeInMillis}\n".toByteArray())
-        fRaw.write("timestamp,acc_x,acc_y,acc_z,real time,activity,label\n".toByteArray())
+        fRaw.write("timestamp,acc_x,acc_y,acc_z,real time,activity,label,state\n".toByteArray())
         rawFileIndex++
     }
 
