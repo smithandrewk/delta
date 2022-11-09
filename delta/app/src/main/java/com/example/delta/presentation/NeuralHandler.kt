@@ -142,6 +142,7 @@ class NeuralHandler (name: String,
         }
     }
     private fun onPuffDetected(){
+        instance.viewModel.iterateNumberOfPuffs()
         Log.d("0000","puff detected")
         if(!instance.isSmoking){
             Log.d("0000","user is not already smoking")
@@ -156,15 +157,15 @@ class NeuralHandler (name: String,
                 sessionState = 2
             } else if (sessionState == 2){
                 sessionState = 3
-                timer.onFinish()
+                timer.transferTimerToUiThread()
             }
         } else {
-            timer.cancel()
+            timer.onFinish()
             sessionState = 0
         }
     }
     private val timer = object : CountDownTimer(100000, 1000) {
-        var progress:Long = 0
+        var progress: Long = 0
         var progress_float = 0.0f
         override fun onTick(millisUntilFinished: Long) {
             progress += 1000
@@ -172,15 +173,17 @@ class NeuralHandler (name: String,
             Log.d("0000", progress.toString())
 
         }
-
-        override fun onFinish() {
+        fun transferTimerToUiThread(){
             Log.d("0000", "Stopping neural handler timer, passing off to UI")
             Log.d("0000","Current progress $progress")
             instance.startSmoking(100000-progress,progress_float)
             cancel()
         }
+        override fun onFinish() {
+            cancel()
+        }
     }
-    fun forwardPropagate(input: Matrix): Double {
+    private fun forwardPropagate(input: Matrix): Double {
         /*
             input : three-axis accelerometer values from smartwatch sampled at 20 Hz for 5 seconds.
                     i.e. the input is (1x300) where the first 100 values are x accelerometer

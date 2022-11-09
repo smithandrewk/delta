@@ -56,7 +56,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     private var extrasBuffer:MutableList<MutableList<String>> = mutableListOf()
     private val windowUpperLim = numWindowsBatched + 99
     private val windowRange:IntRange = numWindowsBatched..windowUpperLim
-    private val viewModel: MainViewModel = MainViewModel()
+    val viewModel: MainViewModel = MainViewModel()
     var isSmoking: Boolean = false
     private val sessionLengthMillis: Long = 10000
     private val progressIndicatorIterator: Float = 0.1f
@@ -65,7 +65,6 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContent {
             val uiState by viewModel.uiState.collectAsState()
             val animatedProgress by animateFloatAsState(
@@ -417,7 +416,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         Card(
             onClick = { /* ... */ }
         ) {
-            Text("Looks like you've only smoked $numberOfCigs cigs!")
+            Text("Looks like you've only smoked $numberOfCigs cigs and $numberOfPuffs puffs!")
         }
     }
     @Composable
@@ -493,6 +492,4 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             text = stringResource(id = R.string.title_text)
         )
     }
-
-
 }
