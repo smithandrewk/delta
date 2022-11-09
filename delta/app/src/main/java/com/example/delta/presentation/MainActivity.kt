@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     private lateinit var nHandler: NeuralHandler
     private lateinit var falseNegativesFilename: String
     private lateinit var falseNegativesFile: File
-    private lateinit var timer: CountDownTimer
+    lateinit var timer: CountDownTimer
     private var sampleIndex: Int = 0
     private var xBuffer:MutableList<MutableList<Double>> = mutableListOf()
     private var yBuffer:MutableList<MutableList<Double>> = mutableListOf()
@@ -57,7 +57,11 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     private val windowUpperLim = numWindowsBatched + 99
     private val windowRange:IntRange = numWindowsBatched..windowUpperLim
     private val viewModel: MainViewModel = MainViewModel()
-    private var isSmoking: Boolean = false
+    var isSmoking: Boolean = false
+    private val sessionLengthMillis: Long = 10000
+    private val progressIndicatorIterator: Float = 0.1f
+    private var currentTimerProgress: Long = 0
+    private val countDownIntervalMillis: Long = 1000
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,33 +85,15 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             ConfirmSmokeACigDialog(
                 showDialog = uiState.showConfirmSmokingDialog,
                 onDialogResponse = {
-                    viewModel.setIsSmoking(it)
                     viewModel.setShowConfirmSmokingDialog(false)
                     Log.d("0000",uiState.isSmoking.toString())
-                    if(it) {
-                        viewModel.setProgressZero()
-                        timer = object : CountDownTimer(20000, 1000) {
-                            override fun onTick(millisUntilFinished: Long) {
-                                viewModel.iterateProgressByFloat(0.05f)
-                                Log.d("0000", uiState.progress.toString())
-                            }
-
-                            override fun onFinish() {
-                                Log.d("0000", "here")
-                                viewModel.setIsSmoking(false)
-                                viewModel.iterateNumberOfCigs()
-                                timer.cancel()
-                            }
-                        }
-                    timer.start()
-                    }
+                    if(it) startSmoking(sessionLengthMillis,0.0f)
                 })
             ConfirmDoneSmokingDialog(
                 showDialog = uiState.showConfirmDoneSmokingDialog,
                 onDialogResponse = {
-                    viewModel.setIsSmoking(!it)
                     viewModel.setShowConfirmDoneSmokingDialog(false)
-                    if(it) viewModel.iterateNumberOfCigs()
+                    if(it) stopSmoking()
                 })
             if(uiState.isSmoking){
                 CircularProgressIndicator(
@@ -122,10 +108,9 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                 isSmoking = uiState.isSmoking
             }
         }
-
         createInitialFiles()
         createAndRegisterAccelerometerListener()
-        nHandler = getNeuralHandler()
+        nHandler = getNeuralHandler(this)
     }
     private fun createAndRegisterAccelerometerListener() {
         // Register Listener for Accelerometer Data
@@ -169,6 +154,31 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
         // do nothing
     }
+    fun startSmoking(millisInFuture:Long,progressIndicatorProgress: Float){
+        viewModel.setIsSmoking(true)
+        viewModel.setProgress(progressIndicatorProgress)
+
+        Log.d("0000","Starting UI timer for $millisInFuture")
+        timer = object : CountDownTimer(millisInFuture, countDownIntervalMillis) {
+            override fun onTick(millisUntilFinished: Long) {
+                viewModel.iterateProgressByFloat(progressIndicatorIterator)
+                Log.d("0000","Current timer progress : $currentTimerProgress")
+                currentTimerProgress += countDownIntervalMillis
+            }
+
+            override fun onFinish() {
+                Log.d("0000", "smoking timer on finish")
+                stopSmoking()
+            }
+        }
+        timer.start()
+    }
+    fun stopSmoking(){
+        viewModel.setIsSmoking(false)
+        viewModel.iterateNumberOfCigs()
+        currentTimerProgress = 0
+        timer.cancel()
+    }
     private fun createInitialFiles(){
         currentActivity = getString(R.string.NO_ACTIVITY)
 
@@ -211,7 +221,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         fRaw.write("timestamp,acc_x,acc_y,acc_z,real time,activity,label,state\n".toByteArray())
         rawFileIndex++
     }
-    private fun getNeuralHandler(): NeuralHandler{
+    private fun getNeuralHandler(instance: MainActivity): NeuralHandler{
         // Load ANN weights and input ranges
         // TODO: Can we move loading the weights to the NeuralHandler class?
         var ins: InputStream = resources.openRawResource(R.raw.input_to_hidden_weights_and_biases)
@@ -228,7 +238,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             inputToHiddenWeightsAndBiasesString,
             hiddenToOutputWeightsAndBiasesString,
             inputRangesString,
-            numWindowsBatched,applicationContext)
+            numWindowsBatched,applicationContext,instance)
     }
     private fun onReportFalseNegative(){
         falseNegativesFile.appendText("${Calendar.getInstance().timeInMillis}\n")
@@ -272,14 +282,14 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                     }
                     item {
                         if(uiState.isSmoking){
-                            SmokeACigChip(
+                            CompactCallbackChip(
                                 chipText="Finish cig",
                                 chipColor = "#827978",
                                 onChipClick = {
                                     viewModel.setShowConfirmDoneSmokingDialog(true)
                                 })
                         } else {
-                            SmokeACigChip(
+                            CompactCallbackChip(
                                 chipText="Smoke cig",
                                 chipColor = "#b52914",
                                 onChipClick = {
@@ -292,7 +302,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         }
     }
     @Composable
-    fun SmokeACigChip(chipText:String,chipColor:String,onChipClick: (Boolean) -> Unit){
+    fun CompactCallbackChip(chipText:String,chipColor:String,onChipClick: (Boolean) -> Unit){
             CompactChip(
                 onClick = { onChipClick(true) },
                 enabled = true,

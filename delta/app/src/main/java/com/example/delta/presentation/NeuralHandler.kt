@@ -2,6 +2,7 @@ package com.example.delta.presentation
 
 import android.content.Context
 import android.content.Intent
+import android.os.CountDownTimer
 import android.util.Log
 import com.example.delta.presentation.Matrix.Companion.logSigmoid
 import com.example.delta.presentation.Matrix.Companion.minMaxNorm
@@ -13,7 +14,7 @@ class NeuralHandler (name: String,
                      inputToHiddenWeightsAndBiasesString: String,
                      hiddenToOutputWeightsAndBiasesString: String,
                      inputRangesString:String,
-                     private var numWindows: Int, applicationContext: Context){
+                     private var numWindows: Int, applicationContext: Context,instance: MainActivity){
     val mName = name.uppercase()
 
     private var inputToHiddenWeightsAndBiases: Matrix
@@ -21,9 +22,11 @@ class NeuralHandler (name: String,
     private var inputRanges: Matrix
     private val windowSize = 100
     private var state = 0
+    private var sessionState = 0
     private var currentPuffLength = 0
     private var currentInterPuffIntervalLength = 0
     private val applicationContext = applicationContext
+    private val instance: MainActivity = instance
 
     init{
         Log.d("0010","Initializing Neural Handler...")
@@ -118,7 +121,7 @@ class NeuralHandler (name: String,
                     state = 0
                     currentPuffLength = 0
                     currentInterPuffIntervalLength = 0
-                    // TODO puff detected
+                    onPuffDetected()
                 }
             } else if (state == 4 && smokingOutput == 1.0){
                 // back into puff for already valid puff
@@ -126,7 +129,7 @@ class NeuralHandler (name: String,
                 currentPuffLength ++
                 state = 2
             }
-
+//            Log.d("0000","state $state")
             fRaw.write((extrasBuffer[i][0]+","+
                     xBuffer[i][0]+","+
                     yBuffer[i][0]+","+
@@ -136,6 +139,45 @@ class NeuralHandler (name: String,
                     smokingOutput.toString()+","+
                     state.toString()+"\n").toByteArray())
             i++
+        }
+    }
+    private fun onPuffDetected(){
+        Log.d("0000","puff detected")
+        if(!instance.isSmoking){
+            Log.d("0000","user is not already smoking")
+            // if not in session and puff detected, start internal timer
+            if(sessionState == 0) {
+                // seen 1 puff
+                sessionState = 1
+
+                timer.start()
+            } else if (sessionState == 1){
+                // seen 2 puffs
+                sessionState = 2
+            } else if (sessionState == 2){
+                sessionState = 3
+                timer.onFinish()
+            }
+        } else {
+            timer.cancel()
+            sessionState = 0
+        }
+    }
+    private val timer = object : CountDownTimer(100000, 1000) {
+        var progress:Long = 0
+        var progress_float = 0.0f
+        override fun onTick(millisUntilFinished: Long) {
+            progress += 1000
+            progress_float += 0.01f
+            Log.d("0000", progress.toString())
+
+        }
+
+        override fun onFinish() {
+            Log.d("0000", "Stopping neural handler timer, passing off to UI")
+            Log.d("0000","Current progress $progress")
+            instance.startSmoking(100000-progress,progress_float)
+            cancel()
         }
     }
     fun forwardPropagate(input: Matrix): Double {

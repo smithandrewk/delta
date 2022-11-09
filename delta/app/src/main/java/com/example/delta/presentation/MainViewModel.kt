@@ -72,6 +72,13 @@ class MainViewModel : ViewModel() {
             )
         }
     }
+    fun setProgress(value: Float){
+        _uiState.update { currentState ->
+            currentState.copy(
+                progress = value
+            )
+        }
+    }
     fun iterateProgressByFloat(value: Float){
         _uiState.update { currentState ->
             currentState.copy(
