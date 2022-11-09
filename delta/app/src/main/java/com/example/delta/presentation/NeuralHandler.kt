@@ -39,7 +39,7 @@ class NeuralHandler (name: String,
                      xBuffer: MutableList<MutableList<Double>>,
                      yBuffer: MutableList<MutableList<Double>>,
                      zBuffer: MutableList<MutableList<Double>>,
-                     fRaw: FileOutputStream) : Boolean {
+                     fRaw: FileOutputStream) {
         /*
             extrasBuffer: 3x200 timestamps and activity with each row:
                             [SensorEvent timestamp (ns), Calendar timestamp (ms), current activity]
@@ -54,7 +54,6 @@ class NeuralHandler (name: String,
         */
 
         Log.v("0004","x: ${xBuffer.size}     y: ${yBuffer.size}    z: ${zBuffer.size}, extras: ${extrasBuffer.size}")
-        var actionDetected = false
         var smokingOutput: Double
 
         // Run ANN on windows
@@ -66,7 +65,6 @@ class NeuralHandler (name: String,
                         zBuffer.slice(i until i+windowSize)).toMutableList()))
             if (smokingOutput >= 0.85){
                 smokingOutput = 1.0
-                actionDetected = true
             }
             else{
                 smokingOutput = 0.0
@@ -120,7 +118,7 @@ class NeuralHandler (name: String,
                     state = 0
                     currentPuffLength = 0
                     currentInterPuffIntervalLength = 0
-                    applicationContext.sendBroadcast(Intent("delta_activity_detection_code"))
+                    // TODO puff detected
                 }
             } else if (state == 4 && smokingOutput == 1.0){
                 // back into puff for already valid puff
@@ -139,7 +137,6 @@ class NeuralHandler (name: String,
                     state.toString()+"\n").toByteArray())
             i++
         }
-        return actionDetected
     }
     fun forwardPropagate(input: Matrix): Double {
         /*
