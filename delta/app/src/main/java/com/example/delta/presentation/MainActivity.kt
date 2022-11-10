@@ -46,6 +46,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     private lateinit var falseNegativesFile: File       // File to write false negative events
     private lateinit var eventsFile: File               // File to write smoking events
     private lateinit var positivesFile: File            // File to write smoking detected events
+    // TODO positive puffs
 
     // Record raw data
     private lateinit var sensorManager: SensorManager
@@ -209,6 +210,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         createNewRawFile()
 
         // Event Recording Files
+        // TODO add source of end
         eventsFile = File(this.filesDir, "$dataFolderName/Self-Report.$dataFolderName.csv")
         eventsFile.appendText("Event,Start Time,Stop Time\n")
 
