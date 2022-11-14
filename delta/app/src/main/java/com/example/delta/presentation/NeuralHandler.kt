@@ -142,7 +142,7 @@ class NeuralHandler (name: String,
         }
     }
     private fun onPuffDetected(){
-        instance.viewModel.iterateNumberOfPuffs()
+        instance.mViewModel.iterateNumberOfPuffs()
         Log.d("0000","puff detected")
         if(!instance.isSmoking){
             Log.d("0000","user is not already smoking")
