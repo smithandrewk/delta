@@ -65,7 +65,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     var isSmoking: Boolean = false
 
     // UI
-    val viewModel: MainViewModel = MainViewModel()
+    val mViewModel: MainViewModel = MainViewModel()
     lateinit var timer: CountDownTimer
     private val sessionLengthMillis: Long = 10000
     private val progressIndicatorIterator: Float = 0.1f
@@ -77,7 +77,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         setContent {
-            val uiState by viewModel.uiState.collectAsState()
+            val uiState by mViewModel.uiState.collectAsState()
             val animatedProgress by animateFloatAsState(
                 targetValue = uiState.progress,
                 animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec
@@ -86,23 +86,23 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             ReportMissedCigDialog(
                 showDialog = uiState.showConfirmReportFalseNegativeDialog,
                 onDialogResponse = {
-                    viewModel.setShowConfirmReportFalseNegativeDialog(false)
+                    mViewModel.setShowConfirmReportFalseNegativeDialog(false)
                     if(it) {
-                        viewModel.iterateNumberOfCigs()
+                        mViewModel.iterateNumberOfCigs()
                         onReportFalseNegative()
                     }
                 })
             ConfirmSmokeACigDialog(
                 showDialog = uiState.showConfirmSmokingDialog,
                 onDialogResponse = {
-                    viewModel.setShowConfirmSmokingDialog(false)
+                    mViewModel.setShowConfirmSmokingDialog(false)
                     Log.d("0000",uiState.isSmoking.toString())
                     if(it) startSmoking(sessionLengthMillis,0.0f)
                 })
             ConfirmDoneSmokingDialog(
                 showDialog = uiState.showConfirmDoneSmokingDialog,
                 onDialogResponse = {
-                    viewModel.setShowConfirmDoneSmokingDialog(false)
+                    mViewModel.setShowConfirmDoneSmokingDialog(false)
                     if(it) stopSmoking()
                 })
             if(uiState.isSmoking){
@@ -139,6 +139,8 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             in our app. Therefore, we take every 5th value from onsensorchanged to approximate
             20 Hz sampling rate.
          */
+//        mViewModel.updateSensorData("(${event.values[0]}, ${event.values[1]}, ${event.values[2]})")
+        mViewModel.updateSensorData(event.values[0].toString(), event.values[1].toString(), event.values[2].toString())
         if (sampleIndex == 5){
             sampleIndex = 0
             xBuffer.add(mutableListOf(event.values[0].toDouble()))
@@ -169,13 +171,13 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 
     // Functions to respond to Neural Network and User
     fun startSmoking(millisInFuture:Long,progressIndicatorProgress: Float){
-        viewModel.setIsSmoking(true)
-        viewModel.setProgress(progressIndicatorProgress)
+        mViewModel.setIsSmoking(true)
+        mViewModel.setProgress(progressIndicatorProgress)
 
         Log.d("0000","Starting UI timer for $millisInFuture")
         timer = object : CountDownTimer(millisInFuture, countDownIntervalMillis) {
             override fun onTick(millisUntilFinished: Long) {
-                viewModel.iterateProgressByFloat(progressIndicatorIterator)
+                mViewModel.iterateProgressByFloat(progressIndicatorIterator)
                 Log.d("0000","Current timer progress : $currentTimerProgress")
                 currentTimerProgress += countDownIntervalMillis
             }
@@ -190,8 +192,8 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         // HERE write to event file as "Self Report" or "Detected"
     }
     fun stopSmoking(){
-        viewModel.setIsSmoking(false)
-        viewModel.iterateNumberOfCigs()
+        mViewModel.setIsSmoking(false)
+        mViewModel.iterateNumberOfCigs()
         currentTimerProgress = 0
         timer.cancel()
 
@@ -301,7 +303,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                     item { ReportMissedCigChip(
                         chipText = "Report missed cig",
                         onChipClick = {
-                            viewModel.setShowConfirmReportFalseNegativeDialog(it)
+                            mViewModel.setShowConfirmReportFalseNegativeDialog(it)
                         })
                     }
                     item {
@@ -310,16 +312,23 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                                 chipText="Finish cig",
                                 chipColor = "#827978",
                                 onChipClick = {
-                                    viewModel.setShowConfirmDoneSmokingDialog(true)
+                                    mViewModel.setShowConfirmDoneSmokingDialog(true)
                                 })
                         } else {
                             CompactCallbackChip(
                                 chipText="Smoke cig",
                                 chipColor = "#b52914",
                                 onChipClick = {
-                                    viewModel.setShowConfirmSmokingDialog(true)
+                                    mViewModel.setShowConfirmSmokingDialog(true)
                                 })
                         }
+                    }
+                    item {
+                        sensorCoordinates(
+                            sensorX = uiState.sensorX,
+                            sensorY = uiState.sensorY,
+                            sensorZ = uiState.sensorZ
+                        )
                     }
                 }
             }
@@ -516,5 +525,16 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             color = MaterialTheme.colors.primary,
             text = stringResource(id = R.string.title_text)
         )
+    }
+
+    @Composable
+    fun sensorCoordinates(modifier: Modifier = Modifier, sensorX: String, sensorY: String, sensorZ: String){
+        Card(
+            onClick = { /* ... */ }
+        ) {
+            Text(sensorX)
+            Text(sensorY)
+            Text(sensorZ)
+        }
     }
 }
