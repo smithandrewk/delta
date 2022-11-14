@@ -33,32 +33,40 @@ import java.io.FileOutputStream
 import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.util.*
+import org.json.JSONObject
 
 class MainActivity : ComponentActivity(), SensorEventListener {
     private val appStartTimeReadable = SimpleDateFormat("yyyy-MM-dd_HH_mm_ss", Locale.ENGLISH).format(Date())
-    private lateinit var dataFolderName: String
-    private lateinit var fRaw: FileOutputStream
-    private lateinit var fFalseNegatives: FileOutputStream
+    private val appStartTimeMillis = Calendar.getInstance().timeInMillis
 
-    private lateinit var rawFilename: String
-    private lateinit var fSession: FileOutputStream
-    private lateinit var sessionFilename: String
-    private val numWindowsBatched = 1
+    // Files
+    private lateinit var dataFolderName: String
     private var rawFileIndex: Int = 0
-    private var currentActivity: String = "None"
-    private lateinit var nHandler: NeuralHandler
-    private lateinit var falseNegativesFilename: String
-    private lateinit var falseNegativesFile: File
-    lateinit var timer: CountDownTimer
+    private lateinit var fRaw: FileOutputStream         // File output stream to write raw acc data
+    private lateinit var falseNegativesFile: File       // File to write false negative events
+    private lateinit var eventsFile: File               // File to write smoking events
+    private lateinit var positivesFile: File            // File to write smoking detected events
+    // TODO positive puffs
+
+    // Record raw data
+    private lateinit var sensorManager: SensorManager
     private var sampleIndex: Int = 0
+    private val numWindowsBatched = 1
     private var xBuffer:MutableList<MutableList<Double>> = mutableListOf()
     private var yBuffer:MutableList<MutableList<Double>> = mutableListOf()
     private var zBuffer:MutableList<MutableList<Double>> = mutableListOf()
     private var extrasBuffer:MutableList<MutableList<String>> = mutableListOf()
     private val windowUpperLim = numWindowsBatched + 99
     private val windowRange:IntRange = numWindowsBatched..windowUpperLim
-    val viewModel: MainViewModel = MainViewModel()
+
+    // Neural Network
+    private lateinit var nHandler: NeuralHandler
+    private var currentActivity: String = "None"
     var isSmoking: Boolean = false
+
+    // UI
+    val viewModel: MainViewModel = MainViewModel()
+    lateinit var timer: CountDownTimer
     private val sessionLengthMillis: Long = 10000
     private val progressIndicatorIterator: Float = 0.1f
     private var currentTimerProgress: Long = 0
@@ -110,14 +118,17 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                 isSmoking = uiState.isSmoking
             }
         }
+
         createInitialFiles()
         createAndRegisterAccelerometerListener()
         nHandler = getNeuralHandler(this)
     }
+
+    // Functions to setup and listen to accelerometer sensor
     private fun createAndRegisterAccelerometerListener() {
         // Register Listener for Accelerometer Data
         val samplingRateHertz = 100
-        val sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
+        sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
         val sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
         val samplingPeriodMicroseconds = 1000000/samplingRateHertz
         sensorManager.registerListener(this, sensor, samplingPeriodMicroseconds)
@@ -151,11 +162,12 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 //            Log.v("onSensorChanged", "Time: ${event.timestamp}    x: ${event.values[0]}     y: ${event.values[1]}    z: ${event.values[2]}, activity: $currentActivity")
         }
         sampleIndex++
-//        writeToRawFile("${event.timestamp},${event.values[0]},${event.values[1]},${event.values[2]}")
     }
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
         // do nothing
     }
+
+    // Functions to respond to Neural Network and User
     fun startSmoking(millisInFuture:Long,progressIndicatorProgress: Float){
         viewModel.setIsSmoking(true)
         viewModel.setProgress(progressIndicatorProgress)
@@ -174,12 +186,20 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             }
         }
         timer.start()
+
+        // HERE write to event file as "Self Report" or "Detected"
     }
     fun stopSmoking(){
         viewModel.setIsSmoking(false)
         viewModel.iterateNumberOfCigs()
         currentTimerProgress = 0
         timer.cancel()
+
+        // HERE write to event file
+    }
+
+    private fun onReportFalseNegative(){
+        falseNegativesFile.appendText("${Calendar.getInstance().timeInMillis}\n")
     }
     private fun createInitialFiles(){
         currentActivity = getString(R.string.NO_ACTIVITY)
@@ -188,41 +208,46 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         dataFolderName = appStartTimeReadable
         File(this.filesDir, dataFolderName).mkdir()
         createNewRawFile()
-        createFalseNegativesFile()
-        // Create session file and first raw file
-        sessionFilename = "Session.$appStartTimeReadable.csv"    // file to save session information
-        fSession = FileOutputStream(File(this.filesDir, "$dataFolderName/$sessionFilename"))
-        writeToSessionFile("File Start Time: ${Calendar.getInstance().timeInMillis}\n")
-        writeToSessionFile("Event,Start Time,Stop Time\n")
 
-        val fInfo = FileOutputStream(File(this.filesDir, "$dataFolderName/Info.txt"))
-        fInfo.use { f ->
-            f.write("Number of Windows in each Batch: $numWindowsBatched".toByteArray())
-        }
+        // Event Recording Files
+        // TODO add source of end
+        eventsFile = File(this.filesDir, "$dataFolderName/Self-Report.$dataFolderName.csv")
+        eventsFile.appendText("Event,Start Time,Stop Time\n")
+
+        falseNegativesFile = File(this.filesDir, "$dataFolderName/False-Negatives.$dataFolderName.csv")
+        falseNegativesFile.appendText("Time\n")
+
+        positivesFile = File(this.filesDir, "$dataFolderName/Positives.$dataFolderName.csv")
+        positivesFile.appendText("Time \n")
+
+        // Info File
+        try {
+            val json = JSONObject()
+                .put("App Start Time", appStartTimeMillis)
+                .put("App Start Time Readable", appStartTimeReadable)
+                .put("Number of Windows Batched", numWindowsBatched)
+            File(this.filesDir, "$dataFolderName/Info.json").appendText(json.toString())
+        } catch (e: Exception) { e.printStackTrace() }
     }
-    private fun writeToSessionFile(str: String) {
-        // write a string to the session file
-        Log.i("0003", "Writing to Session File")
-        fSession = FileOutputStream(File(this.filesDir, "$dataFolderName/$sessionFilename"), true)
-        fSession.use { f ->
-            f.write(str.toByteArray())
-        }
-    }
-    private fun writeToRawFile(str: String){
-        fRaw.write("${str}\n".toByteArray())
-    }
+
+    // Setup Functions
     private fun createNewRawFile() {
         // Create a new raw file for accelerometer data
         Log.i("0003", "Creating New Raw File")
-        if (rawFileIndex != 0) {
+        if (rawFileIndex == 0) {
+            // Create "raw" directory
+            File(this.filesDir, "$dataFolderName/raw").mkdir()
+        }
+        else {
             fRaw.close()
         }
-        rawFilename = "$appStartTimeReadable.$rawFileIndex.csv"       // file to save raw data
-        fRaw = FileOutputStream(File(this.filesDir, "$dataFolderName/$rawFilename"))
+        val rawFilename = "$appStartTimeReadable.$rawFileIndex.csv"
+        fRaw = FileOutputStream(File(this.filesDir, "$dataFolderName/raw/$rawFilename"))
         fRaw.write("File Start Time: ${Calendar.getInstance().timeInMillis}\n".toByteArray())
         fRaw.write("timestamp,acc_x,acc_y,acc_z,real time,activity,label,state\n".toByteArray())
         rawFileIndex++
     }
+
     private fun getNeuralHandler(instance: MainActivity): NeuralHandler{
         // Load ANN weights and input ranges
         // TODO: Can we move loading the weights to the NeuralHandler class?
@@ -242,17 +267,14 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             inputRangesString,
             numWindowsBatched,applicationContext,instance)
     }
-    private fun onReportFalseNegative(){
-        falseNegativesFile.appendText("${Calendar.getInstance().timeInMillis}\n")
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.i("Delta", "Main Destroyed")
+        fRaw.close()
+        sensorManager.unregisterListener(this)
     }
-    private fun createFalseNegativesFile(){
-        falseNegativesFilename = "False-Negatives.$dataFolderName.csv"
-        falseNegativesFile = File(this.filesDir, "$dataFolderName/$falseNegativesFilename")
-        fFalseNegatives = FileOutputStream(falseNegativesFile)
-        fFalseNegatives.use { f ->
-            f.write("Time\n".toByteArray())
-        }
-    }
+
     @Composable
     fun WearApp(uiState: MainUiState){
         DeltaTheme {
