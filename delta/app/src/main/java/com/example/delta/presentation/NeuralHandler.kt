@@ -121,7 +121,7 @@ class NeuralHandler (name: String,
                     state = 0
                     currentPuffLength = 0
                     currentInterPuffIntervalLength = 0
-                    onPuffDetected()
+//                    onPuffDetected()
                 }
             } else if (state == 4 && smokingOutput == 1.0){
                 // back into puff for already valid puff
