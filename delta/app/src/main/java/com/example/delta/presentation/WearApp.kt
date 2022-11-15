@@ -34,6 +34,8 @@ import com.example.delta.presentation.components.CustomTimeText
 import com.example.delta.R
 import com.example.delta.presentation.navigation.Screen
 import com.example.delta.presentation.ui.landing.LandingScreen
+import com.example.delta.util.FilesHandler
+import com.example.delta.util.SensorHandler
 import java.io.File
 import java.util.*
 
@@ -41,7 +43,9 @@ import java.util.*
 fun WearApp(
     modifier: Modifier = Modifier,
     swipeDismissableNavController: NavHostController = rememberSwipeDismissableNavController(),
-    falseNegativesFile: File
+//    falseNegativesFile: File
+    filesHandler: FilesHandler,
+    sensorHandler: SensorHandler
 ) {
     var themeColors by remember { mutableStateOf(initialThemeValues.colors) }
 
@@ -188,7 +192,8 @@ fun WearApp(
                         onTimeConfirm = {
                             swipeDismissableNavController.popBackStack()
                             dateTimeForUserInput = it.atDate(dateTimeForUserInput.toLocalDate())
-                            writeFalseNegativeToFile(falseNegativesFile = falseNegativesFile,dateTimeForUserInput)
+//                            writeFalseNegativeToFile(falseNegativesFile = falseNegativesFile,dateTimeForUserInput)
+                            // filesHandler.writeFalseNegativeToFile
                         },
                         time = dateTimeForUserInput.toLocalTime()
                     )
