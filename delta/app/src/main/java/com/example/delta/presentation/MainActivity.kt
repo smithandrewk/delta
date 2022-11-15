@@ -65,7 +65,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     var isSmoking: Boolean = false
 
     // UI
-    val viewModel: MainViewModel = MainViewModel()
+    val mViewModel: MainViewModel = MainViewModel()
     lateinit var timer: CountDownTimer
     val sessionLengthMillis: Long = 10000
     private val progressIndicatorIterator: Float = 0.1f
@@ -78,9 +78,9 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         setContent {
-            val uiState by viewModel.uiState.collectAsState()
+            val uiState by mViewModel.uiState.collectAsState()
 
-            WearApp(uiState,viewModel,this)
+            WearApp(uiState,mViewModel,this)
 
             SideEffect {
                 isSmoking = uiState.isSmoking
@@ -107,6 +107,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             in our app. Therefore, we take every 5th value from onsensorchanged to approximate
             20 Hz sampling rate.
          */
+        mViewModel.updateSensorData(event.values[0].toString(), event.values[1].toString(), event.values[2].toString())
         if (sampleIndex == 5){
             sampleIndex = 0
             xBuffer.add(mutableListOf(event.values[0].toDouble()))
@@ -137,13 +138,13 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 
     // Functions to respond to Neural Network and User
     fun startSmoking(millisInFuture:Long,progressIndicatorProgress: Float){
-        viewModel.setIsSmoking(true)
-        viewModel.setProgress(progressIndicatorProgress)
+        mViewModel.setIsSmoking(true)
+        mViewModel.setProgress(progressIndicatorProgress)
 
         Log.d("0000","Starting UI timer for $millisInFuture")
         timer = object : CountDownTimer(millisInFuture, countDownIntervalMillis) {
             override fun onTick(millisUntilFinished: Long) {
-                viewModel.iterateProgressByFloat(progressIndicatorIterator)
+                mViewModel.iterateProgressByFloat(progressIndicatorIterator)
                 Log.d("0000","Current timer progress : $currentTimerProgress")
                 currentTimerProgress += countDownIntervalMillis
             }
@@ -158,8 +159,8 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         // HERE write to event file as "Self Report" or "Detected"
     }
     fun stopSmoking(){
-        viewModel.setIsSmoking(false)
-        viewModel.iterateNumberOfCigs()
+        mViewModel.setIsSmoking(false)
+        mViewModel.iterateNumberOfCigs()
         currentTimerProgress = 0
         timer.cancel()
 

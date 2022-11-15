@@ -69,6 +69,13 @@ fun WearApp(uiState: MainUiState,viewModel: MainViewModel,instance: MainActivity
                             })
                     }
                 }
+                item {
+                    sensorCoordinatesCard (
+                        sensorX = uiState.sensorX,
+                        sensorY = uiState.sensorY,
+                        sensorZ = uiState.sensorZ
+                    )
+                }
             }
             ReportMissedCigDialog(
                 showDialog = uiState.showConfirmReportFalseNegativeDialog,
@@ -295,4 +302,14 @@ fun WelcomeText(modifier: Modifier = Modifier){
         color = MaterialTheme.colors.primary,
         text = stringResource(id = com.example.delta.R.string.title_text)
     )
+}
+@Composable
+fun sensorCoordinatesCard(modifier: Modifier = Modifier, sensorX: String, sensorY: String, sensorZ: String){
+    Card(
+        onClick = { /* ... */ }
+    ) {
+        Text(sensorX)
+        Text(sensorY)
+        Text(sensorZ)
+    }
 }

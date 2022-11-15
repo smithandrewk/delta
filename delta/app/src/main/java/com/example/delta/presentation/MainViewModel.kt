@@ -13,7 +13,10 @@ data class MainUiState(
     val isSmoking: Boolean = false,
     val numberOfCigs: Int = 0,
     val numberOfPuffs: Int = 0,
-    val progress: Float = 0.0f
+    val progress: Float = 0.0f,
+    val sensorX: String = "No Data",
+    val sensorY: String = "No Data",
+    val sensorZ: String = "No Data"
 )
 
 class MainViewModel : ViewModel() {
@@ -21,6 +24,18 @@ class MainViewModel : ViewModel() {
     // Expose screen UI state
     private val _uiState = MutableStateFlow(MainUiState())
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
+
+    fun updateSensorData(sensorX: String, sensorY: String, sensorZ: String){
+//        sensorData = value
+        _uiState.update { currentState ->
+            currentState.copy(
+                sensorX = sensorX,
+                sensorY = sensorY,
+                sensorZ = sensorZ
+            )
+        }
+
+    }
 
     // Handle business logic
     fun setShowConfirmReportFalseNegativeDialog(value: Boolean) {
