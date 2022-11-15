@@ -1,4 +1,4 @@
-package com.example.delta.presentation
+package com.example.delta.util
 
 import kotlin.math.E
 import kotlin.math.pow
@@ -37,7 +37,7 @@ class Matrix {
         shape = Pair(mData.size,mData[0].size)
 
     }
-    operator fun times(rightMatrix: Matrix): Matrix{
+    operator fun times(rightMatrix: Matrix): Matrix {
         if(this.mColSize != rightMatrix.mRowSize){
             throw java.lang.IllegalArgumentException("Matrix dimensions not compatible for multiplication!")
         }
@@ -110,7 +110,7 @@ class Matrix {
             return output
         }
 
-        fun logSigmoid(input: Matrix): Matrix{
+        fun logSigmoid(input: Matrix): Matrix {
             val output = input.copy()
             for (i in 0 until input.getRowSize()){
                 output[i][0] = (1)/(1+E.pow(-input[i][0]))

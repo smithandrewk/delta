@@ -1,315 +1,228 @@
 package com.example.delta.presentation
 
-import android.content.Context
-import android.util.Log
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
+
+import androidx.compose.foundation.background
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.NavHostController
+import androidx.wear.compose.navigation.currentBackStackEntryAsState
+import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
+import com.google.android.horologist.compose.layout.fadeAway
+import com.example.delta.presentation.navigation.DestinationScrollType
+import com.example.delta.presentation.navigation.SCROLL_TYPE_NAV_ARGUMENT
+import com.example.delta.presentation.theme.WearAppTheme
+import com.example.delta.presentation.theme.initialThemeValues
+import java.time.LocalDateTime
+import com.google.android.horologist.compose.layout.fadeAwayScalingLazyList
+import com.example.delta.presentation.ui.ScalingLazyListStateViewModel
+import com.example.delta.presentation.ui.ScrollStateViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import androidx.wear.compose.material.*
-import androidx.wear.compose.material.dialog.Alert
-import androidx.wear.compose.material.dialog.Dialog
-import com.example.delta.presentation.theme.DeltaTheme
+import androidx.wear.compose.navigation.SwipeDismissableNavHost
+import androidx.wear.compose.navigation.composable
+import com.google.android.horologist.composables.TimePicker
+import com.example.delta.presentation.components.CustomTimeText
+import com.example.delta.R
+import com.example.delta.presentation.navigation.Screen
+import com.example.delta.presentation.ui.landing.LandingScreen
+import java.io.File
+import java.util.*
 
 @Composable
-fun WearApp(uiState: MainUiState,viewModel: MainViewModel,instance: MainActivity){
-    DeltaTheme {
-        val listState = rememberScalingLazyListState()
-        val animatedProgress by animateFloatAsState(
-            targetValue = uiState.progress,
-            animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec
-        )
+fun WearApp(
+    modifier: Modifier = Modifier,
+    swipeDismissableNavController: NavHostController = rememberSwipeDismissableNavController(),
+    falseNegativesFile: File
+) {
+    var themeColors by remember { mutableStateOf(initialThemeValues.colors) }
+
+    WearAppTheme(colors = themeColors) {
+        // Allows user to disable the text before the time.
+        var showProceedingTextBeforeTime by rememberSaveable { mutableStateOf(false) }
+
+        // Allows user to show/hide the vignette on appropriate screens.
+        // IMPORTANT NOTE: Usually you want to show the vignette all the time on screens with
+        // scrolling content, a rolling side button, or a rotating bezel. This preference is just
+        // to visually demonstrate the vignette for the developer to see it on and off.
+        var vignetteVisiblePreference by rememberSaveable { mutableStateOf(true) }
+
+        // Observes the current back stack entry to pull information and determine if the screen
+        // is scrollable and the scrollable state.
+        //
+        // The main reason the state for any scrollable screen is hoisted to this level is so the
+        // Scaffold can properly place the position indicator (also known as the scroll indicator).
+        //
+        // We save the above scrollable states in the SavedStateHandle and retrieve them
+        // when needed from custom view models (see ScrollingViewModels class).
+        //
+        // Screens with scrollable content:
+        //  1. The watch list screen uses ScalingLazyColumn (backed by ScalingLazyListState)
+        //  2. The watch detail screens uses Column with scrolling enabled (backed by ScrollState).
+        //
+        // We also use these scrolling states for various other things (like hiding the time
+        // when the user is scrolling and only showing the vignette when the screen is
+        // scrollable).
+        //
+        // Remember, mobile guidelines specify that if you back navigate out of a screen and then
+        // later navigate into it again, it should be in its initial scroll state (not the last
+        // scroll location it was in before you backed out).
+        val currentBackStackEntry by swipeDismissableNavController.currentBackStackEntryAsState()
+
+        val scrollType =
+            currentBackStackEntry?.arguments?.getSerializable(SCROLL_TYPE_NAV_ARGUMENT)
+                ?: DestinationScrollType.NONE
+        var dateTimeForUserInput by remember { mutableStateOf(LocalDateTime.now()) }
         Scaffold(
+            modifier = modifier,
             timeText = {
-                TimeText(modifier = Modifier.scrollAway(listState))
+                // Scaffold places time at top of screen to follow Material Design guidelines.
+                // (Time is hidden while scrolling.)
+
+                val timeTextModifier =
+                    when (scrollType) {
+                        DestinationScrollType.SCALING_LAZY_COLUMN_SCROLLING -> {
+                            val scrollViewModel: ScalingLazyListStateViewModel =
+                                viewModel(currentBackStackEntry!!)
+                            Modifier.fadeAwayScalingLazyList {
+                                scrollViewModel.scrollState
+                            }
+                        }
+                        DestinationScrollType.COLUMN_SCROLLING -> {
+                            val viewModel: ScrollStateViewModel =
+                                viewModel(currentBackStackEntry!!)
+                            Modifier.fadeAway {
+                                viewModel.scrollState
+                            }
+                        }
+                        DestinationScrollType.TIME_TEXT_ONLY -> {
+                            Modifier
+                        }
+                        else -> {
+                            null
+                        }
+                    }
+
+                key(currentBackStackEntry?.destination?.route) {
+                    CustomTimeText(
+                        modifier = timeTextModifier ?: Modifier,
+                        visible = timeTextModifier != null,
+                        startText = if (showProceedingTextBeforeTime) {
+                            stringResource(R.string.leading_time_text)
+                        } else {
+                            null
+                        }
+                    )
+                }
+            },
+            vignette = {
+                // Only show vignette for screens with scrollable content.
+                if (scrollType == DestinationScrollType.SCALING_LAZY_COLUMN_SCROLLING ||
+                    scrollType == DestinationScrollType.COLUMN_SCROLLING
+                ) {
+                    if (vignetteVisiblePreference) {
+                        Vignette(vignettePosition = VignettePosition.TopAndBottom)
+                    }
+                }
             },
             positionIndicator = {
-                PositionIndicator(
-                    scalingLazyListState = listState
-                )
+                // Only displays the position indicator for scrollable content.
+                when (scrollType) {
+                    DestinationScrollType.SCALING_LAZY_COLUMN_SCROLLING -> {
+                        // Get or create the ViewModel associated with the current back stack entry
+                        val scrollViewModel: ScalingLazyListStateViewModel =
+                            viewModel(currentBackStackEntry!!)
+                        PositionIndicator(scalingLazyListState = scrollViewModel.scrollState)
+                    }
+                    DestinationScrollType.COLUMN_SCROLLING -> {
+                        // Get or create the ViewModel associated with the current back stack entry
+                        val viewModel: ScrollStateViewModel = viewModel(currentBackStackEntry!!)
+                        PositionIndicator(scrollState = viewModel.scrollState)
+                    }
+                }
             }
         ) {
-            ScalingLazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                autoCentering = AutoCenteringParams(itemIndex = 0),
-                state = listState
+            SwipeDismissableNavHost(
+                navController = swipeDismissableNavController,
+                startDestination = Screen.Landing.route,
+                modifier = Modifier.background(MaterialTheme.colors.background)
             ) {
-                item { WelcomeText() }
-                item { SmokeStatisticsCard(
-                    numberOfCigs = uiState.numberOfCigs,
-                    numberOfPuffs = uiState.numberOfPuffs)}
-                item { ReportMissedCigChip(
-                    chipText = "Report missed cig",
-                    onChipClick = {
-                        viewModel.setShowConfirmReportFalseNegativeDialog(it)
-                    })
-                }
-                item {
-                    if(uiState.isSmoking){
-                        CompactCallbackChip(
-                            chipText="Finish cig",
-                            chipColor = "#827978",
-                            onChipClick = {
-                                viewModel.setShowConfirmDoneSmokingDialog(true)
-                            })
-                    } else {
-                        CompactCallbackChip(
-                            chipText="Smoke cig",
-                            chipColor = "#b52914",
-                            onChipClick = {
-                                viewModel.setShowConfirmSmokingDialog(true)
-                            })
-                    }
-                }
-                item {
-                    sensorCoordinatesCard (
-                        sensorX = uiState.sensorX,
-                        sensorY = uiState.sensorY,
-                        sensorZ = uiState.sensorZ
+                // Main Window
+                composable(
+                    route = Screen.Landing.route,
+                    arguments = listOf(
+                        // In this case, the argument isn't part of the route, it's just attached
+                        // as information for the destination.
+                        navArgument(SCROLL_TYPE_NAV_ARGUMENT) {
+                            type = NavType.EnumType(DestinationScrollType::class.java)
+                            defaultValue = DestinationScrollType.SCALING_LAZY_COLUMN_SCROLLING
+                        }
                     )
-                }
-            }
-            ReportMissedCigDialog(
-                showDialog = uiState.showConfirmReportFalseNegativeDialog,
-                onDialogResponse = {
-                    viewModel.setShowConfirmReportFalseNegativeDialog(false)
-                    if(it) {
-                        viewModel.iterateNumberOfCigs()
-                        instance.onReportFalseNegative()
-                    }
-                })
-            ConfirmSmokeACigDialog(
-                showDialog = uiState.showConfirmSmokingDialog,
-                onDialogResponse = {
-                    viewModel.setShowConfirmSmokingDialog(false)
-                    Log.d("0000",uiState.isSmoking.toString())
-                    if(it) instance.startSmoking(instance.sessionLengthMillis,0.0f)
-                })
-            ConfirmDoneSmokingDialog(
-                showDialog = uiState.showConfirmDoneSmokingDialog,
-                onDialogResponse = {
-                    viewModel.setShowConfirmDoneSmokingDialog(false)
-                    if(it) instance.stopSmoking()
-                })
-            if(uiState.isSmoking){
-                CircularProgressIndicator(
-                    progress = animatedProgress,
-                    modifier = Modifier.fillMaxSize(),
-                    startAngle = 290.0f,
-                    endAngle = 250.0f,
-                    strokeWidth = 4.dp
-                )
-            }
-        }
-    }
-}
-@Composable
-fun CompactCallbackChip(chipText:String,chipColor:String,onChipClick: (Boolean) -> Unit){
-    CompactChip(
-        onClick = { onChipClick(true) },
-        enabled = true,
-        // CompactChip label should be no more than 1 line of text
-        label = {
-            Text(chipText, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        },
-        icon = {
-            Icon(
-                painter = painterResource(id = com.example.delta.R.drawable.lungs),
-                contentDescription = "airplane",
-                modifier = Modifier.size(ChipDefaults.SmallIconSize),
-            )
-        },
-        colors = ChipDefaults.chipColors(backgroundColor = Color(android.graphics.Color.parseColor(chipColor)))
-    )
-}
-@Composable
-fun ConfirmDoneSmokingDialog(showDialog: Boolean,onDialogResponse: (Boolean) -> Unit){
-    // TODO add timer to dialog
-    val scrollState = rememberScalingLazyListState()
-    Dialog(
-        showDialog = showDialog,
-        onDismissRequest = { },     // do not allow dismissal without responding
-        scrollState = scrollState
-    ) {
-        Alert(
-            scrollState = scrollState,
-            verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.Top),
-            contentPadding =
-            PaddingValues(start = 10.dp, end = 10.dp, top = 24.dp, bottom = 52.dp),
-            icon = {
-                Icon(
-                    painter = painterResource(id = com.example.delta.R.drawable.lungs),
-                    contentDescription = "lungs",
-                    modifier = Modifier
-                        .size(24.dp)
-                        .wrapContentSize(align = Alignment.Center),
-                )
-            },
-            title = { Text(text = "Are you done smoking?", textAlign = TextAlign.Center) },
-        ) {
-            item {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                    Chip(
-                        label = { Text("Yes", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth()) },
-                        onClick = { onDialogResponse(true) },
-                        colors = ChipDefaults.primaryChipColors(),
-                        modifier = Modifier.width(60.dp)
+                ) {
+                    val scalingLazyListState = scalingLazyListState(it)
+
+                    val focusRequester = remember { FocusRequester() }
+                    LandingScreen(
+                        scalingLazyListState = scalingLazyListState,
+                        focusRequester = focusRequester,
+                        onClickWatchList = {
+                            swipeDismissableNavController.navigate(Screen.Time24hPicker.route)
+                        },
+                        proceedingTimeTextEnabled = showProceedingTextBeforeTime,
+                        onClickProceedingTimeText = {
+                            showProceedingTextBeforeTime = !showProceedingTextBeforeTime
+                        }
                     )
 
-                    Chip(
-                        label = { Text("No", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth()) },
-                        onClick = { onDialogResponse(false) },
-                        colors = ChipDefaults.secondaryChipColors(),
-                        modifier = Modifier.width(60.dp)
+                    RequestFocusOnResume(focusRequester)                }
+                composable(Screen.Time24hPicker.route) {
+                    TimePicker(
+                        onTimeConfirm = {
+                            swipeDismissableNavController.popBackStack()
+                            dateTimeForUserInput = it.atDate(dateTimeForUserInput.toLocalDate())
+                            writeFalseNegativeToFile(falseNegativesFile = falseNegativesFile,dateTimeForUserInput)
+                        },
+                        time = dateTimeForUserInput.toLocalTime()
                     )
-
                 }
             }
         }
+        // end wear app theme
     }
 }
+
+fun writeFalseNegativeToFile(falseNegativesFile: File,dateTimeForUserInput: LocalDateTime) {
+    falseNegativesFile.appendText("${Calendar.getInstance().timeInMillis},${dateTimeForUserInput}\n")
+}
 @Composable
-fun ConfirmSmokeACigDialog(showDialog: Boolean,onDialogResponse: (Boolean) -> Unit){
-    // TODO add timer to dialog
-    val scrollState = rememberScalingLazyListState()
-    Dialog(
-        showDialog = showDialog,
-        onDismissRequest = { },     // do not allow dismissal without responding
-        scrollState = scrollState
+private fun scalingLazyListState(it: NavBackStackEntry): ScalingLazyListState {
+    val passedScrollType = it.arguments?.getSerializable(SCROLL_TYPE_NAV_ARGUMENT)
+
+    check(
+        passedScrollType == DestinationScrollType.SCALING_LAZY_COLUMN_SCROLLING
     ) {
-        Alert(
-            scrollState = scrollState,
-            verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.Top),
-            contentPadding =
-            PaddingValues(start = 10.dp, end = 10.dp, top = 24.dp, bottom = 52.dp),
-            icon = {
-                Icon(
-                    painter = painterResource(id = com.example.delta.R.drawable.lungs),
-                    contentDescription = "lungs",
-                    modifier = Modifier
-                        .size(24.dp)
-                        .wrapContentSize(align = Alignment.Center),
-                )
-            },
-            title = { Text(text = "Do you want to record a smoking session?", textAlign = TextAlign.Center) },
-        ) {
-            item {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                    Chip(
-                        label = { Text("Yes", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth()) },
-                        onClick = { onDialogResponse(true) },
-                        colors = ChipDefaults.primaryChipColors(),
-                        modifier = Modifier.width(60.dp)
-                    )
+        "Scroll type must be DestinationScrollType.SCALING_LAZY_COLUMN_SCROLLING"
+    }
 
-                    Chip(
-                        label = { Text("No", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth()) },
-                        onClick = { onDialogResponse(false) },
-                        colors = ChipDefaults.secondaryChipColors(),
-                        modifier = Modifier.width(60.dp)
-                    )
+    val scrollViewModel: ScalingLazyListStateViewModel = viewModel(it)
 
-                }
-            }
+    return scrollViewModel.scrollState
+}
+
+@Composable
+private fun RequestFocusOnResume(focusRequester: FocusRequester) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+    LaunchedEffect(Unit) {
+        lifecycleOwner.repeatOnLifecycle(state = Lifecycle.State.RESUMED) {
+            focusRequester.requestFocus()
         }
-    }
-}
-@Composable
-fun SmokeStatisticsCard(numberOfCigs: Int, numberOfPuffs: Int){
-    Card(
-        onClick = { /* ... */ }
-    ) {
-        Text("Looks like you've only smoked $numberOfCigs cigs and $numberOfPuffs puffs!")
-    }
-}
-@Composable
-fun ReportMissedCigChip(chipText:String,onChipClick: (Boolean) -> Unit){
-    CompactChip(
-        onClick = { onChipClick(true) },
-        enabled = true,
-        // CompactChip label should be no more than 1 line of text
-        label = {
-            Text(chipText, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        },
-        icon = {
-            Icon(
-                painter = painterResource(id = com.example.delta.R.drawable.lungs),
-                contentDescription = "airplane",
-                modifier = Modifier.size(ChipDefaults.SmallIconSize),
-            )
-        },
-    )
-}
-@Composable
-fun ReportMissedCigDialog(showDialog: Boolean,onDialogResponse: (Boolean) -> Unit){
-    // TODO add timer to dialog
-    val scrollState = rememberScalingLazyListState()
-    Dialog(
-        showDialog = showDialog,
-        onDismissRequest = { onDialogResponse(false) },     // do not allow dismissal without responding
-        scrollState = scrollState
-    ) {
-        Alert(
-            scrollState = scrollState,
-            verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.Top),
-            contentPadding =
-            PaddingValues(start = 10.dp, end = 10.dp, top = 24.dp, bottom = 52.dp),
-            icon = {
-                Icon(
-                    painter = painterResource(id = com.example.delta.R.drawable.lungs),
-                    contentDescription = "lungs",
-                    modifier = Modifier
-                        .size(24.dp)
-                        .wrapContentSize(align = Alignment.Center),
-                )
-            },
-            title = { Text(text = "Do you want to report a missed cig?", textAlign = TextAlign.Center) },
-        ) {
-            item {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                    Chip(
-                        label = { Text("Yes", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth()) },
-                        onClick = { onDialogResponse(true) },
-                        colors = ChipDefaults.primaryChipColors(),
-                        modifier = Modifier.width(60.dp)
-                    )
-
-                    Chip(
-                        label = { Text("No", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth()) },
-                        onClick = { onDialogResponse(false) },
-                        colors = ChipDefaults.secondaryChipColors(),
-                        modifier = Modifier.width(60.dp)
-                    )
-
-                }
-            }
-        }
-    }
-}
-@Composable
-fun WelcomeText(modifier: Modifier = Modifier){
-    Text(
-        modifier = modifier,
-        textAlign = TextAlign.Center,
-        color = MaterialTheme.colors.primary,
-        text = stringResource(id = com.example.delta.R.string.title_text)
-    )
-}
-@Composable
-fun sensorCoordinatesCard(modifier: Modifier = Modifier, sensorX: String, sensorY: String, sensorZ: String){
-    Card(
-        onClick = { /* ... */ }
-    ) {
-        Text(sensorX)
-        Text(sensorY)
-        Text(sensorZ)
     }
 }
