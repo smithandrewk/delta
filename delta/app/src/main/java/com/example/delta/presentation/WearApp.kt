@@ -192,8 +192,8 @@ fun WearApp(
                         onTimeConfirm = {
                             swipeDismissableNavController.popBackStack()
                             dateTimeForUserInput = it.atDate(dateTimeForUserInput.toLocalDate())
-//                            writeFalseNegativeToFile(falseNegativesFile = falseNegativesFile,dateTimeForUserInput)
-                            // filesHandler.writeFalseNegativeToFile
+//                            writeFalseNegativeToFile()
+                             filesHandler.writeFalseNegativeToFile(dateTimeForUserInput)
                         },
                         time = dateTimeForUserInput.toLocalTime()
                     )
@@ -202,10 +202,6 @@ fun WearApp(
         }
         // end wear app theme
     }
-}
-
-fun writeFalseNegativeToFile(falseNegativesFile: File,dateTimeForUserInput: LocalDateTime) {
-    falseNegativesFile.appendText("${Calendar.getInstance().timeInMillis},${dateTimeForUserInput}\n")
 }
 @Composable
 private fun scalingLazyListState(it: NavBackStackEntry): ScalingLazyListState {

@@ -12,7 +12,20 @@ class SensorHandler(applicationContext: Context, filesHandler: FilesHandler, mVi
     private val applicationContext = applicationContext
     private val filesHandler = filesHandler
     private val mViewModel = mViewModel
-    private val sensorManager = sensorManager
+    private var currentActivity = "None"
+
+    // Record raw data
+    private lateinit var sensorManager: SensorManager
+    private var sampleIndex: Int = 0
+    private val numWindowsBatched = 1
+    private var xBuffer:MutableList<MutableList<Double>> = mutableListOf()
+    private var yBuffer:MutableList<MutableList<Double>> = mutableListOf()
+    private var zBuffer:MutableList<MutableList<Double>> = mutableListOf()
+    private var extrasBuffer:MutableList<MutableList<String>> = mutableListOf()
+    private val windowUpperLim = numWindowsBatched + 99
+    private val windowRange:IntRange = numWindowsBatched..windowUpperLim
+
+    // TODO Neural Handler
 
     init {
         val samplingRateHertz = 100
@@ -22,6 +35,7 @@ class SensorHandler(applicationContext: Context, filesHandler: FilesHandler, mVi
     }
 
     override fun onSensorChanged(event: SensorEvent) {
+//        filesHandler.writeToRawFile("")
         Log.v("onSensorChanged", "Time: ${event.timestamp}    x: ${event.values[0]}     y: ${event.values[1]}    z: ${event.values[2]}")
     }
 

@@ -7,5 +7,4 @@ import androidx.lifecycle.ViewModel
 
 class MainViewModel : ViewModel() {
     var isSmokingState by mutableStateOf(false)
-    var xIsLessThanNegFour by mutableStateOf("No")
 }
