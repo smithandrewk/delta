@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -30,6 +30,8 @@ import androidx.wear.compose.material.*
 import com.google.android.horologist.compose.navscaffold.scrollableColumn
 import com.example.delta.presentation.ui.util.ReportFullyDrawn
 import com.example.delta.R
+import com.example.delta.presentation.components.ConfirmDoneSmokingDialog
+import com.example.delta.presentation.components.ConfirmSmokingDialog
 
 /**
  * Simple landing page with three actions, view a list of watches, toggle on/off text before the
@@ -43,10 +45,18 @@ import com.example.delta.R
 fun LandingScreen(
     scalingLazyListState: ScalingLazyListState,
     focusRequester: FocusRequester,
-    onClickWatchList: () -> Unit,
-    proceedingTimeTextEnabled: Boolean,
-    onClickProceedingTimeText: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
+    onClickReportMissedCigChip: () -> Unit,
+    isSmoking: Boolean,
+    onClickSmokingToggleChip: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    onClickIteratePuffsChip: () -> Unit,
+    numberOfPuffs: Int,
+    numberOfCigs: Int,
+    alertShowDialog: Boolean,
+    setAlertShowDialog: (Boolean) -> Unit,
+    setIsSmoking: (Boolean) -> Unit,
+    showConfirmDoneSmokingDialog: Boolean,
+    setShowConfirmDoneSmokingDialog: (Boolean) -> Unit
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         // Places both Chips (button and toggle) in the middle of the screen.
@@ -58,14 +68,39 @@ fun LandingScreen(
             item {
                 // Signify we have drawn the content of the first screen
                 ReportFullyDrawn()
-                ReportMissedCigChip (onClickWatchList)
+                ReportMissedCigChip (onClickReportMissedCigChip)
+            }
+            item {
+                SmokingToggleChip(
+                    isSmoking = isSmoking,
+                    onClickSmokingToggleChip = onClickSmokingToggleChip
+                )
+            }
+            item {
+                Button(onClick = onClickIteratePuffsChip) {
+                    Text(text = "iterate puffs (dev)")
+                }
             }
         }
+        val scrollState = rememberScalingLazyListState()
 
+
+        ConfirmSmokingDialog(
+            scrollState = scrollState,
+            alertShowDialog = alertShowDialog,
+            setAlertShowDialog = setAlertShowDialog,
+            setIsSmoking = setIsSmoking
+        )
+        ConfirmDoneSmokingDialog(
+            scrollState = scrollState,
+            showConfirmDoneSmokingDialog = showConfirmDoneSmokingDialog,
+            setShowConfirmDoneSmokingDialog = setShowConfirmDoneSmokingDialog,
+            setIsSmoking = setIsSmoking
+        )
         // Places curved text at the bottom of round devices and straight text at the bottom of
         // non-round devices.
         if (LocalConfiguration.current.isScreenRound) {
-            val watchShape = stringResource(R.string.watch_shape)
+            val watchShape = "Cigs: $numberOfCigs, Puffs: $numberOfPuffs"
             val primaryColor = MaterialTheme.colors.primary
             CurvedLayout(
                 anchor = 90F,
@@ -111,7 +146,7 @@ fun LandingScreen(
                         ),
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colors.primary,
-                    text = stringResource(R.string.watch_shape),
+                    text = "Cigs: $numberOfCigs, Puffs: $numberOfPuffs",
                     fontSize = 18.sp
                 )
             }
@@ -120,9 +155,9 @@ fun LandingScreen(
 }
 
 @Composable
-fun ReportMissedCigChip(onClickWatchList: () -> Unit) {
+fun ReportMissedCigChip(onClickReportMissedCigChip: () -> Unit) {
     Chip(
-        onClick = onClickWatchList,
+        onClick = onClickReportMissedCigChip,
         label = {
             Text(
                 stringResource(R.string.report_false_negative_button_label),
@@ -134,11 +169,11 @@ fun ReportMissedCigChip(onClickWatchList: () -> Unit) {
     )
 }
 @Composable
-fun SmokingToggleChip(proceedingTimeTextEnabled: Boolean,onClickProceedingTimeText: (Boolean) -> Unit){
+fun SmokingToggleChip(isSmoking: Boolean,onClickSmokingToggleChip: (Boolean) -> Unit){
     ToggleChip(
         modifier = Modifier.fillMaxWidth(),
-        checked = proceedingTimeTextEnabled,
-        onCheckedChange = onClickProceedingTimeText,
+        checked = isSmoking,
+        onCheckedChange = onClickSmokingToggleChip,
         label = {
             Text(
                 text = stringResource(R.string.start_smoking_session_button_label),
@@ -149,9 +184,9 @@ fun SmokingToggleChip(proceedingTimeTextEnabled: Boolean,onClickProceedingTimeTe
         toggleControl = {
             Icon(
                 imageVector = ToggleChipDefaults.switchIcon(
-                    checked = proceedingTimeTextEnabled
+                    checked = isSmoking
                 ),
-                contentDescription = if (proceedingTimeTextEnabled) "On" else "Off"
+                contentDescription = if (isSmoking) "On" else "Off"
             )
         }
     )

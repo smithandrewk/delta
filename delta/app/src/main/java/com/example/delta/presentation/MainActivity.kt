@@ -2,7 +2,6 @@ package com.example.delta.presentation
 
 import android.hardware.SensorManager
 import android.os.Bundle
-import android.os.CountDownTimer
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -12,10 +11,9 @@ import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import com.example.delta.R
 import com.example.delta.presentation.ui.MainViewModel
 import com.example.delta.util.FilesHandler
+import com.example.delta.util.NeuralHandler
 import com.example.delta.util.SensorHandler
-import org.json.JSONObject
-import java.io.File
-import java.io.FileOutputStream
+import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -26,11 +24,6 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var sensorHandler: SensorHandler
     private lateinit var filesHandler: FilesHandler
-
-    // Neural Network
-//    private lateinit var nHandler: NeuralHandler
-//    private var currentActivity: String = "None"
-//    var isSmoking: Boolean = false
 
     // UI
     private val mViewModel: MainViewModel = MainViewModel()
@@ -48,21 +41,37 @@ class MainActivity : ComponentActivity() {
         setTheme(android.R.style.Theme_DeviceDefault)
 
         filesHandler = FilesHandler(this.filesDir, mViewModel, appStartTimeMillis, appStartTimeReadable)
-
         sensorHandler = SensorHandler(
             applicationContext,
             filesHandler,
             mViewModel,
-            getSystemService(SENSOR_SERVICE) as SensorManager
+            getSystemService(SENSOR_SERVICE) as SensorManager,
         )
 
         setContent {
             navController = rememberSwipeDismissableNavController()
 
             WearApp(
-                swipeDismissableNavController = navController,
+                swipeDismissibleNavController = navController,
                 filesHandler = filesHandler,
-                sensorHandler = sensorHandler
+                sensorHandler = sensorHandler,
+                isSmokingState = mViewModel.isSmokingState,
+                numberOfPuffs = mViewModel.numberOfPuffsState,
+                numberOfCigs = mViewModel.numberOfCigsState,
+                onClickSmokingToggleChip = {
+                    Log.d("0000","here")
+                    if(!it) mViewModel.numberOfCigsState ++
+                    mViewModel.isSmokingState = !mViewModel.isSmokingState
+                                           },
+                iterateNumberOfCigs = {mViewModel.numberOfCigsState ++},
+                onClickIteratePuffsChip = { mViewModel.onPuffDetected() },
+                alertShowDialog = mViewModel.alertShowDialog,
+                setAlertShowDialog = { mViewModel.alertShowDialog = it },
+                showConfirmDoneSmokingDialog = mViewModel.showConfirmDoneSmokingDialog,
+                setIsSmoking = {
+                    Log.d("0000","here $it")
+                    mViewModel.isSmokingState = it },
+                setShowConfirmDoneSmokingDialog = {mViewModel.showConfirmDoneSmokingDialog = it}
             )
         }
 
