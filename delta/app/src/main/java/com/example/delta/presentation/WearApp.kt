@@ -1,7 +1,11 @@
 package com.example.delta.presentation
 
 
+import android.app.Activity
+import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
@@ -28,7 +32,9 @@ import androidx.navigation.navArgument
 import androidx.wear.compose.material.*
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
+import com.example.delta.presentation.components.ActivityPickerScreen
 import com.example.delta.presentation.components.CustomTimeText
+import com.example.delta.presentation.components.SliderScreen
 import com.google.android.horologist.composables.TimePicker
 import com.example.delta.presentation.navigation.Screen
 import com.example.delta.presentation.ui.landing.LandingScreen
@@ -40,18 +46,22 @@ fun WearApp(
     modifier: Modifier = Modifier,
     swipeDismissibleNavController: NavHostController = rememberSwipeDismissableNavController(),
     filesHandler: FilesHandler,
-    sensorHandler: SensorHandler,
-    isSmokingState: Boolean,
+    isSmoking: Boolean,
     numberOfPuffs: Int,
     numberOfCigs: Int,
-    onClickSmokingToggleChip: (Boolean) -> Unit,
-    iterateNumberOfCigs: () -> Unit,
-    onClickIteratePuffsChip: () -> Unit,
-    alertShowDialog: Boolean,
-    setAlertShowDialog: (Boolean) -> Unit,
-    setIsSmoking: (Boolean) -> Unit,
+    showConfirmSmokingDialog: Boolean,
+    setShowConfirmSmokingDialog: (Boolean) -> Unit,
+    onConfirmSmokingDialogResponse: (Boolean) -> Unit,
     showConfirmDoneSmokingDialog: Boolean,
-    setShowConfirmDoneSmokingDialog: (Boolean) -> Unit
+    setShowConfirmDoneSmokingDialog: (Boolean) -> Unit,
+    onConfirmDoneSmokingDialogResponse: (Boolean) -> Unit,
+    showConfirmReportMissedCigDialog: Boolean,
+    setShowConfirmReportMissedCigDialog: (Boolean) -> Unit,
+    onConfirmReportMissedCigDialogResponse: (Boolean) -> Unit,
+    onClickIteratePuffsChip: () -> Unit,
+    onClickSmokingToggleChip: (Boolean) -> Unit,
+    onClickReportMissedCigChip : () -> Unit,
+    onClickActivityPickerChip: (String) -> Unit
 ) {
     var themeColors by remember { mutableStateOf(initialThemeValues.colors) }
     WearAppTheme(colors = themeColors) {
@@ -87,6 +97,8 @@ fun WearApp(
             currentBackStackEntry?.arguments?.getSerializable(SCROLL_TYPE_NAV_ARGUMENT)
                 ?: DestinationScrollType.NONE
         var dateTimeForUserInput by remember { mutableStateOf(LocalDateTime.now()) }
+        var displayValueForUserInput by remember { mutableStateOf(5) }
+
         Scaffold(
             modifier = modifier,
             timeText = {
@@ -174,19 +186,21 @@ fun WearApp(
                     LandingScreen(
                         scalingLazyListState = scalingLazyListState,
                         focusRequester = focusRequester,
-                        onClickReportMissedCigChip = {
-                            swipeDismissibleNavController.navigate(Screen.Time24hPicker.route)
-                        },
-                        isSmoking = isSmokingState,
-                        onClickSmokingToggleChip = onClickSmokingToggleChip,
-                        onClickIteratePuffsChip = onClickIteratePuffsChip,
+                        isSmoking = isSmoking,
                         numberOfPuffs = numberOfPuffs,
                         numberOfCigs = numberOfCigs,
-                        alertShowDialog = alertShowDialog,
-                        setAlertShowDialog = setAlertShowDialog,
-                        setIsSmoking = setIsSmoking,
+                        showConfirmSmokingDialog = showConfirmSmokingDialog,
+                        setShowConfirmSmokingDialog = setShowConfirmSmokingDialog,
+                        onConfirmSmokingDialogResponse = onConfirmSmokingDialogResponse,
                         showConfirmDoneSmokingDialog = showConfirmDoneSmokingDialog,
-                        setShowConfirmDoneSmokingDialog = setShowConfirmDoneSmokingDialog
+                        setShowConfirmDoneSmokingDialog = setShowConfirmDoneSmokingDialog,
+                        onConfirmDoneSmokingDialogResponse = onConfirmDoneSmokingDialogResponse,
+                        showConfirmReportMissedCigDialog = showConfirmReportMissedCigDialog,
+                        setShowConfirmReportMissedCigDialog = setShowConfirmReportMissedCigDialog,
+                        onConfirmReportMissedCigDialogResponse = onConfirmReportMissedCigDialogResponse,
+                        onClickIteratePuffsChip = onClickIteratePuffsChip,
+                        onClickSmokingToggleChip = onClickSmokingToggleChip,
+                        onClickReportMissedCigChip = onClickReportMissedCigChip
                     )
 
                     RequestFocusOnResume(focusRequester)
@@ -196,11 +210,53 @@ fun WearApp(
                         onTimeConfirm = {
                             swipeDismissibleNavController.popBackStack()
                             dateTimeForUserInput = it.atDate(dateTimeForUserInput.toLocalDate())
-                            filesHandler.writeFalseNegativeToFile(dateTimeForUserInput)
-                            iterateNumberOfCigs()
+                            swipeDismissibleNavController.navigate(Screen.Slider.route)
+
+//                            filesHandler.writeFalseNegativeToFile(dateTimeForUserInput)
+//                            iterateNumberOfCigs()
                         },
-                        time = dateTimeForUserInput.toLocalTime()
+                        time = dateTimeForUserInput.toLocalTime(),
+                        showSeconds = false
                     )
+                }
+                composable(route = Screen.Slider.route) {
+                    SliderScreen(
+                        displayValue = displayValueForUserInput,
+                        onValueChange = {
+                            displayValueForUserInput = it
+                        },
+                        onClickSliderScreenButton = {
+                            Log.d("0000","herere")
+                            swipeDismissibleNavController.popBackStack()
+                            swipeDismissibleNavController.navigate(Screen.WatchList.route)
+
+                        }
+                    )
+
+                }
+                composable(
+                    route = Screen.WatchList.route,
+                    arguments = listOf(
+                        // In this case, the argument isn't part of the route, it's just attached
+                        // as information for the destination.
+                        navArgument(SCROLL_TYPE_NAV_ARGUMENT) {
+                            type = NavType.EnumType(DestinationScrollType::class.java)
+                            defaultValue = DestinationScrollType.SCALING_LAZY_COLUMN_SCROLLING
+                        }
+                    )
+                ) {
+                    val scalingLazyListState = scalingLazyListState(it)
+                    val focusRequester = remember { FocusRequester() }
+
+
+                    ActivityPickerScreen(
+                        watches = listOf("smoking","vaping","eating"),
+                        scalingLazyListState = scalingLazyListState,
+                        focusRequester = focusRequester,
+                        onClickWatch = onClickActivityPickerChip
+                    )
+
+                    RequestFocusOnResume(focusRequester)
                 }
             }
         }

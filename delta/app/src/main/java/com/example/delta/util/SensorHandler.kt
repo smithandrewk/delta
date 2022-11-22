@@ -47,7 +47,7 @@ class SensorHandler(applicationContext: Context, filesHandler: FilesHandler, mVi
             extrasBuffer.add(mutableListOf(
                 event.timestamp.toString(),
                 Calendar.getInstance().timeInMillis.toString(),
-                if(mViewModel.isSmokingState) "Smoking" else "None"
+                if(mViewModel.isSmoking) "Smoking" else "None"
             ))
             if(xBuffer.size > windowUpperLim){
                 neuralHandler.processBatch(extrasBuffer, xBuffer, yBuffer, zBuffer)
@@ -68,7 +68,7 @@ class SensorHandler(applicationContext: Context, filesHandler: FilesHandler, mVi
     }
 
     fun onIsSmokingToggleClicked() {
-        Log.i("Delta","SensorManager.onIsSmokingToggleClicked() : isSmoking = ${mViewModel.isSmokingState}")
+        Log.i("Delta","SensorManager.onIsSmokingToggleClicked() : isSmoking = ${mViewModel.isSmoking}")
     }
 
     fun unregister() {

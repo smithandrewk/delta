@@ -13,19 +13,12 @@ import com.example.delta.R
 
 @Composable
 fun ConfirmSmokingDialog(scrollState: ScalingLazyListState,
-                        alertShowDialog: Boolean,
-                        setAlertShowDialog: (Boolean) -> Unit,
-                        setIsSmoking: (Boolean) -> Unit){
-    var alertStatus by remember { mutableStateOf("") }
-    val dialogDismissed = stringResource(R.string.dialog_dismissed)
-    val dialogNo = stringResource(R.string.confirmation_dialog_no)
-    val dialogYes = stringResource(R.string.alert_dialog_yes)
+                         showConfirmSmokingDialog: Boolean,
+                         setShowConfirmSmokingDialog: (Boolean) -> Unit,
+                         onConfirmSmokingDialogResponse: (Boolean) -> Unit) {
     Dialog(
-        showDialog = alertShowDialog,
-        onDismissRequest = {
-            if (alertStatus.isEmpty()) alertStatus = dialogDismissed
-            setAlertShowDialog(false)
-        },
+        showDialog = showConfirmSmokingDialog,
+        onDismissRequest = { setShowConfirmSmokingDialog(false) },
         scrollState = scrollState
     ) {
         Alert(
@@ -39,30 +32,24 @@ fun ConfirmSmokingDialog(scrollState: ScalingLazyListState,
             negativeButton = {
                 Button(
                     onClick = {
-                        alertStatus = dialogNo
-                        setIsSmoking(false)
-                        setAlertShowDialog(false)
+                        onConfirmSmokingDialogResponse(false)
                     },
                     colors = ButtonDefaults.secondaryButtonColors()
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Clear,
-                        contentDescription = dialogNo
+                        contentDescription = "no"
                     )
                 }
             },
             positiveButton = {
                 Button(
-                    onClick = {
-                        alertStatus = dialogYes
-                        setIsSmoking(true)
-                        setAlertShowDialog(false)
-                    },
+                    onClick = { onConfirmSmokingDialogResponse(true) },
                     colors = ButtonDefaults.primaryButtonColors()
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Check,
-                        contentDescription = dialogYes
+                        contentDescription = "yes"
                     )
                 }
             },
@@ -81,18 +68,11 @@ fun ConfirmSmokingDialog(scrollState: ScalingLazyListState,
 fun ConfirmDoneSmokingDialog(scrollState: ScalingLazyListState,
                              showConfirmDoneSmokingDialog: Boolean,
                              setShowConfirmDoneSmokingDialog: (Boolean) -> Unit,
-                         setIsSmoking: (Boolean) -> Unit){
-    var alertStatus by remember { mutableStateOf("") }
-    val dialogDismissed = stringResource(R.string.dialog_dismissed)
-    val dialogNo = stringResource(R.string.confirmation_dialog_no)
-    val dialogYes = stringResource(R.string.alert_dialog_yes)
+                             onConfirmDoneSmokingDialogResponse: (Boolean) -> Unit){
+
     Dialog(
         showDialog = showConfirmDoneSmokingDialog,
-        onDismissRequest = {
-            if (alertStatus.isEmpty()) alertStatus = dialogDismissed
-            setIsSmoking(false)
-            setShowConfirmDoneSmokingDialog(false)
-        },
+        onDismissRequest = { setShowConfirmDoneSmokingDialog(false) },
         scrollState = scrollState
     ) {
         Alert(
@@ -105,31 +85,23 @@ fun ConfirmDoneSmokingDialog(scrollState: ScalingLazyListState,
             },
             negativeButton = {
                 Button(
-                    onClick = {
-                        alertStatus = dialogNo
-                        setIsSmoking(true)
-                        setShowConfirmDoneSmokingDialog(false)
-                    },
+                    onClick = { onConfirmDoneSmokingDialogResponse(false) },
                     colors = ButtonDefaults.secondaryButtonColors()
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Clear,
-                        contentDescription = dialogNo
+                        contentDescription = "no"
                     )
                 }
             },
             positiveButton = {
                 Button(
-                    onClick = {
-                        alertStatus = dialogYes
-                        setIsSmoking(false)
-                        setShowConfirmDoneSmokingDialog(false)
-                    },
+                    onClick = { onConfirmDoneSmokingDialogResponse(true) },
                     colors = ButtonDefaults.primaryButtonColors()
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Check,
-                        contentDescription = dialogYes
+                        contentDescription = "yes"
                     )
                 }
             },
@@ -137,6 +109,57 @@ fun ConfirmDoneSmokingDialog(scrollState: ScalingLazyListState,
         ) {
             Text(
                 text = stringResource(R.string.dialog_sure),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.body2,
+                color = MaterialTheme.colors.onBackground
+            )
+        }
+    }
+}
+@Composable
+fun ConfirmReportMissedCigDialog(scrollState: ScalingLazyListState,
+                             showConfirmReportMissedCigDialog: Boolean,
+                             setShowConfirmReportMissedCigDialog: (Boolean) -> Unit,
+                             onConfirmReportMissedCigDialogResponse: (Boolean) -> Unit){
+    Dialog(
+        showDialog = showConfirmReportMissedCigDialog,
+        onDismissRequest = { setShowConfirmReportMissedCigDialog(false) },
+        scrollState = scrollState
+    ) {
+        Alert(
+            title = {
+                Text(
+                    text = "Confirm that you want to report a cig that you smoked.",
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colors.onBackground
+                )
+            },
+            negativeButton = {
+                Button(
+                    onClick = { onConfirmReportMissedCigDialogResponse(false) },
+                    colors = ButtonDefaults.secondaryButtonColors()
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Clear,
+                        contentDescription = "no"
+                    )
+                }
+            },
+            positiveButton = {
+                Button(
+                    onClick = { onConfirmReportMissedCigDialogResponse(true) },
+                    colors = ButtonDefaults.primaryButtonColors()
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Check,
+                        contentDescription = "yes"
+                    )
+                }
+            },
+            scrollState = scrollState
+        ) {
+            Text(
+                text = "Confirm?",
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.body2,
                 color = MaterialTheme.colors.onBackground

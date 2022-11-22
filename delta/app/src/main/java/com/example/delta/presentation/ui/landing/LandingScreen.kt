@@ -31,6 +31,7 @@ import com.google.android.horologist.compose.navscaffold.scrollableColumn
 import com.example.delta.presentation.ui.util.ReportFullyDrawn
 import com.example.delta.R
 import com.example.delta.presentation.components.ConfirmDoneSmokingDialog
+import com.example.delta.presentation.components.ConfirmReportMissedCigDialog
 import com.example.delta.presentation.components.ConfirmSmokingDialog
 
 /**
@@ -43,20 +44,24 @@ import com.example.delta.presentation.components.ConfirmSmokingDialog
  */
 @Composable
 fun LandingScreen(
+    modifier: Modifier = Modifier,
     scalingLazyListState: ScalingLazyListState,
     focusRequester: FocusRequester,
-    onClickReportMissedCigChip: () -> Unit,
     isSmoking: Boolean,
-    onClickSmokingToggleChip: (Boolean) -> Unit,
-    modifier: Modifier = Modifier,
-    onClickIteratePuffsChip: () -> Unit,
     numberOfPuffs: Int,
     numberOfCigs: Int,
-    alertShowDialog: Boolean,
-    setAlertShowDialog: (Boolean) -> Unit,
-    setIsSmoking: (Boolean) -> Unit,
+    showConfirmSmokingDialog: Boolean,
+    setShowConfirmSmokingDialog: (Boolean) -> Unit,
+    onConfirmSmokingDialogResponse: (Boolean) -> Unit,
     showConfirmDoneSmokingDialog: Boolean,
-    setShowConfirmDoneSmokingDialog: (Boolean) -> Unit
+    setShowConfirmDoneSmokingDialog: (Boolean) -> Unit,
+    onConfirmDoneSmokingDialogResponse: (Boolean) -> Unit,
+    showConfirmReportMissedCigDialog: Boolean,
+    setShowConfirmReportMissedCigDialog: (Boolean) -> Unit,
+    onConfirmReportMissedCigDialogResponse: (Boolean) -> Unit,
+    onClickIteratePuffsChip: () -> Unit,
+    onClickSmokingToggleChip: (Boolean) -> Unit,
+    onClickReportMissedCigChip: () -> Unit
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         // Places both Chips (button and toggle) in the middle of the screen.
@@ -84,18 +89,24 @@ fun LandingScreen(
         }
         val scrollState = rememberScalingLazyListState()
 
-
         ConfirmSmokingDialog(
             scrollState = scrollState,
-            alertShowDialog = alertShowDialog,
-            setAlertShowDialog = setAlertShowDialog,
-            setIsSmoking = setIsSmoking
+            showConfirmSmokingDialog = showConfirmSmokingDialog,
+            setShowConfirmSmokingDialog = setShowConfirmSmokingDialog,
+            onConfirmSmokingDialogResponse = onConfirmSmokingDialogResponse
         )
         ConfirmDoneSmokingDialog(
             scrollState = scrollState,
             showConfirmDoneSmokingDialog = showConfirmDoneSmokingDialog,
             setShowConfirmDoneSmokingDialog = setShowConfirmDoneSmokingDialog,
-            setIsSmoking = setIsSmoking
+            onConfirmDoneSmokingDialogResponse = onConfirmDoneSmokingDialogResponse
+        )
+        ConfirmReportMissedCigDialog(
+            scrollState = scrollState,
+            showConfirmReportMissedCigDialog = showConfirmReportMissedCigDialog,
+            setShowConfirmReportMissedCigDialog = setShowConfirmReportMissedCigDialog,
+            onConfirmReportMissedCigDialogResponse = onConfirmReportMissedCigDialogResponse
+
         )
         // Places curved text at the bottom of round devices and straight text at the bottom of
         // non-round devices.
@@ -175,11 +186,19 @@ fun SmokingToggleChip(isSmoking: Boolean,onClickSmokingToggleChip: (Boolean) -> 
         checked = isSmoking,
         onCheckedChange = onClickSmokingToggleChip,
         label = {
-            Text(
-                text = stringResource(R.string.start_smoking_session_button_label),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            if(isSmoking){
+                Text(
+                    text = stringResource(R.string.stop_smoking_session_button_label),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            } else {
+                Text(
+                    text = stringResource(R.string.start_smoking_session_button_label),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         },
         toggleControl = {
             Icon(

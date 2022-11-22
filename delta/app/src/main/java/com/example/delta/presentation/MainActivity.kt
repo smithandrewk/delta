@@ -1,14 +1,18 @@
 package com.example.delta.presentation
 
+import android.content.Context
 import android.hardware.SensorManager
 import android.os.Bundle
+import android.os.Vibrator
 import android.util.Log
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.NavHostController
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import com.example.delta.R
+import com.example.delta.presentation.navigation.Screen
 import com.example.delta.presentation.ui.MainViewModel
 import com.example.delta.util.FilesHandler
 import com.example.delta.util.NeuralHandler
@@ -25,18 +29,16 @@ class MainActivity : ComponentActivity() {
     private lateinit var sensorHandler: SensorHandler
     private lateinit var filesHandler: FilesHandler
 
+
     // UI
     private val mViewModel: MainViewModel = MainViewModel()
-//    lateinit var timer: CountDownTimer
-//    val sessionLengthMillis: Long = 10000
-//    private val progressIndicatorIterator: Float = 0.1f
-//    private var currentTimerProgress: Long = 0
-//    private val countDownIntervalMillis: Long = 1000
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
 
         super.onCreate(savedInstanceState)
+
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         setTheme(android.R.style.Theme_DeviceDefault)
 
@@ -54,24 +56,30 @@ class MainActivity : ComponentActivity() {
             WearApp(
                 swipeDismissibleNavController = navController,
                 filesHandler = filesHandler,
-                sensorHandler = sensorHandler,
-                isSmokingState = mViewModel.isSmokingState,
-                numberOfPuffs = mViewModel.numberOfPuffsState,
-                numberOfCigs = mViewModel.numberOfCigsState,
-                onClickSmokingToggleChip = {
-                    Log.d("0000","here")
-                    if(!it) mViewModel.numberOfCigsState ++
-                    mViewModel.isSmokingState = !mViewModel.isSmokingState
-                                           },
-                iterateNumberOfCigs = {mViewModel.numberOfCigsState ++},
-                onClickIteratePuffsChip = { mViewModel.onPuffDetected() },
-                alertShowDialog = mViewModel.alertShowDialog,
-                setAlertShowDialog = { mViewModel.alertShowDialog = it },
+                isSmoking = mViewModel.isSmoking,
+                numberOfPuffs = mViewModel.totalNumberOfPuffsDetected,
+                numberOfCigs = mViewModel.totalNumberOfCigsDetected,
+                showConfirmSmokingDialog = mViewModel.showConfirmSmokingDialog,
+                setShowConfirmSmokingDialog = { mViewModel.showConfirmSmokingDialog = it },
+                onConfirmSmokingDialogResponse =  { mViewModel.onConfirmSmokingDialogResponse(it) },
                 showConfirmDoneSmokingDialog = mViewModel.showConfirmDoneSmokingDialog,
-                setIsSmoking = {
-                    Log.d("0000","here $it")
-                    mViewModel.isSmokingState = it },
-                setShowConfirmDoneSmokingDialog = {mViewModel.showConfirmDoneSmokingDialog = it}
+                setShowConfirmDoneSmokingDialog = {mViewModel.showConfirmDoneSmokingDialog = it},
+                onConfirmDoneSmokingDialogResponse = { mViewModel.onConfirmDoneSmokingDialogResponse(it) },
+                showConfirmReportMissedCigDialog = mViewModel.showConfirmReportMissedCigDialog,
+                setShowConfirmReportMissedCigDialog = { mViewModel.showConfirmReportMissedCigDialog = it },
+                onConfirmReportMissedCigDialogResponse = {
+                    mViewModel.onConfirmReportMissedCigDialogResponse(it)
+                    if(it) {
+                        navController.navigate(Screen.Time24hPicker.route)
+                    }
+                                                         },
+                onClickIteratePuffsChip = { mViewModel.onPuffDetected() },
+                onClickSmokingToggleChip = { mViewModel.onClickSmokingToggleChip(it) },
+                onClickReportMissedCigChip = { mViewModel.onClickReportMissedCigChip() },
+                onClickActivityPickerChip = {
+                    mViewModel.onClickActivityPickerChip(it)
+                    navController.popBackStack()
+                }
             )
         }
 
