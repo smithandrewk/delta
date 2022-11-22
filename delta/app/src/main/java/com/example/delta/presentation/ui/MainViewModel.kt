@@ -5,27 +5,18 @@ import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.input.key.Key.Companion.D
 import androidx.lifecycle.ViewModel
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
-import com.example.delta.util.FilesHandler
-import java.time.LocalDateTime
-import java.time.LocalTime
 
-class MainViewModel(filesHandler: FilesHandler) : ViewModel() {
-    var filesHandler = filesHandler
+class MainViewModel : ViewModel() {
     var isSmoking by mutableStateOf(false)
     var totalNumberOfPuffsDetected by mutableStateOf(0)
     var totalNumberOfCigsDetected by mutableStateOf(0)
     var numberOfPuffsInCurrentSession by mutableStateOf(0)
     var showConfirmSmokingDialog by mutableStateOf(false)
     var showConfirmDoneSmokingDialog by mutableStateOf(false)
-//    var showConfirmReportMissedCigDialog by mutableStateOf(false)
+    var showConfirmReportMissedCigDialog by mutableStateOf(false)
     var allowDialogToBeSent by mutableStateOf(true)
-
-    var missedCigChosenTime = ""
-    var missedCigEnjoyment = -1
-    var missedCigAction = ""
 
     fun sendConfirmSmokingDialog(){
         if(allowDialogToBeSent){
@@ -59,31 +50,19 @@ class MainViewModel(filesHandler: FilesHandler) : ViewModel() {
     }
 
     fun onClickReportMissedCigChip(){
-//        if(allowDialogToBeSent) {
-//            allowDialogToBeSent = false
-//            showConfirmReportMissedCigDialog = true
-//        }
-        allowDialogToBeSent = false
+        if(allowDialogToBeSent) {
+            allowDialogToBeSent = false
+            showConfirmReportMissedCigDialog = true
+        }
     }
-//    fun onConfirmReportMissedCigDialogResponse(response: Boolean){
-//        showConfirmReportMissedCigDialog = false
-//        if(!response) {
-//            allowDialogToBeSent = true
-//        }
-//    }
-    fun onTimeConfirmReportMissedCig(chosenTime: LocalTime) {
-        Log.d("Delta", "Time: $chosenTime")
-        missedCigChosenTime = "$chosenTime"
+    fun onClickActivityPickerChip(it: String){
+        Log.d("0000",it)
     }
-    fun onConfirmSmokingEnjoyment(enjoyment: Int) {
-        Log.d("Delta", "Enjoyment: $enjoyment")
-        missedCigEnjoyment = enjoyment
-    }
-    fun onClickActionPickerChip(action: String){
-        Log.d("Delta", "Action: $action")
-        allowDialogToBeSent = true
-        missedCigAction = action
-        filesHandler.writeFalseNegativeToFile(missedCigChosenTime, missedCigEnjoyment, missedCigAction)
+    fun onConfirmReportMissedCigDialogResponse(response: Boolean){
+        showConfirmReportMissedCigDialog = false
+        if(!response) {
+            allowDialogToBeSent = true
+        }
     }
     fun onPuffDetected(){
         totalNumberOfPuffsDetected ++

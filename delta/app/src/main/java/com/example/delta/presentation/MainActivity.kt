@@ -31,7 +31,7 @@ class MainActivity : ComponentActivity() {
 
 
     // UI
-    private lateinit var mViewModel: MainViewModel
+    private val mViewModel: MainViewModel = MainViewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -42,8 +42,7 @@ class MainActivity : ComponentActivity() {
 
         setTheme(android.R.style.Theme_DeviceDefault)
 
-        filesHandler = FilesHandler(this.filesDir, appStartTimeMillis, appStartTimeReadable)
-        mViewModel = MainViewModel(filesHandler)
+        filesHandler = FilesHandler(this.filesDir, mViewModel, appStartTimeMillis, appStartTimeReadable)
         sensorHandler = SensorHandler(
             applicationContext,
             filesHandler,
@@ -66,32 +65,19 @@ class MainActivity : ComponentActivity() {
                 showConfirmDoneSmokingDialog = mViewModel.showConfirmDoneSmokingDialog,
                 setShowConfirmDoneSmokingDialog = {mViewModel.showConfirmDoneSmokingDialog = it},
                 onConfirmDoneSmokingDialogResponse = { mViewModel.onConfirmDoneSmokingDialogResponse(it) },
-//                showConfirmReportMissedCigDialog = mViewModel.showConfirmReportMissedCigDialog,
-//                setShowConfirmReportMissedCigDialog = { mViewModel.showConfirmReportMissedCigDialog = it },
-//                onConfirmReportMissedCigDialogResponse = {
-//                    mViewModel.onConfirmReportMissedCigDialogResponse(it)
-//                    if(it) {
-//                        navController.navigate(Screen.Time24hPicker.route)
-//                    }
-//                },
+                showConfirmReportMissedCigDialog = mViewModel.showConfirmReportMissedCigDialog,
+                setShowConfirmReportMissedCigDialog = { mViewModel.showConfirmReportMissedCigDialog = it },
+                onConfirmReportMissedCigDialogResponse = {
+                    mViewModel.onConfirmReportMissedCigDialogResponse(it)
+                    if(it) {
+                        navController.navigate(Screen.Time24hPicker.route)
+                    }
+                                                         },
                 onClickIteratePuffsChip = { mViewModel.onPuffDetected() },
                 onClickSmokingToggleChip = { mViewModel.onClickSmokingToggleChip(it) },
-                onClickReportMissedCigChip = {
-                    mViewModel.onClickReportMissedCigChip()
-                    navController.navigate(Screen.Time24hPicker.route)
-                },
-                onTimeConfirmReportMissedCig = {
-                    mViewModel.onTimeConfirmReportMissedCig(it)
-                    navController.popBackStack()
-                    navController.navigate(Screen.Slider.route)
-                },
-                onConfirmSmokingEnjoyment = {
-                    mViewModel.onConfirmSmokingEnjoyment(it)
-                    navController.popBackStack()
-                    navController.navigate(Screen.WatchList.route)
-                },
+                onClickReportMissedCigChip = { mViewModel.onClickReportMissedCigChip() },
                 onClickActivityPickerChip = {
-                    mViewModel.onClickActionPickerChip(it)
+                    mViewModel.onClickActivityPickerChip(it)
                     navController.popBackStack()
                 }
             )

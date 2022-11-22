@@ -7,11 +7,11 @@ import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
-import java.time.LocalTime
 import java.util.*
 
-class FilesHandler(filesDir: File, appStartTimeMillis: Long, appStartTimeReadable: String) {
+class FilesHandler(filesDir: File, mViewModel: MainViewModel, appStartTimeMillis: Long, appStartTimeReadable: String) {
     private val filesDir = filesDir
+    private val mViewModel = mViewModel
     private val appStartTimeMillis = appStartTimeMillis
     private val appStartTimeReadable = appStartTimeReadable
 
@@ -30,12 +30,8 @@ class FilesHandler(filesDir: File, appStartTimeMillis: Long, appStartTimeReadabl
         createInitialFiles()
     }
 
-    fun writeFalseNegativeToFile(chosenTime: String, enjoyment:Int, action: String) {
-        falseNegativesFile.appendText(
-            "${Calendar.getInstance().timeInMillis}," +
-                    "$chosenTime," +
-                    "$enjoyment," +
-                    "$action\n")
+    fun writeFalseNegativeToFile(dateTimeForUserInput: LocalDateTime) {
+    falseNegativesFile.appendText("${Calendar.getInstance().timeInMillis},${dateTimeForUserInput}\n")
     }
 
     private fun createInitialFiles(){
@@ -50,7 +46,7 @@ class FilesHandler(filesDir: File, appStartTimeMillis: Long, appStartTimeReadabl
         eventsFile.appendText("Event,Start Time,Stop Time\n")
 
         falseNegativesFile = File(this.filesDir, "$dataFolderName/False-Negatives.$dataFolderName.csv")
-        falseNegativesFile.appendText("timeInMillis,userEstimatedTimeOfFalseNegative, enjoyment, actionUserWasDoing\n")
+        falseNegativesFile.appendText("timeInMillis,userEstimatedTimeOfFalseNegative\n")
 
         positivesFile = File(this.filesDir, "$dataFolderName/Positives.$dataFolderName.csv")
         positivesFile.appendText("Time \n")

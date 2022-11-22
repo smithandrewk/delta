@@ -56,9 +56,9 @@ fun LandingScreen(
     showConfirmDoneSmokingDialog: Boolean,
     setShowConfirmDoneSmokingDialog: (Boolean) -> Unit,
     onConfirmDoneSmokingDialogResponse: (Boolean) -> Unit,
-//    showConfirmReportMissedCigDialog: Boolean,
-//    setShowConfirmReportMissedCigDialog: (Boolean) -> Unit,
-//    onConfirmReportMissedCigDialogResponse: (Boolean) -> Unit,
+    showConfirmReportMissedCigDialog: Boolean,
+    setShowConfirmReportMissedCigDialog: (Boolean) -> Unit,
+    onConfirmReportMissedCigDialogResponse: (Boolean) -> Unit,
     onClickIteratePuffsChip: () -> Unit,
     onClickSmokingToggleChip: (Boolean) -> Unit,
     onClickReportMissedCigChip: () -> Unit
@@ -101,12 +101,13 @@ fun LandingScreen(
             setShowConfirmDoneSmokingDialog = setShowConfirmDoneSmokingDialog,
             onConfirmDoneSmokingDialogResponse = onConfirmDoneSmokingDialogResponse
         )
-//        ConfirmReportMissedCigDialog(
-//            scrollState = scrollState,
-//            showConfirmReportMissedCigDialog = showConfirmReportMissedCigDialog,
-//            setShowConfirmReportMissedCigDialog = setShowConfirmReportMissedCigDialog,
-//            onConfirmReportMissedCigDialogResponse = onConfirmReportMissedCigDialogResponse
-//        )
+        ConfirmReportMissedCigDialog(
+            scrollState = scrollState,
+            showConfirmReportMissedCigDialog = showConfirmReportMissedCigDialog,
+            setShowConfirmReportMissedCigDialog = setShowConfirmReportMissedCigDialog,
+            onConfirmReportMissedCigDialogResponse = onConfirmReportMissedCigDialogResponse
+
+        )
         // Places curved text at the bottom of round devices and straight text at the bottom of
         // non-round devices.
         if (LocalConfiguration.current.isScreenRound) {
