@@ -40,6 +40,7 @@ import com.example.delta.presentation.navigation.Screen
 import com.example.delta.presentation.ui.landing.LandingScreen
 import com.example.delta.util.FilesHandler
 import com.example.delta.util.SensorHandler
+import java.time.LocalTime
 
 @Composable
 fun WearApp(
@@ -55,9 +56,11 @@ fun WearApp(
     showConfirmDoneSmokingDialog: Boolean,
     setShowConfirmDoneSmokingDialog: (Boolean) -> Unit,
     onConfirmDoneSmokingDialogResponse: (Boolean) -> Unit,
-    showConfirmReportMissedCigDialog: Boolean,
-    setShowConfirmReportMissedCigDialog: (Boolean) -> Unit,
-    onConfirmReportMissedCigDialogResponse: (Boolean) -> Unit,
+//    showConfirmReportMissedCigDialog: Boolean,
+    onTimeConfirmReportMissedCig : (LocalTime) -> Unit,
+    onConfirmSmokingEnjoyment: (Int) -> Unit,
+//    setShowConfirmReportMissedCigDialog: (Boolean) -> Unit,
+//    onConfirmReportMissedCigDialogResponse: (Boolean) -> Unit,
     onClickIteratePuffsChip: () -> Unit,
     onClickSmokingToggleChip: (Boolean) -> Unit,
     onClickReportMissedCigChip : () -> Unit,
@@ -195,9 +198,9 @@ fun WearApp(
                         showConfirmDoneSmokingDialog = showConfirmDoneSmokingDialog,
                         setShowConfirmDoneSmokingDialog = setShowConfirmDoneSmokingDialog,
                         onConfirmDoneSmokingDialogResponse = onConfirmDoneSmokingDialogResponse,
-                        showConfirmReportMissedCigDialog = showConfirmReportMissedCigDialog,
-                        setShowConfirmReportMissedCigDialog = setShowConfirmReportMissedCigDialog,
-                        onConfirmReportMissedCigDialogResponse = onConfirmReportMissedCigDialogResponse,
+//                        showConfirmReportMissedCigDialog = showConfirmReportMissedCigDialog,
+//                        setShowConfirmReportMissedCigDialog = setShowConfirmReportMissedCigDialog,
+//                        onConfirmReportMissedCigDialogResponse = onConfirmReportMissedCigDialogResponse,
                         onClickIteratePuffsChip = onClickIteratePuffsChip,
                         onClickSmokingToggleChip = onClickSmokingToggleChip,
                         onClickReportMissedCigChip = onClickReportMissedCigChip
@@ -208,12 +211,8 @@ fun WearApp(
                 composable(Screen.Time24hPicker.route) {
                     TimePicker(
                         onTimeConfirm = {
-                            swipeDismissibleNavController.popBackStack()
-                            dateTimeForUserInput = it.atDate(dateTimeForUserInput.toLocalDate())
-                            swipeDismissibleNavController.navigate(Screen.Slider.route)
-
-//                            filesHandler.writeFalseNegativeToFile(dateTimeForUserInput)
-//                            iterateNumberOfCigs()
+                            dateTimeForUserInput = it.atDate(dateTimeForUserInput.toLocalDate()) // For UI
+                            onTimeConfirmReportMissedCig(it)
                         },
                         time = dateTimeForUserInput.toLocalTime(),
                         showSeconds = false
@@ -226,10 +225,9 @@ fun WearApp(
                             displayValueForUserInput = it
                         },
                         onClickSliderScreenButton = {
-                            Log.d("0000","herere")
-                            swipeDismissibleNavController.popBackStack()
-                            swipeDismissibleNavController.navigate(Screen.WatchList.route)
-
+                            onConfirmSmokingEnjoyment(displayValueForUserInput)
+//                            swipeDismissibleNavController.popBackStack()
+//                            swipeDismissibleNavController.navigate(Screen.WatchList.route)
                         }
                     )
 
@@ -250,7 +248,7 @@ fun WearApp(
 
 
                     ActivityPickerScreen(
-                        watches = listOf("smoking","vaping","eating"),
+                        watches = listOf("Smoking", "Vaping", "Eating", "Drinking"),
                         scalingLazyListState = scalingLazyListState,
                         focusRequester = focusRequester,
                         onClickWatch = onClickActivityPickerChip
