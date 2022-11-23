@@ -2,6 +2,7 @@ package com.example.delta.presentation
 
 import android.hardware.SensorManager
 import android.os.Bundle
+import android.util.Log
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -52,24 +53,13 @@ class MainActivity : ComponentActivity() {
                 isSmoking = mViewModel.isSmoking,
                 numberOfPuffs = mViewModel.totalNumberOfPuffsDetected,
                 numberOfCigs = mViewModel.totalNumberOfCigsDetected,
-                showConfirmSmokingDialog = mViewModel.showConfirmSmokingDialog,
-                onConfirmSmokingDialogResponse =  { mViewModel.onConfirmSmokingDialogResponse(it) },
-                showConfirmDoneSmokingDialog = mViewModel.showConfirmDoneSmokingDialog,
-                onConfirmDoneSmokingDialogResponse = { mViewModel.onConfirmDoneSmokingDialogResponse(it) },
-                showConfirmReportMissedCigDialog = mViewModel.showConfirmReportMissedCigDialog,
-                onConfirmReportMissedCigDialogResponse = {
-                    mViewModel.onConfirmReportMissedCigDialogResponse(it)
-                    if(it) {
-                        navController.navigate(Screen.Time24hPicker.route)
-                    }
-                                                         },
-                onClickIteratePuffsChip = { mViewModel.onPuffDetected() },
-                onClickSmokingToggleChip = { mViewModel.onClickSmokingToggleChip(it) },
+                dialogText = mViewModel.mDialogText,
+                showConfirmationDialog = mViewModel.showDialog,
+                onDialogResponse = { mViewModel.onDialogResponse(it) },
+                onClickIteratePuffsChip = { Log.d("0000","iterate puffs ") },
+                onClickSmokingToggleChip = { Log.d("0000","onClickSmokingToggleChip") },
                 onClickReportMissedCigChip = { mViewModel.onClickReportMissedCigChip() },
-                onClickActivityPickerChip = {
-                    mViewModel.onClickActivityPickerChip(it)
-                    navController.popBackStack()
-                }
+                onClickActivityPickerChip = { Log.d("0000","activity")}
             )
         }
 

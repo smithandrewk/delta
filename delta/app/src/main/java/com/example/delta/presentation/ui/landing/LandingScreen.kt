@@ -30,9 +30,7 @@ import androidx.wear.compose.material.*
 import com.google.android.horologist.compose.navscaffold.scrollableColumn
 import com.example.delta.presentation.ui.util.ReportFullyDrawn
 import com.example.delta.R
-import com.example.delta.presentation.components.ConfirmDoneSmokingDialog
-import com.example.delta.presentation.components.ConfirmReportMissedCigDialog
-import com.example.delta.presentation.components.ConfirmSmokingDialog
+import com.example.delta.presentation.components.ConfirmationDialog
 
 /**
  * Simple landing page with three actions, view a list of watches, toggle on/off text before the
@@ -50,23 +48,21 @@ fun LandingScreen(
     isSmoking: Boolean,
     numberOfPuffs: Int,
     numberOfCigs: Int,
-    showConfirmSmokingDialog: Boolean,
-    onConfirmSmokingDialogResponse: (Boolean) -> Unit,
-    showConfirmDoneSmokingDialog: Boolean,
-    onConfirmDoneSmokingDialogResponse: (Boolean) -> Unit,
-    showConfirmReportMissedCigDialog: Boolean,
-    onConfirmReportMissedCigDialogResponse: (Boolean) -> Unit,
+    showConfirmationDialog: Boolean,
+    onDialogResponse: (Boolean) -> Unit,
+    dialogText: String,
     onClickIteratePuffsChip: () -> Unit,
     onClickSmokingToggleChip: (Boolean) -> Unit,
     onClickReportMissedCigChip: () -> Unit
 ) {
+
     Box(modifier = modifier.fillMaxSize()) {
         // Places both Chips (button and toggle) in the middle of the screen.
         ScalingLazyColumn(
             modifier = Modifier.scrollableColumn(focusRequester, scalingLazyListState),
             state = scalingLazyListState,
-            autoCentering = AutoCenteringParams(itemIndex = 0)
-        ) {
+            anchorType = ScalingLazyListAnchorType.ItemStart,
+            ) {
             item {
                 // Signify we have drawn the content of the first screen
                 ReportFullyDrawn()
@@ -79,29 +75,20 @@ fun LandingScreen(
                 )
             }
             item {
-                Button(onClick = onClickIteratePuffsChip) {
+                Button(onClick = onClickIteratePuffsChip, colors = ButtonDefaults.secondaryButtonColors()) {
                     Text(text = "iterate puffs (dev)")
                 }
             }
         }
         val scrollState = rememberScalingLazyListState()
 
-        ConfirmSmokingDialog(
+        ConfirmationDialog(
             scrollState = scrollState,
-            showConfirmSmokingDialog = showConfirmSmokingDialog,
-            onConfirmSmokingDialogResponse = onConfirmSmokingDialogResponse
+            showConfirmationDialog = showConfirmationDialog,
+            onDialogResponse = onDialogResponse,
+            dialogText = dialogText
         )
-        ConfirmDoneSmokingDialog(
-            scrollState = scrollState,
-            showConfirmDoneSmokingDialog = showConfirmDoneSmokingDialog,
-            onConfirmDoneSmokingDialogResponse = onConfirmDoneSmokingDialogResponse
-        )
-        ConfirmReportMissedCigDialog(
-            scrollState = scrollState,
-            showConfirmReportMissedCigDialog = showConfirmReportMissedCigDialog,
-            onConfirmReportMissedCigDialogResponse = onConfirmReportMissedCigDialogResponse
 
-        )
         // Places curved text at the bottom of round devices and straight text at the bottom of
         // non-round devices.
         if (LocalConfiguration.current.isScreenRound) {

@@ -19,6 +19,6 @@
     <string name="confirmation_dialog_tick">confirm dialog tick</string>
     <string name="confirmation_dialog_success">confirm dialog success</string>
     <string name="confirmation_dialog_power_off">confirm dialog power off</string>
-    <string name="dialog_sure">Yes or no?</string>
+    <string name="dialog_sure">Cancel or confirm?</string>
     <string name="stop_smoking_session_button_label">stop smoking</string>
 </resources>
