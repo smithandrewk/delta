@@ -32,9 +32,11 @@ import androidx.wear.compose.navigation.composable
 import com.example.delta.presentation.components.ActivityPickerScreen
 import com.example.delta.presentation.components.CustomTimeText
 import com.example.delta.presentation.components.SliderScreen
+import com.example.delta.presentation.components.UserInputComponentsScreen
 import com.google.android.horologist.composables.TimePicker
 import com.example.delta.presentation.navigation.Screen
 import com.example.delta.presentation.ui.landing.LandingScreen
+import java.time.LocalTime
 
 @Composable
 fun WearApp(
@@ -46,11 +48,16 @@ fun WearApp(
     dialogText: String,
     showConfirmationDialog: Boolean,
     onDialogResponse: (Boolean) -> Unit,
+    onDismissDialogRequest: () -> Unit,
     onClickIteratePuffsChip: () -> Unit,
     onClickSmokingToggleChip: () -> Unit,
     onClickReportMissedCigChip : () -> Unit,
     onClickActivityPickerChip: (String) -> Unit,
-    secondarySmokingText: String
+    secondarySmokingText: String,
+    onTimePickerConfirm: (LocalTime) -> Unit,
+    onClickSliderScreenButton: (Int) -> Unit,
+    onSubmitNewActivity: (String) -> Unit,
+    activities: MutableList<String>
 ) {
     var themeColors by remember { mutableStateOf(initialThemeValues.colors) }
     WearAppTheme(colors = themeColors) {
@@ -179,6 +186,7 @@ fun WearApp(
                         numberOfCigs = numberOfCigs,
                         showConfirmationDialog = showConfirmationDialog,
                         onDialogResponse = onDialogResponse,
+                        onDismissDialogRequest = onDismissDialogRequest,
                         dialogText = dialogText,
                         onClickIteratePuffsChip = onClickIteratePuffsChip,
                         onClickSmokingToggleChip = onClickSmokingToggleChip,
@@ -195,11 +203,7 @@ fun WearApp(
                 }
                 composable(Screen.Time24hPicker.route) {
                     TimePicker(
-                        onTimeConfirm = {
-                            swipeDismissibleNavController.popBackStack()
-                            dateTimeForUserInput = it.atDate(dateTimeForUserInput.toLocalDate())
-                            swipeDismissibleNavController.navigate(Screen.Slider.route)
-                        },
+                        onTimeConfirm = onTimePickerConfirm,
                         time = dateTimeForUserInput.toLocalTime(),
                         showSeconds = false
                     )
@@ -210,14 +214,8 @@ fun WearApp(
                         onValueChange = {
                             displayValueForUserInput = it
                         },
-                        onClickSliderScreenButton = {
-                            Log.d("0000","herere")
-                            swipeDismissibleNavController.popBackStack()
-                            swipeDismissibleNavController.navigate(Screen.WatchList.route)
-
-                        }
+                        onClickSliderScreenButton = { onClickSliderScreenButton(displayValueForUserInput) }
                     )
-
                 }
                 composable(
                     route = Screen.WatchList.route,
@@ -233,17 +231,57 @@ fun WearApp(
                     val scalingLazyListState = scalingLazyListState(it)
                     val focusRequester = remember { FocusRequester() }
 
-
                     ActivityPickerScreen(
-                        watches = listOf("smoking","vaping","eating"),
+                        activities = activities,
                         scalingLazyListState = scalingLazyListState,
                         focusRequester = focusRequester,
-                        onClickWatch = onClickActivityPickerChip
+                        onClickWatch = onClickActivityPickerChip,
+                        onClickCreateNewActivityButton = {Log.d("0000","create new activity")},
+                        onSubmitNewActivity = onSubmitNewActivity
+                    )
+                    RequestFocusOnResume(focusRequester)
+                }
+                composable(
+                    route = Screen.UserInputComponents.route,
+                    arguments = listOf(
+                        // In this case, the argument isn't part of the route, it's just attached
+                        // as information for the destination.
+                        navArgument(SCROLL_TYPE_NAV_ARGUMENT) {
+                            type = NavType.EnumType(DestinationScrollType::class.java)
+                            defaultValue = DestinationScrollType.SCALING_LAZY_COLUMN_SCROLLING
+                        }
+                    )
+                ) {
+                    val scalingLazyListState = scalingLazyListState(it)
+
+                    val focusRequester = remember { FocusRequester() }
+
+                    UserInputComponentsScreen(
+                        scalingLazyListState = scalingLazyListState,
+                        focusRequester = focusRequester,
+                        value = displayValueForUserInput,
+                        dateTime = dateTimeForUserInput,
+                        onClickStepper = {
+                            swipeDismissibleNavController.navigate(Screen.Stepper.route)
+                        },
+                        onClickSlider = {
+                            swipeDismissibleNavController.navigate(Screen.Slider.route)
+                        },
+                        onClickDemoDatePicker = {
+                            swipeDismissibleNavController.navigate(Screen.DatePicker.route)
+                        },
+                        onClickDemo12hTimePicker = {
+                            swipeDismissibleNavController.navigate(Screen.Time12hPicker.route)
+                        },
+                        onClickDemo24hTimePicker = {
+                            swipeDismissibleNavController.navigate(Screen.Time24hPicker.route)
+                        }
                     )
 
                     RequestFocusOnResume(focusRequester)
                 }
             }
+
         }
         // end wear app theme
     }

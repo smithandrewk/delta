@@ -21,4 +21,6 @@
     <string name="confirmation_dialog_power_off">confirm dialog power off</string>
     <string name="dialog_sure">Cancel or confirm?</string>
     <string name="stop_smoking_session_button_label">stop smoking</string>
+    <string name="text_input_label">Create New Activity</string>
+    <string name="manual_text_entry_label">Enter Activity Manually</string>
 </resources>

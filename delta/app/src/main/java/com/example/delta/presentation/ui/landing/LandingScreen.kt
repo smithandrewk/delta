@@ -45,6 +45,7 @@ fun LandingScreen(
     numberOfCigs: Int,
     showConfirmationDialog: Boolean,
     onDialogResponse: (Boolean) -> Unit,
+    onDismissDialogRequest: () -> Unit,
     dialogText: String,
     onClickIteratePuffsChip: () -> Unit,
     onClickSmokingToggleChip: () -> Unit,
@@ -82,6 +83,7 @@ fun LandingScreen(
             scrollState = scrollState,
             showConfirmationDialog = showConfirmationDialog,
             onDialogResponse = onDialogResponse,
+            onDismissDialogRequest = onDismissDialogRequest,
             dialogText = dialogText
         )
 

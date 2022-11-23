@@ -30,8 +30,8 @@ class FilesHandler(filesDir: File, mViewModel: MainViewModel, appStartTimeMillis
         createInitialFiles()
     }
 
-    fun writeFalseNegativeToFile(dateTimeForUserInput: LocalDateTime) {
-    falseNegativesFile.appendText("${Calendar.getInstance().timeInMillis},${dateTimeForUserInput}\n")
+    fun writeFalseNegativeToFile(dateTimeForUserInput: LocalDateTime,satisfaction: Int, otherActivity: String) {
+    falseNegativesFile.appendText("${Calendar.getInstance().timeInMillis},$dateTimeForUserInput,$satisfaction,$otherActivity\n")
     }
 
     private fun createInitialFiles(){
@@ -46,7 +46,7 @@ class FilesHandler(filesDir: File, mViewModel: MainViewModel, appStartTimeMillis
         eventsFile.appendText("Event,Start Time,Stop Time\n")
 
         falseNegativesFile = File(this.filesDir, "$dataFolderName/False-Negatives.$dataFolderName.csv")
-        falseNegativesFile.appendText("timeInMillis,userEstimatedTimeOfFalseNegative\n")
+        falseNegativesFile.appendText("timeInMillis,userEstimatedTimeOfFalseNegative,perceivedEnjoymentOfCig,activityRememberedDoingWhileSmoking\n")
 
         positivesFile = File(this.filesDir, "$dataFolderName/Positives.$dataFolderName.csv")
         positivesFile.appendText("Time \n")

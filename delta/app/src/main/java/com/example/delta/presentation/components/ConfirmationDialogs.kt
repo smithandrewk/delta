@@ -16,10 +16,11 @@ import com.example.delta.R
 fun ConfirmationDialog(scrollState: ScalingLazyListState,
                         showConfirmationDialog: Boolean,
                         onDialogResponse: (Boolean) -> Unit,
+                        onDismissDialogRequest: () -> Unit,
                         dialogText: String) {
     Dialog(
         showDialog = showConfirmationDialog,
-        onDismissRequest = { Log.d("0000","ondismissrequest")},
+        onDismissRequest = onDismissDialogRequest,
         scrollState = scrollState
     ) {
         Alert(

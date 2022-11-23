@@ -77,6 +77,8 @@ dependencies {
     // ViewModel
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     // ViewModel utilities for Compose
+    implementation "androidx.wear:wear-input:1.2.0-alpha02"
+
 }
 
 kapt {

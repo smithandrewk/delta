@@ -1,5 +1,3 @@
-package com.example.delta.presentation.components
-
 /*
  * Copyright 2021 The Android Open Source Project
  *
@@ -15,59 +13,55 @@ package com.example.delta.presentation.components
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+package com.example.delta.presentation.components
 
 import android.app.RemoteInput
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
+import android.speech.RecognizerIntent
+import android.text.SpannableString
 import android.view.inputmethod.EditorInfo
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.wear.compose.material.*
-
-/**
- * Displays a Slider, which allows users to make a selection from a range of values.
- */
-
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-
 import androidx.compose.ui.text.style.TextOverflow
-
+import androidx.wear.compose.material.AutoCenteringParams
+import androidx.wear.compose.material.Chip
 import androidx.wear.compose.material.ScalingLazyColumn
 import androidx.wear.compose.material.ScalingLazyListState
 import androidx.wear.compose.material.Text
-import androidx.wear.compose.material.ToggleChip
-import androidx.wear.compose.material.items
 import androidx.wear.input.RemoteInputIntentHelper
 import androidx.wear.input.wearableExtender
 import com.example.delta.R
-
 import com.google.android.horologist.compose.navscaffold.scrollableColumn
-
-
+import java.time.LocalDateTime
 
 /**
- * Displays a list of watches plus a [ToggleChip] at the top to display/hide the Vignette around
- * the screen. The list is powered using a [ScalingLazyColumn].
+ * Shows different input options like Pickers, Steppers and Sliders
  */
 @Composable
-fun ActivityPickerScreen(
-    activities: List<String>,
+fun UserInputComponentsScreen(
     scalingLazyListState: ScalingLazyListState,
     focusRequester: FocusRequester,
-    onClickWatch: (String) -> Unit,
-    modifier: Modifier = Modifier,
-    onClickCreateNewActivityButton: () -> Unit,
-    onSubmitNewActivity: (String) -> Unit
+    value: Int,
+    dateTime: LocalDateTime,
+    onClickStepper: () -> Unit,
+    onClickSlider: () -> Unit,
+    onClickDemoDatePicker: () -> Unit,
+    onClickDemo12hTimePicker: () -> Unit,
+    onClickDemo24hTimePicker: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     var textForUserInput by remember { mutableStateOf("") }
+    var textForVoiceInput by remember { mutableStateOf("") }
 
     val inputTextKey = "input_text"
 
@@ -79,28 +73,24 @@ fun ActivityPickerScreen(
                 val results: Bundle = RemoteInput.getResultsFromIntent(data)
                 val newInputText: CharSequence? = results.getCharSequence(inputTextKey)
                 textForUserInput = newInputText.toString()
-                onSubmitNewActivity(textForUserInput)
             }
         }
-    ScalingLazyColumn(
-        modifier = modifier.scrollableColumn(focusRequester, scalingLazyListState),
-        state = scalingLazyListState
-    ) {
-        // Displays all watches.
-        items(activities) { string ->
-            Chip(
-                onClick = { onClickWatch(string) },
-                label = {
-                    Text(
-                        text = string,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
+
+    val voiceLauncher =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) {
+            it.data?.let { data ->
+                val results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+                textForVoiceInput = results?.get(0) ?: "None"
+            }
         }
 
+    ScalingLazyColumn(
+        modifier = modifier.scrollableColumn(focusRequester, scalingLazyListState),
+        state = scalingLazyListState,
+        autoCentering = AutoCenteringParams(itemIndex = 0)
+    ) {
         item {
             val intent: Intent = RemoteInputIntentHelper.createActionRemoteInputIntent()
             val remoteInputs: List<RemoteInput> = listOf(
@@ -117,7 +107,6 @@ fun ActivityPickerScreen(
             Chip(
                 onClick = {
                     launcher.launch(intent)
-                    onClickCreateNewActivityButton()
                 },
                 label = {
                     Text(
