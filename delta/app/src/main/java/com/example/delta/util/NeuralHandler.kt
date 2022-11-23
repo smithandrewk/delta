@@ -1,12 +1,11 @@
-package com.example.delta.presentation
+package com.example.delta.util
 
 import android.content.Context
-import android.content.Intent
-import android.os.CountDownTimer
 import android.util.Log
-import com.example.delta.presentation.Matrix.Companion.logSigmoid
-import com.example.delta.presentation.Matrix.Companion.minMaxNorm
-import com.example.delta.presentation.Matrix.Companion.tanSigmoid
+import com.example.delta.presentation.ui.MainViewModel
+import com.example.delta.util.Matrix.Companion.logSigmoid
+import com.example.delta.util.Matrix.Companion.minMaxNorm
+import com.example.delta.util.Matrix.Companion.tanSigmoid
 import java.io.FileOutputStream
 
 
@@ -14,7 +13,10 @@ class NeuralHandler (name: String,
                      inputToHiddenWeightsAndBiasesString: String,
                      hiddenToOutputWeightsAndBiasesString: String,
                      inputRangesString:String,
-                     private var numWindows: Int, applicationContext: Context,instance: MainActivity){
+                     private var numWindows: Int,
+                     applicationContext: Context,
+                     filesHandler: FilesHandler,
+                     mViewModel: MainViewModel){
     val mName = name.uppercase()
 
     private var inputToHiddenWeightsAndBiases: Matrix
@@ -22,11 +24,12 @@ class NeuralHandler (name: String,
     private var inputRanges: Matrix
     private val windowSize = 100
     private var state = 0
-    private var sessionState = 0
     private var currentPuffLength = 0
     private var currentInterPuffIntervalLength = 0
     private val applicationContext = applicationContext
-    private val instance: MainActivity = instance
+    private val filesHandler = filesHandler
+    private val mViewModel = mViewModel
+
 
     init{
         Log.d("0010","Initializing Neural Handler...")
@@ -41,8 +44,7 @@ class NeuralHandler (name: String,
     fun processBatch(extrasBuffer: MutableList<MutableList<String>>,
                      xBuffer: MutableList<MutableList<Double>>,
                      yBuffer: MutableList<MutableList<Double>>,
-                     zBuffer: MutableList<MutableList<Double>>,
-                     fRaw: FileOutputStream) {
+                     zBuffer: MutableList<MutableList<Double>>) {
         /*
             extrasBuffer: 3x200 timestamps and activity with each row:
                             [SensorEvent timestamp (ns), Calendar timestamp (ms), current activity]
@@ -50,27 +52,27 @@ class NeuralHandler (name: String,
             yBuffer:    1x200 y-axis accelerometer data values
             zBuffer:    1x200 z-axis accelerometer data values
             fRaw:       File output stream to write accelerometer raw data
-
             This function calls forwardPropagate for each of the windows
             (for 100 windows: [0-100...99-199] in the input matrix and then writes the data points
             and ANN outputs to a file
         */
 
-        Log.v("0004","x: ${xBuffer.size}     y: ${yBuffer.size}    z: ${zBuffer.size}, extras: ${extrasBuffer.size}")
+//        Log.v("0004","x: ${xBuffer.size}     y: ${yBuffer.size}    z: ${zBuffer.size}, extras: ${extrasBuffer.size}")
         var smokingOutput: Double
+        var rawSmokingOutput: Double
 
         // Run ANN on windows
         var i = 0
         while(i < numWindows){
-            smokingOutput = forwardPropagate(
+            rawSmokingOutput = forwardPropagate(
                 Matrix((xBuffer.slice(i until i+windowSize)+
                         yBuffer.slice(i until i+windowSize)+
                         zBuffer.slice(i until i+windowSize)).toMutableList()))
-            if (smokingOutput >= 0.85){
-                smokingOutput = 1.0
-            }
-            else{
-                smokingOutput = 0.0
+
+            smokingOutput = if (rawSmokingOutput >= 0.85){
+                1.0
+            } else{
+                0.0
             }
             // puff counter
             if (state == 0 && smokingOutput == 0.0){
@@ -121,7 +123,7 @@ class NeuralHandler (name: String,
                     state = 0
                     currentPuffLength = 0
                     currentInterPuffIntervalLength = 0
-//                    onPuffDetected()
+                    mViewModel.onPuffDetected()
                 }
             } else if (state == 4 && smokingOutput == 1.0){
                 // back into puff for already valid puff
@@ -129,60 +131,19 @@ class NeuralHandler (name: String,
                 currentPuffLength ++
                 state = 2
             }
-//            Log.d("0000","state $state")
-            fRaw.write((extrasBuffer[i][0]+","+
-                    xBuffer[i][0]+","+
-                    yBuffer[i][0]+","+
-                    zBuffer[i][0]+","+
-                    extrasBuffer[i][1]+","+
-                    extrasBuffer[i][2]+","+
-                    smokingOutput.toString()+","+
-                    state.toString()+"\n").toByteArray())
+            filesHandler.writeToRawFile(eventTimeStamp = extrasBuffer[i][0],
+                                        acc_x = xBuffer[i][0],
+                                        acc_y = yBuffer[i][0],
+                                        acc_z = zBuffer[i][0],
+                                        timeInMillis = extrasBuffer[i][1],
+                                        smokingStateString = extrasBuffer[i][2],
+                                        thresholdSmokingOutput = smokingOutput,
+                                        rawSmokingOutput = rawSmokingOutput,
+                                        expertStateMachineState = state)
             i++
         }
     }
-    private fun onPuffDetected(){
-        instance.mViewModel.iterateNumberOfPuffs()
-        Log.d("0000","puff detected")
-        if(!instance.isSmoking){
-            Log.d("0000","user is not already smoking")
-            // if not in session and puff detected, start internal timer
-            if(sessionState == 0) {
-                // seen 1 puff
-                sessionState = 1
 
-                timer.start()
-            } else if (sessionState == 1){
-                // seen 2 puffs
-                sessionState = 2
-            } else if (sessionState == 2){
-                sessionState = 3
-                timer.transferTimerToUiThread()
-            }
-        } else {
-            timer.onFinish()
-            sessionState = 0
-        }
-    }
-    private val timer = object : CountDownTimer(100000, 1000) {
-        var progress: Long = 0
-        var progress_float = 0.0f
-        override fun onTick(millisUntilFinished: Long) {
-            progress += 1000
-            progress_float += 0.01f
-            Log.d("0000", progress.toString())
-
-        }
-        fun transferTimerToUiThread(){
-            Log.d("0000", "Stopping neural handler timer, passing off to UI")
-            Log.d("0000","Current progress $progress")
-            instance.startSmoking(100000-progress,progress_float)
-            cancel()
-        }
-        override fun onFinish() {
-            cancel()
-        }
-    }
     private fun forwardPropagate(input: Matrix): Double {
         /*
             input : three-axis accelerometer values from smartwatch sampled at 20 Hz for 5 seconds.
