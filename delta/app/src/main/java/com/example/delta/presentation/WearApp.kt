@@ -47,9 +47,10 @@ fun WearApp(
     showConfirmationDialog: Boolean,
     onDialogResponse: (Boolean) -> Unit,
     onClickIteratePuffsChip: () -> Unit,
-    onClickSmokingToggleChip: (Boolean) -> Unit,
+    onClickSmokingToggleChip: () -> Unit,
     onClickReportMissedCigChip : () -> Unit,
-    onClickActivityPickerChip: (String) -> Unit
+    onClickActivityPickerChip: (String) -> Unit,
+    secondarySmokingText: String
 ) {
     var themeColors by remember { mutableStateOf(initialThemeValues.colors) }
     WearAppTheme(colors = themeColors) {
@@ -174,7 +175,6 @@ fun WearApp(
                     LandingScreen(
                         scalingLazyListState = scalingLazyListState,
                         focusRequester = focusRequester,
-                        isSmoking = isSmoking,
                         numberOfPuffs = numberOfPuffs,
                         numberOfCigs = numberOfCigs,
                         showConfirmationDialog = showConfirmationDialog,
@@ -182,7 +182,13 @@ fun WearApp(
                         dialogText = dialogText,
                         onClickIteratePuffsChip = onClickIteratePuffsChip,
                         onClickSmokingToggleChip = onClickSmokingToggleChip,
-                        onClickReportMissedCigChip = onClickReportMissedCigChip
+                        onClickReportMissedCigChip = onClickReportMissedCigChip,
+                        chipColors = if (isSmoking) {
+                            ChipDefaults.gradientBackgroundChipColors()
+                        } else {
+                            ChipDefaults.primaryChipColors()
+                        },
+                        secondarySmokingText = secondarySmokingText
                     )
 
                     RequestFocusOnResume(focusRequester)
@@ -193,9 +199,6 @@ fun WearApp(
                             swipeDismissibleNavController.popBackStack()
                             dateTimeForUserInput = it.atDate(dateTimeForUserInput.toLocalDate())
                             swipeDismissibleNavController.navigate(Screen.Slider.route)
-
-//                            filesHandler.writeFalseNegativeToFile(dateTimeForUserInput)
-//                            iterateNumberOfCigs()
                         },
                         time = dateTimeForUserInput.toLocalTime(),
                         showSeconds = false

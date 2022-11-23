@@ -47,7 +47,6 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             navController = rememberSwipeDismissableNavController()
-
             WearApp(
                 swipeDismissibleNavController = navController,
                 isSmoking = mViewModel.isSmoking,
@@ -56,10 +55,13 @@ class MainActivity : ComponentActivity() {
                 dialogText = mViewModel.mDialogText,
                 showConfirmationDialog = mViewModel.showDialog,
                 onDialogResponse = { mViewModel.onDialogResponse(it) },
-                onClickIteratePuffsChip = { Log.d("0000","iterate puffs ") },
-                onClickSmokingToggleChip = { Log.d("0000","onClickSmokingToggleChip") },
-                onClickReportMissedCigChip = { mViewModel.onClickReportMissedCigChip() },
-                onClickActivityPickerChip = { Log.d("0000","activity")}
+                onClickIteratePuffsChip = { mViewModel.onPuffDetected() },
+                onClickSmokingToggleChip = { mViewModel.onClickSmokingToggleChip() },
+                onClickReportMissedCigChip = { mViewModel.onClickReportMissedCigChip(navigationCallback = {
+                    navController.navigate(Screen.Time24hPicker.route)
+                }) },
+                onClickActivityPickerChip = { Log.d("0000","activity")},
+                secondarySmokingText = mViewModel.secondarySmokingText
             )
         }
 

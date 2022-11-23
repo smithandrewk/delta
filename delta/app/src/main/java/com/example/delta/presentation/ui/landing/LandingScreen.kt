@@ -1,12 +1,7 @@
 package com.example.delta.presentation.ui.landing
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -14,6 +9,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -45,15 +41,16 @@ fun LandingScreen(
     modifier: Modifier = Modifier,
     scalingLazyListState: ScalingLazyListState,
     focusRequester: FocusRequester,
-    isSmoking: Boolean,
     numberOfPuffs: Int,
     numberOfCigs: Int,
     showConfirmationDialog: Boolean,
     onDialogResponse: (Boolean) -> Unit,
     dialogText: String,
     onClickIteratePuffsChip: () -> Unit,
-    onClickSmokingToggleChip: (Boolean) -> Unit,
-    onClickReportMissedCigChip: () -> Unit
+    onClickSmokingToggleChip: () -> Unit,
+    onClickReportMissedCigChip: () -> Unit,
+    chipColors: ChipColors,
+    secondarySmokingText: String
 ) {
 
     Box(modifier = modifier.fillMaxSize()) {
@@ -70,14 +67,13 @@ fun LandingScreen(
             }
             item {
                 SmokingToggleChip(
-                    isSmoking = isSmoking,
-                    onClickSmokingToggleChip = onClickSmokingToggleChip
+                    onClickSmokingToggleChip = onClickSmokingToggleChip,
+                    chipColors = chipColors,
+                    secondarySmokingText = secondarySmokingText
                 )
             }
             item {
-                Button(onClick = onClickIteratePuffsChip, colors = ButtonDefaults.secondaryButtonColors()) {
-                    Text(text = "iterate puffs (dev)")
-                }
+                CompactChip(onClick = onClickIteratePuffsChip, colors = ChipDefaults.secondaryChipColors(),label= { Text("puff") })
             }
         }
         val scrollState = rememberScalingLazyListState()
@@ -157,37 +153,30 @@ fun ReportMissedCigChip(onClickReportMissedCigChip: () -> Unit) {
                 overflow = TextOverflow.Ellipsis
             )
         },
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        colors = ChipDefaults.secondaryChipColors()
     )
 }
 @Composable
-fun SmokingToggleChip(isSmoking: Boolean,onClickSmokingToggleChip: (Boolean) -> Unit){
-    ToggleChip(
-        modifier = Modifier.fillMaxWidth(),
-        checked = isSmoking,
-        onCheckedChange = onClickSmokingToggleChip,
-        label = {
-            if(isSmoking){
-                Text(
-                    text = stringResource(R.string.stop_smoking_session_button_label),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            } else {
-                Text(
-                    text = stringResource(R.string.start_smoking_session_button_label),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
+fun SmokingToggleChip(onClickSmokingToggleChip: () -> Unit,chipColors: ChipColors,secondarySmokingText: String){
+    Chip(
+        onClick = onClickSmokingToggleChip,
+        enabled = true,
+        // When we have both label and secondary label present limit both to 1 line of text
+        label = { Text(text = "Smoking Session", maxLines = 1, overflow = TextOverflow.Ellipsis) },
+        secondaryLabel = {
+            Text(text = secondarySmokingText, maxLines = 1, overflow = TextOverflow.Ellipsis)
         },
-        toggleControl = {
+        icon = {
             Icon(
-                imageVector = ToggleChipDefaults.switchIcon(
-                    checked = isSmoking
-                ),
-                contentDescription = if (isSmoking) "On" else "Off"
+                painter = painterResource(id = R.drawable.lungs),
+                contentDescription = "lungs",
+                modifier = Modifier
+                    .size(ChipDefaults.IconSize)
+                    .wrapContentSize(align = Alignment.Center)
             )
-        }
+        },
+        colors = chipColors,
+        modifier = Modifier.fillMaxWidth()
     )
 }
