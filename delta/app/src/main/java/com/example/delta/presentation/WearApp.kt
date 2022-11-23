@@ -1,13 +1,16 @@
 package com.example.delta.presentation
 
 
+import android.app.Activity
+import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavHostController
@@ -29,26 +32,39 @@ import androidx.navigation.navArgument
 import androidx.wear.compose.material.*
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
-import com.google.android.horologist.composables.TimePicker
+import com.example.delta.presentation.components.ActivityPickerScreen
 import com.example.delta.presentation.components.CustomTimeText
-import com.example.delta.R
+import com.example.delta.presentation.components.SliderScreen
+import com.google.android.horologist.composables.TimePicker
 import com.example.delta.presentation.navigation.Screen
 import com.example.delta.presentation.ui.landing.LandingScreen
-import java.io.File
-import java.util.*
+import com.example.delta.util.FilesHandler
+import com.example.delta.util.SensorHandler
 
 @Composable
 fun WearApp(
     modifier: Modifier = Modifier,
-    swipeDismissableNavController: NavHostController = rememberSwipeDismissableNavController(),
-    falseNegativesFile: File
+    swipeDismissibleNavController: NavHostController = rememberSwipeDismissableNavController(),
+    filesHandler: FilesHandler,
+    isSmoking: Boolean,
+    numberOfPuffs: Int,
+    numberOfCigs: Int,
+    showConfirmSmokingDialog: Boolean,
+    setShowConfirmSmokingDialog: (Boolean) -> Unit,
+    onConfirmSmokingDialogResponse: (Boolean) -> Unit,
+    showConfirmDoneSmokingDialog: Boolean,
+    setShowConfirmDoneSmokingDialog: (Boolean) -> Unit,
+    onConfirmDoneSmokingDialogResponse: (Boolean) -> Unit,
+    showConfirmReportMissedCigDialog: Boolean,
+    setShowConfirmReportMissedCigDialog: (Boolean) -> Unit,
+    onConfirmReportMissedCigDialogResponse: (Boolean) -> Unit,
+    onClickIteratePuffsChip: () -> Unit,
+    onClickSmokingToggleChip: (Boolean) -> Unit,
+    onClickReportMissedCigChip : () -> Unit,
+    onClickActivityPickerChip: (String) -> Unit
 ) {
     var themeColors by remember { mutableStateOf(initialThemeValues.colors) }
-
     WearAppTheme(colors = themeColors) {
-        // Allows user to disable the text before the time.
-        var showProceedingTextBeforeTime by rememberSaveable { mutableStateOf(false) }
-
         // Allows user to show/hide the vignette on appropriate screens.
         // IMPORTANT NOTE: Usually you want to show the vignette all the time on screens with
         // scrolling content, a rolling side button, or a rotating bezel. This preference is just
@@ -75,12 +91,14 @@ fun WearApp(
         // Remember, mobile guidelines specify that if you back navigate out of a screen and then
         // later navigate into it again, it should be in its initial scroll state (not the last
         // scroll location it was in before you backed out).
-        val currentBackStackEntry by swipeDismissableNavController.currentBackStackEntryAsState()
+        val currentBackStackEntry by swipeDismissibleNavController.currentBackStackEntryAsState()
 
         val scrollType =
             currentBackStackEntry?.arguments?.getSerializable(SCROLL_TYPE_NAV_ARGUMENT)
                 ?: DestinationScrollType.NONE
         var dateTimeForUserInput by remember { mutableStateOf(LocalDateTime.now()) }
+        var displayValueForUserInput by remember { mutableStateOf(5) }
+
         Scaffold(
             modifier = modifier,
             timeText = {
@@ -110,16 +128,11 @@ fun WearApp(
                             null
                         }
                     }
-
                 key(currentBackStackEntry?.destination?.route) {
                     CustomTimeText(
                         modifier = timeTextModifier ?: Modifier,
                         visible = timeTextModifier != null,
-                        startText = if (showProceedingTextBeforeTime) {
-                            stringResource(R.string.leading_time_text)
-                        } else {
-                            null
-                        }
+                        startText = null
                     )
                 }
             },
@@ -151,7 +164,7 @@ fun WearApp(
             }
         ) {
             SwipeDismissableNavHost(
-                navController = swipeDismissableNavController,
+                navController = swipeDismissibleNavController,
                 startDestination = Screen.Landing.route,
                 modifier = Modifier.background(MaterialTheme.colors.background)
             ) {
@@ -173,34 +186,82 @@ fun WearApp(
                     LandingScreen(
                         scalingLazyListState = scalingLazyListState,
                         focusRequester = focusRequester,
-                        onClickWatchList = {
-                            swipeDismissableNavController.navigate(Screen.Time24hPicker.route)
-                        },
-                        proceedingTimeTextEnabled = showProceedingTextBeforeTime,
-                        onClickProceedingTimeText = {
-                            showProceedingTextBeforeTime = !showProceedingTextBeforeTime
-                        }
+                        isSmoking = isSmoking,
+                        numberOfPuffs = numberOfPuffs,
+                        numberOfCigs = numberOfCigs,
+                        showConfirmSmokingDialog = showConfirmSmokingDialog,
+                        setShowConfirmSmokingDialog = setShowConfirmSmokingDialog,
+                        onConfirmSmokingDialogResponse = onConfirmSmokingDialogResponse,
+                        showConfirmDoneSmokingDialog = showConfirmDoneSmokingDialog,
+                        setShowConfirmDoneSmokingDialog = setShowConfirmDoneSmokingDialog,
+                        onConfirmDoneSmokingDialogResponse = onConfirmDoneSmokingDialogResponse,
+                        showConfirmReportMissedCigDialog = showConfirmReportMissedCigDialog,
+                        setShowConfirmReportMissedCigDialog = setShowConfirmReportMissedCigDialog,
+                        onConfirmReportMissedCigDialogResponse = onConfirmReportMissedCigDialogResponse,
+                        onClickIteratePuffsChip = onClickIteratePuffsChip,
+                        onClickSmokingToggleChip = onClickSmokingToggleChip,
+                        onClickReportMissedCigChip = onClickReportMissedCigChip
                     )
 
-                    RequestFocusOnResume(focusRequester)                }
+                    RequestFocusOnResume(focusRequester)
+                }
                 composable(Screen.Time24hPicker.route) {
                     TimePicker(
                         onTimeConfirm = {
-                            swipeDismissableNavController.popBackStack()
+                            swipeDismissibleNavController.popBackStack()
                             dateTimeForUserInput = it.atDate(dateTimeForUserInput.toLocalDate())
-                            writeFalseNegativeToFile(falseNegativesFile = falseNegativesFile,dateTimeForUserInput)
+                            swipeDismissibleNavController.navigate(Screen.Slider.route)
+
+//                            filesHandler.writeFalseNegativeToFile(dateTimeForUserInput)
+//                            iterateNumberOfCigs()
                         },
-                        time = dateTimeForUserInput.toLocalTime()
+                        time = dateTimeForUserInput.toLocalTime(),
+                        showSeconds = false
                     )
+                }
+                composable(route = Screen.Slider.route) {
+                    SliderScreen(
+                        displayValue = displayValueForUserInput,
+                        onValueChange = {
+                            displayValueForUserInput = it
+                        },
+                        onClickSliderScreenButton = {
+                            Log.d("0000","herere")
+                            swipeDismissibleNavController.popBackStack()
+                            swipeDismissibleNavController.navigate(Screen.WatchList.route)
+
+                        }
+                    )
+
+                }
+                composable(
+                    route = Screen.WatchList.route,
+                    arguments = listOf(
+                        // In this case, the argument isn't part of the route, it's just attached
+                        // as information for the destination.
+                        navArgument(SCROLL_TYPE_NAV_ARGUMENT) {
+                            type = NavType.EnumType(DestinationScrollType::class.java)
+                            defaultValue = DestinationScrollType.SCALING_LAZY_COLUMN_SCROLLING
+                        }
+                    )
+                ) {
+                    val scalingLazyListState = scalingLazyListState(it)
+                    val focusRequester = remember { FocusRequester() }
+
+
+                    ActivityPickerScreen(
+                        watches = listOf("smoking","vaping","eating"),
+                        scalingLazyListState = scalingLazyListState,
+                        focusRequester = focusRequester,
+                        onClickWatch = onClickActivityPickerChip
+                    )
+
+                    RequestFocusOnResume(focusRequester)
                 }
             }
         }
         // end wear app theme
     }
-}
-
-fun writeFalseNegativeToFile(falseNegativesFile: File,dateTimeForUserInput: LocalDateTime) {
-    falseNegativesFile.appendText("${Calendar.getInstance().timeInMillis},${dateTimeForUserInput}\n")
 }
 @Composable
 private fun scalingLazyListState(it: NavBackStackEntry): ScalingLazyListState {
