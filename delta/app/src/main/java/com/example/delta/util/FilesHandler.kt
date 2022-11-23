@@ -61,7 +61,7 @@ class FilesHandler(filesDir: File, mViewModel: MainViewModel, appStartTimeMillis
         } catch (e: Exception) { e.printStackTrace() }
     }
     // Setup Functions
-    fun createNewRawFile() {
+    private fun createNewRawFile() {
         // Create a new raw file for accelerometer data
         Log.i("0003", "Creating New Raw File")
         if (rawFileIndex == 0) {
@@ -74,11 +74,11 @@ class FilesHandler(filesDir: File, mViewModel: MainViewModel, appStartTimeMillis
         val rawFilename = "$appStartTimeReadable.$rawFileIndex.csv"
         fRaw = FileOutputStream(File(this.filesDir, "$dataFolderName/raw/$rawFilename"))
         fRaw.write("File Start Time: ${Calendar.getInstance().timeInMillis}\n".toByteArray())
-        fRaw.write("timestamp,acc_x,acc_y,acc_z,real time,activity,label,state\n".toByteArray())
+        fRaw.write("timestamp,acc_x,acc_y,acc_z,real time,activity,label,rawlabel,state\n".toByteArray())
         rawFileIndex++
     }
-    fun writeToRawFile(data: String){
-        // TODO
+    fun writeToRawFile(eventTimeStamp: String, acc_x: Double,acc_y: Double,acc_z: Double,timeInMillis: String,smokingStateString: String,thresholdSmokingOutput: Double,rawSmokingOutput: Double,expertStateMachineState: Int){
+        fRaw.write("${eventTimeStamp},${acc_x},${acc_y},${acc_z},${timeInMillis},${smokingStateString},${thresholdSmokingOutput},${rawSmokingOutput},${expertStateMachineState}".toByteArray())
     }
 
     fun closeRawFile(){
