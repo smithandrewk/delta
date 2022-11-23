@@ -1,11 +1,8 @@
 package com.example.delta.presentation
 
 
-import android.app.Activity
 import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
@@ -38,25 +35,19 @@ import com.example.delta.presentation.components.SliderScreen
 import com.google.android.horologist.composables.TimePicker
 import com.example.delta.presentation.navigation.Screen
 import com.example.delta.presentation.ui.landing.LandingScreen
-import com.example.delta.util.FilesHandler
-import com.example.delta.util.SensorHandler
 
 @Composable
 fun WearApp(
     modifier: Modifier = Modifier,
     swipeDismissibleNavController: NavHostController = rememberSwipeDismissableNavController(),
-    filesHandler: FilesHandler,
     isSmoking: Boolean,
     numberOfPuffs: Int,
     numberOfCigs: Int,
     showConfirmSmokingDialog: Boolean,
-    setShowConfirmSmokingDialog: (Boolean) -> Unit,
     onConfirmSmokingDialogResponse: (Boolean) -> Unit,
     showConfirmDoneSmokingDialog: Boolean,
-    setShowConfirmDoneSmokingDialog: (Boolean) -> Unit,
     onConfirmDoneSmokingDialogResponse: (Boolean) -> Unit,
     showConfirmReportMissedCigDialog: Boolean,
-    setShowConfirmReportMissedCigDialog: (Boolean) -> Unit,
     onConfirmReportMissedCigDialogResponse: (Boolean) -> Unit,
     onClickIteratePuffsChip: () -> Unit,
     onClickSmokingToggleChip: (Boolean) -> Unit,
@@ -190,13 +181,10 @@ fun WearApp(
                         numberOfPuffs = numberOfPuffs,
                         numberOfCigs = numberOfCigs,
                         showConfirmSmokingDialog = showConfirmSmokingDialog,
-                        setShowConfirmSmokingDialog = setShowConfirmSmokingDialog,
                         onConfirmSmokingDialogResponse = onConfirmSmokingDialogResponse,
                         showConfirmDoneSmokingDialog = showConfirmDoneSmokingDialog,
-                        setShowConfirmDoneSmokingDialog = setShowConfirmDoneSmokingDialog,
                         onConfirmDoneSmokingDialogResponse = onConfirmDoneSmokingDialogResponse,
                         showConfirmReportMissedCigDialog = showConfirmReportMissedCigDialog,
-                        setShowConfirmReportMissedCigDialog = setShowConfirmReportMissedCigDialog,
                         onConfirmReportMissedCigDialogResponse = onConfirmReportMissedCigDialogResponse,
                         onClickIteratePuffsChip = onClickIteratePuffsChip,
                         onClickSmokingToggleChip = onClickSmokingToggleChip,

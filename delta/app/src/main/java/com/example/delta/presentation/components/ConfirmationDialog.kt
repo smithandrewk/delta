@@ -14,11 +14,10 @@ import com.example.delta.R
 @Composable
 fun ConfirmSmokingDialog(scrollState: ScalingLazyListState,
                          showConfirmSmokingDialog: Boolean,
-                         setShowConfirmSmokingDialog: (Boolean) -> Unit,
                          onConfirmSmokingDialogResponse: (Boolean) -> Unit) {
     Dialog(
         showDialog = showConfirmSmokingDialog,
-        onDismissRequest = { setShowConfirmSmokingDialog(false) },
+        onDismissRequest = { onConfirmSmokingDialogResponse(false) },
         scrollState = scrollState
     ) {
         Alert(
@@ -67,12 +66,11 @@ fun ConfirmSmokingDialog(scrollState: ScalingLazyListState,
 @Composable
 fun ConfirmDoneSmokingDialog(scrollState: ScalingLazyListState,
                              showConfirmDoneSmokingDialog: Boolean,
-                             setShowConfirmDoneSmokingDialog: (Boolean) -> Unit,
                              onConfirmDoneSmokingDialogResponse: (Boolean) -> Unit){
 
     Dialog(
         showDialog = showConfirmDoneSmokingDialog,
-        onDismissRequest = { setShowConfirmDoneSmokingDialog(false) },
+        onDismissRequest = { onConfirmDoneSmokingDialogResponse(false) },
         scrollState = scrollState
     ) {
         Alert(
@@ -119,11 +117,10 @@ fun ConfirmDoneSmokingDialog(scrollState: ScalingLazyListState,
 @Composable
 fun ConfirmReportMissedCigDialog(scrollState: ScalingLazyListState,
                              showConfirmReportMissedCigDialog: Boolean,
-                             setShowConfirmReportMissedCigDialog: (Boolean) -> Unit,
                              onConfirmReportMissedCigDialogResponse: (Boolean) -> Unit){
     Dialog(
         showDialog = showConfirmReportMissedCigDialog,
-        onDismissRequest = { setShowConfirmReportMissedCigDialog(false) },
+        onDismissRequest = { onConfirmReportMissedCigDialogResponse(false) },
         scrollState = scrollState
     ) {
         Alert(

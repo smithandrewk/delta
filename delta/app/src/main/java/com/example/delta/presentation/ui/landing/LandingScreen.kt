@@ -51,13 +51,10 @@ fun LandingScreen(
     numberOfPuffs: Int,
     numberOfCigs: Int,
     showConfirmSmokingDialog: Boolean,
-    setShowConfirmSmokingDialog: (Boolean) -> Unit,
     onConfirmSmokingDialogResponse: (Boolean) -> Unit,
     showConfirmDoneSmokingDialog: Boolean,
-    setShowConfirmDoneSmokingDialog: (Boolean) -> Unit,
     onConfirmDoneSmokingDialogResponse: (Boolean) -> Unit,
     showConfirmReportMissedCigDialog: Boolean,
-    setShowConfirmReportMissedCigDialog: (Boolean) -> Unit,
     onConfirmReportMissedCigDialogResponse: (Boolean) -> Unit,
     onClickIteratePuffsChip: () -> Unit,
     onClickSmokingToggleChip: (Boolean) -> Unit,
@@ -92,19 +89,16 @@ fun LandingScreen(
         ConfirmSmokingDialog(
             scrollState = scrollState,
             showConfirmSmokingDialog = showConfirmSmokingDialog,
-            setShowConfirmSmokingDialog = setShowConfirmSmokingDialog,
             onConfirmSmokingDialogResponse = onConfirmSmokingDialogResponse
         )
         ConfirmDoneSmokingDialog(
             scrollState = scrollState,
             showConfirmDoneSmokingDialog = showConfirmDoneSmokingDialog,
-            setShowConfirmDoneSmokingDialog = setShowConfirmDoneSmokingDialog,
             onConfirmDoneSmokingDialogResponse = onConfirmDoneSmokingDialogResponse
         )
         ConfirmReportMissedCigDialog(
             scrollState = scrollState,
             showConfirmReportMissedCigDialog = showConfirmReportMissedCigDialog,
-            setShowConfirmReportMissedCigDialog = setShowConfirmReportMissedCigDialog,
             onConfirmReportMissedCigDialogResponse = onConfirmReportMissedCigDialogResponse
 
         )
