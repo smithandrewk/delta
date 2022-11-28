@@ -46,6 +46,7 @@ fun LandingScreen(
     showConfirmationDialog: Boolean,
     onDialogResponse: (String) -> Unit,
     dialogText: String,
+    alertStatus: String,
     onClickIteratePuffsChip: () -> Unit,
     onClickSmokingToggleChip: () -> Unit,
     onClickReportMissedCigChip: () -> Unit,
@@ -82,7 +83,8 @@ fun LandingScreen(
             scrollState = scrollState,
             showConfirmationDialog = showConfirmationDialog,
             onDialogResponse = onDialogResponse,
-            dialogText = dialogText
+            dialogText = dialogText,
+            alertStatus = alertStatus
         )
 
         // Places curved text at the bottom of round devices and straight text at the bottom of

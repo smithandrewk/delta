@@ -22,6 +22,8 @@ class FilesHandler(filesDir: File, mViewModel: MainViewModel, appStartTimeMillis
     private lateinit var falseNegativesFile: File       // File to write false negative events
     private lateinit var eventsFile: File               // File to write smoking events
     private lateinit var positivesFile: File            // File to write smoking detected events
+    private lateinit var fLog: FileOutputStream        // File to write smoking detected events
+
     // TODO positive puffs
 
     private val numWindowsBatched = 1       // TODO should we get rid of this? or at least make it global
@@ -31,7 +33,7 @@ class FilesHandler(filesDir: File, mViewModel: MainViewModel, appStartTimeMillis
     }
 
     fun writeFalseNegativeToFile(dateTimeForUserInput: LocalDateTime,satisfaction: Int, otherActivity: String) {
-    falseNegativesFile.appendText("${Calendar.getInstance().timeInMillis},$dateTimeForUserInput,$satisfaction,$otherActivity\n")
+        falseNegativesFile.appendText("${Calendar.getInstance().timeInMillis},$dateTimeForUserInput,$satisfaction,$otherActivity\n")
     }
 
     private fun createInitialFiles(){
@@ -47,6 +49,8 @@ class FilesHandler(filesDir: File, mViewModel: MainViewModel, appStartTimeMillis
 
         falseNegativesFile = File(this.filesDir, "$dataFolderName/False-Negatives.$dataFolderName.csv")
         falseNegativesFile.appendText("timeInMillis,userEstimatedTimeOfFalseNegative,perceivedEnjoymentOfCig,activityRememberedDoingWhileSmoking\n")
+
+        fLog = FileOutputStream(File(this.filesDir, "$dataFolderName/log.csv"))
 
         positivesFile = File(this.filesDir, "$dataFolderName/Positives.$dataFolderName.csv")
         positivesFile.appendText("Time \n")
@@ -80,7 +84,12 @@ class FilesHandler(filesDir: File, mViewModel: MainViewModel, appStartTimeMillis
     fun writeToRawFile(eventTimeStamp: String, acc_x: Double,acc_y: Double,acc_z: Double,timeInMillis: String,smokingStateString: String,thresholdSmokingOutput: Double,rawSmokingOutput: Double,expertStateMachineState: Int){
         fRaw.write("${eventTimeStamp},${acc_x},${acc_y},${acc_z},${timeInMillis},${smokingStateString},${thresholdSmokingOutput},${rawSmokingOutput},${expertStateMachineState}\n".toByteArray())
     }
-
+    fun writeToLogFile(logEntry: String){
+        fLog.write("${Calendar.getInstance().timeInMillis}: $logEntry\n".toByteArray())
+    }
+    fun writeStringToRawFile(string: String){
+        fRaw.write(string.toByteArray())
+    }
     fun closeRawFile(){
         fRaw.close()
     }

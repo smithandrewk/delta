@@ -21,13 +21,17 @@ class MainViewModel(vibrateWatch: () -> Unit,
                     applicationContext: Context,
                     writeFalseNegativeToFile: (dateTimeForUserInput: LocalDateTime,
                                                satisfaction: Int,
-                                               otherActivity: String) -> Unit,) : ViewModel() {
-    val sessionLengthMilliseconds: Long = 10000
+                                               otherActivity: String) -> Unit,
+                    writeToLogFile: (logEntry: String) -> Unit
+) : ViewModel() {
+    val sessionTimerLengthMilliseconds: Long = 480000
+    val dialogTimerLengthMilliseconds: Long = 20000
     var isSmoking by mutableStateOf(false)
     var totalNumberOfPuffsDetected by mutableStateOf(0)
     var totalNumberOfCigsDetected by mutableStateOf(0)
     var numberOfPuffsInCurrentSession by mutableStateOf(0)
     var showDialog by mutableStateOf(false)
+    var alertStatus by mutableStateOf("")
     private var allowDialogToBeSent by mutableStateOf(true)
     var mDialogText by mutableStateOf("")
     var secondarySmokingText by mutableStateOf("tap to start")
@@ -35,6 +39,8 @@ class MainViewModel(vibrateWatch: () -> Unit,
     lateinit var mOnDialogResponse : (Boolean) -> Unit
     var mVibrateWatch: () -> Unit = vibrateWatch
     var mWriteFalseNegativeToFile: (dateTimeForUserInput: LocalDateTime, satisfaction: Int, otherActivity: String) -> Unit = writeFalseNegativeToFile
+    var mWriteToLogFile: (logEntry: String) -> Unit = writeToLogFile
+
     private val file = File(applicationContext.filesDir, "activities")
     var activities by mutableStateOf(mutableListOf(""))
     var dateTimeForUserInput: LocalDateTime by mutableStateOf(LocalDateTime.now())
@@ -43,7 +49,9 @@ class MainViewModel(vibrateWatch: () -> Unit,
     var puffTimers = mutableListOf<CountDownTimer>()
     var currentDestination: String = ""
     var lastResponse: String = "dismiss"
-
+    var dialogQueued: Boolean = false
+    lateinit var mQueuedOnDialogResponse : (Boolean) -> Unit
+    var mQueuedDialogText by mutableStateOf("")
 
     init {
         initializeActivitiesFile()
@@ -60,10 +68,18 @@ class MainViewModel(vibrateWatch: () -> Unit,
         activities = file.readLines().toMutableList()
     }
     private fun sendDialog(dialogText: String, onDialogResponse: (Boolean) -> Unit){
+        mWriteToLogFile("sendDialog($dialogText)")
         // General send dialog called by specific use-case functions
-        if(!allowDialogToBeSent) return
+        if(!allowDialogToBeSent) {
+            mWriteToLogFile("dialog cannot be sent, queuing for after response")
+            dialogQueued = true
+            mQueuedOnDialogResponse = onDialogResponse
+            mQueuedDialogText = dialogText
+            return
+        }
         mOnDialogResponse = onDialogResponse
         mDialogText = dialogText
+        alertStatus = ""
         allowDialogToBeSent = false
         mVibrateWatch()
         showDialog = true
@@ -71,25 +87,28 @@ class MainViewModel(vibrateWatch: () -> Unit,
     }
 
     fun onDialogResponse(res: String){
-        Log.d("0001","onDialogResponse $res")
-        if(lastResponse == "dismiss" && res == "dismiss"){
-            // just a dismiss
+        mWriteToLogFile("onDialogResponse($res)")
+        alertStatus = res
+        if(res == "dismiss") {
             mOnDialogResponse(false)
-        } else if (lastResponse == "dismiss" && res != "dismiss"){
-            // actual response
-            mOnDialogResponse(res != "no")
         } else {
-            // ignore
+            mOnDialogResponse(res != "no")
         }
         lastResponse = res
         closeDialog()
     }
     private fun closeDialog(){
+        mWriteToLogFile("closeDialog")
         showDialog = false
         allowDialogToBeSent = true
         dialogTimer.cancel()
+        if(dialogQueued){
+            sendDialog(mQueuedDialogText,mQueuedOnDialogResponse)
+            dialogQueued = false
+        }
     }
     private fun sendConfirmSmokingDialog(){
+        mWriteToLogFile("sendConfirmSmokingDialog")
         sendDialog("Confirm that you started smoking.",
             onDialogResponse = { response ->
                 if(response) startSmoking()
@@ -102,9 +121,10 @@ class MainViewModel(vibrateWatch: () -> Unit,
         )
     }
     private fun sendConfirmDoneSmokingDialog() {
+        mWriteToLogFile("sendConfirmDoneSmokingDialog")
         sendDialog("Confirm that you are done smoking.",
             onDialogResponse = { response ->
-                Log.d("0001","onDialogResponse")
+                Log.d("0001","Confirm Done Smoking Response: $response")
                 if(response) {
                     stopSmoking()
                     for (timer in puffTimers) {
@@ -119,12 +139,14 @@ class MainViewModel(vibrateWatch: () -> Unit,
         )
     }
     private fun resetSessionTimer(){
+        mWriteToLogFile("resetSessionTimer")
         sessionTimer.cancel()
         sessionLengthSeconds = 0
         sessionTimer.start()
     }
     private fun startPuffTimer(){
-        val timer = object : CountDownTimer(480000, 60000) {
+        mWriteToLogFile("startPuffTimer")
+        val timer = object : CountDownTimer(sessionTimerLengthMilliseconds, 60000) {
             // 8 minutes of milliseconds is 480000
             override fun onTick(millisUntilFinished: Long) {}
             override fun onFinish() {
@@ -137,7 +159,7 @@ class MainViewModel(vibrateWatch: () -> Unit,
         puffTimers.add(timer)
         timer.start()
     }
-    private val sessionTimer = object : CountDownTimer(sessionLengthMilliseconds, 1000) {
+    private val sessionTimer = object : CountDownTimer(sessionTimerLengthMilliseconds, 1000) {
                 // 8 minutes of milliseconds is 480000
                 override fun onTick(millisUntilFinished: Long) {
                     // onTick is called every countDownInterval, which we force to be 1000 ms;
@@ -151,20 +173,23 @@ class MainViewModel(vibrateWatch: () -> Unit,
                     sendConfirmDoneSmokingDialog()
                 }
             }
-    private val dialogTimer = object : CountDownTimer(20000, 10000) {
-            override fun onTick(millisUntilFinished: Long) {}
+    private val dialogTimer = object : CountDownTimer(dialogTimerLengthMilliseconds, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                Log.d("0001","dialogTimer $millisUntilFinished")
+            }
             override fun onFinish() {
-                Log.d("0000","dialogTimer::onFinish dialog timed out after 20 seconds")
+                Log.d("0001","dialogTimer::onFinish dialog timed out after 20 seconds")
                 // If dialog times out, same as dismissing
                 onDialogResponse("dismiss")
-                cancel()
             }
         }
     private fun startSmoking(){
+        mWriteToLogFile("startSmoking")
         isSmoking = true
         sessionTimer.start()
     }
     private fun stopSmoking(){
+        mWriteToLogFile("stopSmoking")
         sessionLengthSeconds = 0
         secondarySmokingText = "tap to start"
         totalNumberOfCigsDetected ++
@@ -172,6 +197,7 @@ class MainViewModel(vibrateWatch: () -> Unit,
         sessionTimer.cancel()
     }
     fun onClickSmokingToggleChip(){
+        mWriteToLogFile("onClickSmokingToggleChip")
         if(isSmoking){
             stopSmoking()
         } else {
@@ -180,28 +206,34 @@ class MainViewModel(vibrateWatch: () -> Unit,
     }
     fun onDestinationChangedCallback(destination: NavDestination){
         currentDestination = "${destination.route}"
-        allowDialogToBeSent = currentDestination == "landing"
+//        allowDialogToBeSent = currentDestination == "landing"
     }
     fun onSubmitNewActivity(activity: String){
+        mWriteToLogFile("onSubmitNewActivity $activity")
         file.appendText("$activity\n")
         activities.add(activity)
     }
-    fun onClickReportMissedCigChip(navigateToTimePicker: (Boolean) -> Unit){
+    fun onClickReportMissedCigChip(navigateToTimePicker: () -> Unit){
+        mWriteToLogFile("onClickReportMissedCigChip")
         sendDialog("Confirm that you want to report missed cig.",
-            onDialogResponse = navigateToTimePicker)
+            onDialogResponse = { if(it) navigateToTimePicker() })
     }
     fun onTimePickerConfirm(it: LocalTime){
+        mWriteToLogFile("onTimePickerConfirm $it")
         dateTimeForUserInput = it.atDate(dateTimeForUserInput.toLocalDate())
     }
     fun onClickSliderScreenButton(it: Int) {
+        mWriteToLogFile("onClickSliderScreenButton $it")
         satisfaction = it
     }
     fun onClickActivityButton(it: String){
+        mWriteToLogFile("onClickActivityButton $it")
         otherActivity = it
         mWriteFalseNegativeToFile(dateTimeForUserInput, satisfaction, otherActivity)
         totalNumberOfCigsDetected ++
     }
     fun onPuffDetected(){
+        mWriteToLogFile("onPuffDetected")
         totalNumberOfPuffsDetected ++
         if (isSmoking) return
         numberOfPuffsInCurrentSession ++

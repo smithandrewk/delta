@@ -39,14 +39,14 @@ class MainActivity : ComponentActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         setTheme(android.R.style.Theme_DeviceDefault)
-        mViewModel = MainViewModel(::vibrateWatch,applicationContext,::writeFalseNegativeToFile)
+        mViewModel = MainViewModel(::vibrateWatch,applicationContext,::writeFalseNegativeToFile,::writeToLogFile)
         filesHandler = FilesHandler(this.filesDir, mViewModel, appStartTimeMillis, appStartTimeReadable)
-        sensorHandler = SensorHandler(
-            applicationContext,
-            filesHandler,
-            mViewModel,
-            getSystemService(SENSOR_SERVICE) as SensorManager,
-        )
+//        sensorHandler = SensorHandler(
+//            applicationContext,
+//            filesHandler,
+//            mViewModel,
+//            getSystemService(SENSOR_SERVICE) as SensorManager,
+//        )
 
         setContent {
             navController = rememberSwipeDismissableNavController()
@@ -56,6 +56,7 @@ class MainActivity : ComponentActivity() {
             WearApp(
                 swipeDismissibleNavController = navController,
                 isSmoking = mViewModel.isSmoking,
+                alertStatus = mViewModel.alertStatus,
                 numberOfPuffs = mViewModel.totalNumberOfPuffsDetected,
                 numberOfCigs = mViewModel.totalNumberOfCigsDetected,
                 dialogText = mViewModel.mDialogText,
@@ -66,7 +67,8 @@ class MainActivity : ComponentActivity() {
                 onClickReportMissedCigChip = {
                     mViewModel.onClickReportMissedCigChip(
                         navigateToTimePicker = {
-                            if(it) navController.navigate(Screen.Time24hPicker.route)
+                            Log.d("0001","Navigating to time picker")
+                            navController.navigate(Screen.Time24hPicker.route)
                         })
                                              },
                 secondarySmokingText = mViewModel.secondarySmokingText,
@@ -100,6 +102,9 @@ class MainActivity : ComponentActivity() {
     }
     private fun writeFalseNegativeToFile(dateTimeForUserInput: LocalDateTime, satisfaction: Int, otherActivity: String){
         filesHandler.writeFalseNegativeToFile(dateTimeForUserInput,satisfaction,otherActivity)
+    }
+    private fun writeToLogFile(logEntry: String){
+        filesHandler.writeToLogFile(logEntry)
     }
     override fun onDestroy() {
         super.onDestroy()
