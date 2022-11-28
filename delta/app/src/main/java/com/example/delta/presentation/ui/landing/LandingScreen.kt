@@ -44,8 +44,7 @@ fun LandingScreen(
     numberOfPuffs: Int,
     numberOfCigs: Int,
     showConfirmationDialog: Boolean,
-    onDialogResponse: (Boolean) -> Unit,
-    onDismissDialogRequest: () -> Unit,
+    onDialogResponse: (String) -> Unit,
     dialogText: String,
     onClickIteratePuffsChip: () -> Unit,
     onClickSmokingToggleChip: () -> Unit,
@@ -73,9 +72,9 @@ fun LandingScreen(
                     secondarySmokingText = secondarySmokingText
                 )
             }
-            item {
-                CompactChip(onClick = onClickIteratePuffsChip, colors = ChipDefaults.secondaryChipColors(),label= { Text("puff") })
-            }
+//            item {
+//                CompactChip(onClick = onClickIteratePuffsChip, colors = ChipDefaults.secondaryChipColors(),label= { Text("puff") })
+//            }
         }
         val scrollState = rememberScalingLazyListState()
 
@@ -83,7 +82,6 @@ fun LandingScreen(
             scrollState = scrollState,
             showConfirmationDialog = showConfirmationDialog,
             onDialogResponse = onDialogResponse,
-            onDismissDialogRequest = onDismissDialogRequest,
             dialogText = dialogText
         )
 

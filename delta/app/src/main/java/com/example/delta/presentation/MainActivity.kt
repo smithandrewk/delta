@@ -61,7 +61,6 @@ class MainActivity : ComponentActivity() {
                 dialogText = mViewModel.mDialogText,
                 showConfirmationDialog = mViewModel.showDialog,
                 onDialogResponse = { mViewModel.onDialogResponse(it) },
-                onDismissDialogRequest = { mViewModel.dismissDialog() },
                 onClickIteratePuffsChip = { mViewModel.onPuffDetected() },
                 onClickSmokingToggleChip = { mViewModel.onClickSmokingToggleChip() },
                 onClickReportMissedCigChip = {
@@ -72,19 +71,19 @@ class MainActivity : ComponentActivity() {
                                              },
                 secondarySmokingText = mViewModel.secondarySmokingText,
                 onTimePickerConfirm = {
-                    navController.popBackStack()
                     mViewModel.onTimePickerConfirm(it)
                     navController.navigate(Screen.Slider.route)
                 },
                 onClickSliderScreenButton = {
-                    navController.popBackStack()
                     mViewModel.onClickSliderScreenButton(it)
                     navController.navigate(Screen.WatchList.route)
                 },
                 onClickActivityPickerChip = {
-                    navController.popBackStack()
                     mViewModel.onClickActivityButton(it)
-                                            },
+                    navController.popBackStack()
+                    navController.popBackStack()
+                    navController.popBackStack()
+                },
                 onSubmitNewActivity = {mViewModel.onSubmitNewActivity(it)},
                 activities = mViewModel.activities
 
@@ -92,7 +91,6 @@ class MainActivity : ComponentActivity() {
         }
     }
     private fun vibrateWatch() {
-        Log.d("0000", "vibrating watch")
         val vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
         if (Build.VERSION.SDK_INT >= 26) {
             vibrator.vibrate(VibrationEffect.createOneShot(1000, 255))
@@ -100,7 +98,7 @@ class MainActivity : ComponentActivity() {
             vibrator.vibrate(1000)
         }
     }
-    fun writeFalseNegativeToFile(dateTimeForUserInput: LocalDateTime, satisfaction: Int, otherActivity: String){
+    private fun writeFalseNegativeToFile(dateTimeForUserInput: LocalDateTime, satisfaction: Int, otherActivity: String){
         filesHandler.writeFalseNegativeToFile(dateTimeForUserInput,satisfaction,otherActivity)
     }
     override fun onDestroy() {

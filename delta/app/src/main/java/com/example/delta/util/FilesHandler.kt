@@ -78,7 +78,7 @@ class FilesHandler(filesDir: File, mViewModel: MainViewModel, appStartTimeMillis
         rawFileIndex++
     }
     fun writeToRawFile(eventTimeStamp: String, acc_x: Double,acc_y: Double,acc_z: Double,timeInMillis: String,smokingStateString: String,thresholdSmokingOutput: Double,rawSmokingOutput: Double,expertStateMachineState: Int){
-        fRaw.write("${eventTimeStamp},${acc_x},${acc_y},${acc_z},${timeInMillis},${smokingStateString},${thresholdSmokingOutput},${rawSmokingOutput},${expertStateMachineState}".toByteArray())
+        fRaw.write("${eventTimeStamp},${acc_x},${acc_y},${acc_z},${timeInMillis},${smokingStateString},${thresholdSmokingOutput},${rawSmokingOutput},${expertStateMachineState}\n".toByteArray())
     }
 
     fun closeRawFile(){

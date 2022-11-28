@@ -17,64 +17,170 @@ import java.io.File
 import java.time.LocalDateTime
 import java.time.LocalTime
 
-class MainViewModel(vibrateWatch: () -> Unit, applicationContext: Context,writeFalseNegativeToFile: (dateTimeForUserInput: LocalDateTime, satisfaction: Int, otherActivity: String) -> Unit,) : ViewModel() {
+class MainViewModel(vibrateWatch: () -> Unit,
+                    applicationContext: Context,
+                    writeFalseNegativeToFile: (dateTimeForUserInput: LocalDateTime,
+                                               satisfaction: Int,
+                                               otherActivity: String) -> Unit,) : ViewModel() {
+    val sessionLengthMilliseconds: Long = 10000
     var isSmoking by mutableStateOf(false)
     var totalNumberOfPuffsDetected by mutableStateOf(0)
     var totalNumberOfCigsDetected by mutableStateOf(0)
     var numberOfPuffsInCurrentSession by mutableStateOf(0)
     var showDialog by mutableStateOf(false)
-    var allowDialogToBeSent by mutableStateOf(true)
+    private var allowDialogToBeSent by mutableStateOf(true)
     var mDialogText by mutableStateOf("")
     var secondarySmokingText by mutableStateOf("tap to start")
     var sessionLengthSeconds by mutableStateOf(0)
-    lateinit var mDialogCallback : (Boolean) -> Unit
+    lateinit var mOnDialogResponse : (Boolean) -> Unit
     var mVibrateWatch: () -> Unit = vibrateWatch
     var mWriteFalseNegativeToFile: (dateTimeForUserInput: LocalDateTime, satisfaction: Int, otherActivity: String) -> Unit = writeFalseNegativeToFile
-
     private val file = File(applicationContext.filesDir, "activities")
     var activities by mutableStateOf(mutableListOf(""))
     var dateTimeForUserInput: LocalDateTime by mutableStateOf(LocalDateTime.now())
     var satisfaction by mutableStateOf(5)
     var otherActivity by mutableStateOf("")
+    var puffTimers = mutableListOf<CountDownTimer>()
+    var currentDestination: String = ""
+    lateinit var mOnDismissDialogRequest : () -> Unit
+    var lastResponse: String = "dismiss"
+
+
     init {
-        Log.d("0000","instanced file")
+        initializeActivitiesFile()
+    }
+    private fun initializeActivitiesFile(){
+        // if /data/data/com.example.delta/activities exists
         if(file.exists()){
-            Log.d("0000","file exists")
+            // do nothing
         } else {
-            Log.d("0000","file does not exist")
+            // if activities file doesn't exist, write simple list of activities to file
             file.writeText("reclining\nvaping\neating\ndriving\n")
         }
+        // save activities to mutable list as well
         activities = file.readLines().toMutableList()
     }
-    private fun sendDialog(dialogText: String, dialogCallback: (Boolean) -> Unit){
-        Log.d("0000","sending dialog")
-        mDialogCallback = dialogCallback
-        if(allowDialogToBeSent){
-            allowDialogToBeSent = false
-            mDialogText = dialogText
-            mVibrateWatch()
-            showDialog = true
-            dialogTimer.start()
+    private fun sendDialog(dialogText: String, onDialogResponse: (Boolean) -> Unit, onDismissDialogRequest: () -> Unit){
+        // General send dialog called by specific use-case functions
+        if(!allowDialogToBeSent) return
+        mOnDialogResponse = onDialogResponse
+        mOnDismissDialogRequest = onDismissDialogRequest
+        mDialogText = dialogText
+        allowDialogToBeSent = false
+        mVibrateWatch()
+        showDialog = true
+        dialogTimer.start()
+    }
+
+    fun onDialogResponse(res: String){
+        Log.d("0001","onDialogResponse $res")
+        if(lastResponse == "dismiss" && res == "dismiss"){
+            // just a dismiss
+            mOnDialogResponse(false)
+        } else if (lastResponse == "dismiss" && res != "dismiss"){
+            // actual response
+            mOnDialogResponse(res != "no")
+        } else {
+            // ignore
         }
+        lastResponse = res
+        closeDialog()
     }
-    fun dismissDialog(){
-        Log.d("0000","on dismiss request")
-        if(!allowDialogToBeSent){
-            allowDialogToBeSent = true
-            showDialog = false
-            dialogTimer.cancel()
+    private fun closeDialog(){
+        showDialog = false
+        allowDialogToBeSent = true
+        dialogTimer.cancel()
+    }
+    private fun sendConfirmSmokingDialog(){
+        sendDialog("Confirm that you started smoking.",
+            onDialogResponse = { response ->
+                if(response) startSmoking()
+                for (timer in puffTimers) {
+                    timer.cancel()
+                }
+                puffTimers.clear()
+                numberOfPuffsInCurrentSession = 0
+                               },
+            onDismissDialogRequest = {
+                // onDismissDialogRequest from user, assume response is negative
+                mOnDialogResponse(false)
+            }
+        )
+    }
+    private fun sendConfirmDoneSmokingDialog() {
+        sendDialog("Confirm that you are done smoking.",
+            onDialogResponse = { response ->
+                Log.d("0001","onDialogResponse")
+                if(response) {
+                    stopSmoking()
+                    for (timer in puffTimers) {
+                        timer.cancel()
+                    }
+                    puffTimers.clear()
+                    numberOfPuffsInCurrentSession = 0
+                } else {
+                    resetSessionTimer()
+                }
+                               },
+            onDismissDialogRequest = {
+                Log.d("0001","onDismissDialog")
+                // onDismissDialogRequest from user, assume response is negative
+                mOnDialogResponse(false)
+            }
+        )
+    }
+    private fun resetSessionTimer(){
+        sessionTimer.cancel()
+        sessionLengthSeconds = 0
+        sessionTimer.start()
+    }
+    private fun startPuffTimer(){
+        val timer = object : CountDownTimer(480000, 60000) {
+            // 8 minutes of milliseconds is 480000
+            override fun onTick(millisUntilFinished: Long) {}
+            override fun onFinish() {
+                // puff was more than 8 minutes ago
+                numberOfPuffsInCurrentSession --
+                puffTimers.removeAt(0)
+                cancel()
+            }
         }
+        puffTimers.add(timer)
+        timer.start()
     }
-    fun onDialogResponse(res: Boolean){
-        Log.d("0000","got dialog response")
-        mDialogCallback(res)
-        dismissDialog()
-    }
+    private val sessionTimer = object : CountDownTimer(sessionLengthMilliseconds, 1000) {
+                // 8 minutes of milliseconds is 480000
+                override fun onTick(millisUntilFinished: Long) {
+                    // onTick is called every countDownInterval, which we force to be 1000 ms;
+                    // thus, iterate sessionLengthSeconds by 1 every time onTick is called
+                    sessionLengthSeconds ++
+                    // Given a variable with seconds, formats as a string mm:ss
+                    secondarySmokingText = "${(sessionLengthSeconds / 60).toString().padStart(2, '0')} : ${(sessionLengthSeconds % 60).toString().padStart(2, '0')}"
+                }
+                override fun onFinish() {
+                    // onFinish is only called when millisUntilFinished equals 0, never called externally
+                    sendConfirmDoneSmokingDialog()
+                }
+            }
+    private val dialogTimer = object : CountDownTimer(20000, 10000) {
+            override fun onTick(millisUntilFinished: Long) {}
+            override fun onFinish() {
+                Log.d("0000","dialogTimer::onFinish dialog timed out after 20 seconds")
+                // If dialog times out, same as dismissing
+                onDialogResponse("dismiss")
+                cancel()
+            }
+        }
     private fun startSmoking(){
+        isSmoking = true
         sessionTimer.start()
     }
     private fun stopSmoking(){
-        sessionTimer.onFinish()
+        sessionLengthSeconds = 0
+        secondarySmokingText = "tap to start"
+        totalNumberOfCigsDetected ++
+        isSmoking = false
+        sessionTimer.cancel()
     }
     fun onClickSmokingToggleChip(){
         if(isSmoking){
@@ -82,99 +188,38 @@ class MainViewModel(vibrateWatch: () -> Unit, applicationContext: Context,writeF
         } else {
             startSmoking()
         }
-        isSmoking = !isSmoking
-    }
-    fun onPuffDetected(){
-        totalNumberOfPuffsDetected ++
     }
     fun onDestinationChangedCallback(destination: NavDestination){
-        Log.d("0000","$destination")
+        currentDestination = "${destination.route}"
+        allowDialogToBeSent = currentDestination == "landing"
     }
     fun onSubmitNewActivity(activity: String){
         file.appendText("$activity\n")
         activities.add(activity)
     }
     fun onClickReportMissedCigChip(navigateToTimePicker: (Boolean) -> Unit){
-        Log.d("0000","onClickReportMissedCigChip")
-        sendDialog("Confirm that you want to report missed cig.", dialogCallback = navigateToTimePicker)
+        sendDialog("Confirm that you want to report missed cig.",
+            onDialogResponse = navigateToTimePicker,
+            onDismissDialogRequest = { closeDialog() })
     }
     fun onTimePickerConfirm(it: LocalTime){
-        Log.d("0000","onTimePickerConfirm $it")
         dateTimeForUserInput = it.atDate(dateTimeForUserInput.toLocalDate())
     }
     fun onClickSliderScreenButton(it: Int) {
-        Log.d("0000","onClickSliderScreenButton $it")
         satisfaction = it
     }
     fun onClickActivityButton(it: String){
-        Log.d("0000","onClickActivityButton $it")
         otherActivity = it
         mWriteFalseNegativeToFile(dateTimeForUserInput, satisfaction, otherActivity)
+        totalNumberOfCigsDetected ++
     }
-
-//    fun onConfirmReportMissedCigDialogResponse(response: Boolean){
-//        showConfirmReportMissedCigDialog = false
-//        if(!response) {
-//            allowDialogToBeSent = true
-//        }
-//    }
-//    fun onPuffDetected(){
-//        totalNumberOfPuffsDetected ++
-//        startPuffTimer(totalNumberOfCigsDetected.toString())
-//        numberOfPuffsInCurrentSession ++
-//        if(!isSmoking) {
-//            if(numberOfPuffsInCurrentSession > 2) {
-//                showConfirmationDialog = true
-//            }
-//        }
-//    }
-//    private fun startPuffTimer(id: String): CountDownTimer{
-//        val timer = object : CountDownTimer(20000, 1000) {
-//            // 8 minutes of milliseconds is 480000
-//            override fun onTick(millisUntilFinished: Long) {
-//                Log.d("0000","Current Puffs: $numberOfPuffsInCurrentSession ID: $id : $millisUntilFinished")
-//            }
-//            override fun onFinish() {
-//                Log.d("0000","20 seconds up! Removing puff from session")
-//                numberOfPuffsInCurrentSession --
-//                if(isSmoking && numberOfPuffsInCurrentSession == 0){
-//                    showConfirmationDialog = true
-//                }
-//                cancel()
-//            }
-//        }
-//        timer.start()
-//        return timer
-//    }
-        val sessionTimer = object : CountDownTimer(480000, 1000) {
-                // 8 minutes of milliseconds is 480000
-                override fun onTick(millisUntilFinished: Long) {
-                    sessionLengthSeconds ++
-                    secondarySmokingText = "${(sessionLengthSeconds / 60).toString().padStart(2, '0')} : ${(sessionLengthSeconds % 60).toString().padStart(2, '0')}"
-                }
-                override fun onFinish() {
-                    Log.d("0000","20 seconds up! Removing puff from session")
-                    sessionLengthSeconds = 0
-                    secondarySmokingText = "tap to start"
-                    cancel()
-                }
-            }
-        private val dialogTimer = object : CountDownTimer(20000, 1000) {
-            override fun onTick(millisUntilFinished: Long) {
-//                Log.d("0000","$millisUntilFinished")
-            }
-            override fun onFinish() {
-                Log.d("0000","dialogTimer::onFinish dialog timed out after 20 seconds")
-                dismissDialog()
-                cancel()
-            }
+    fun onPuffDetected(){
+        totalNumberOfPuffsDetected ++
+        if (isSmoking) return
+        numberOfPuffsInCurrentSession ++
+        startPuffTimer()
+        if(numberOfPuffsInCurrentSession > 2) {
+            sendConfirmSmokingDialog()
         }
     }
-
-//    fun onConfirmDoneSmokingDialogResponse(response: Boolean){
-//        showConfirmDoneSmokingDialog = false
-//        if(response) {
-//            isSmoking = false
-//            totalNumberOfCigsDetected ++
-//        }
-//    }
+}
