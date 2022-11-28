@@ -42,7 +42,6 @@ class MainViewModel(vibrateWatch: () -> Unit,
     var otherActivity by mutableStateOf("")
     var puffTimers = mutableListOf<CountDownTimer>()
     var currentDestination: String = ""
-    lateinit var mOnDismissDialogRequest : () -> Unit
     var lastResponse: String = "dismiss"
 
 
@@ -60,11 +59,10 @@ class MainViewModel(vibrateWatch: () -> Unit,
         // save activities to mutable list as well
         activities = file.readLines().toMutableList()
     }
-    private fun sendDialog(dialogText: String, onDialogResponse: (Boolean) -> Unit, onDismissDialogRequest: () -> Unit){
+    private fun sendDialog(dialogText: String, onDialogResponse: (Boolean) -> Unit){
         // General send dialog called by specific use-case functions
         if(!allowDialogToBeSent) return
         mOnDialogResponse = onDialogResponse
-        mOnDismissDialogRequest = onDismissDialogRequest
         mDialogText = dialogText
         allowDialogToBeSent = false
         mVibrateWatch()
@@ -100,11 +98,7 @@ class MainViewModel(vibrateWatch: () -> Unit,
                 }
                 puffTimers.clear()
                 numberOfPuffsInCurrentSession = 0
-                               },
-            onDismissDialogRequest = {
-                // onDismissDialogRequest from user, assume response is negative
-                mOnDialogResponse(false)
-            }
+                               }
         )
     }
     private fun sendConfirmDoneSmokingDialog() {
@@ -121,12 +115,7 @@ class MainViewModel(vibrateWatch: () -> Unit,
                 } else {
                     resetSessionTimer()
                 }
-                               },
-            onDismissDialogRequest = {
-                Log.d("0001","onDismissDialog")
-                // onDismissDialogRequest from user, assume response is negative
-                mOnDialogResponse(false)
-            }
+                               }
         )
     }
     private fun resetSessionTimer(){
@@ -199,8 +188,7 @@ class MainViewModel(vibrateWatch: () -> Unit,
     }
     fun onClickReportMissedCigChip(navigateToTimePicker: (Boolean) -> Unit){
         sendDialog("Confirm that you want to report missed cig.",
-            onDialogResponse = navigateToTimePicker,
-            onDismissDialogRequest = { closeDialog() })
+            onDialogResponse = navigateToTimePicker)
     }
     fun onTimePickerConfirm(it: LocalTime){
         dateTimeForUserInput = it.atDate(dateTimeForUserInput.toLocalDate())
