@@ -24,17 +24,15 @@ class MainActivity : ComponentActivity() {
     private lateinit var sensorHandler: SensorHandler
     private lateinit var filesHandler: FilesHandler
 
-    // UI
     private lateinit var mViewModel: MainViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
-
         super.onCreate(savedInstanceState)
-
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
         setTheme(android.R.style.Theme_DeviceDefault)
+
+        // Initialize Objects
         mViewModel = MainViewModel(::vibrateWatch,applicationContext,::writeToLogFile, ::writeToEventsFile, ::writeFalseNegativeToEventsFile)
         filesHandler = FilesHandler(applicationContext, this.filesDir, mViewModel, appStartTimeMillis, appStartTimeReadable)
         sensorHandler = SensorHandler(
@@ -44,6 +42,7 @@ class MainActivity : ComponentActivity() {
             getSystemService(SENSOR_SERVICE) as SensorManager,
         )
 
+        // UI
         setContent {
             navController = rememberSwipeDismissableNavController()
             navController.addOnDestinationChangedListener { controller, destination, arguments ->
@@ -96,9 +95,6 @@ class MainActivity : ComponentActivity() {
             vibrator.vibrate(1000)
         }
     }
-//    private fun writeFalseNegativeToFile(dateTimeForUserInput: LocalDateTime, satisfaction: Int, otherActivity: String){
-//        filesHandler.writeFalseNegativeToFile(dateTimeForUserInput,satisfaction,otherActivity)
-//    }
     private fun writeToLogFile(logEntry: String){
         filesHandler.writeToLogFile(logEntry)
     }

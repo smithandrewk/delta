@@ -25,6 +25,7 @@ class FilesHandler(private val applicationContext: Context,
 
     private val numWindowsBatched = 1       // TODO should we get rid of this? or at least make it global
 
+    // Map of IDs to name of event
     private val eventIDs = mapOf(
         R.integer.FALSE_NEGATIVE to "False Negative Reported",
         R.integer.PUFF_DETECTED to "Puff Detected",

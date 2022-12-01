@@ -24,8 +24,11 @@ class MainViewModel(vibrateWatch: () -> Unit,
                                                      satisfaction: Int,
                                                      otherActivity: String) -> Unit
 ) : ViewModel() {
+    // Timer Lengths
     val sessionTimerLengthMilliseconds: Long = 480000
     val dialogTimerLengthMilliseconds: Long = 20000
+
+    // State variables
     var isSmoking by mutableStateOf(false)
     var totalNumberOfPuffsDetected by mutableStateOf(0)
     var totalNumberOfCigsDetected by mutableStateOf(0)
@@ -36,11 +39,14 @@ class MainViewModel(vibrateWatch: () -> Unit,
     var mDialogText by mutableStateOf("")
     var secondarySmokingText by mutableStateOf("tap to start")
     var sessionLengthSeconds by mutableStateOf(0)
+
+    // Local Copies of functions
     lateinit var mOnDialogResponse : (Boolean) -> Unit
     var mVibrateWatch: () -> Unit = vibrateWatch
     var mWriteToLogFile: (logEntry: String) -> Unit = writeToLogFile
     var mWriteToEventsFile: (events_id: Int) -> Unit = writeToEventsFile
     var mWriteFalseNegativeToEventsFile: (event_id: Int, dateTimeForUserInput: String, satisfaction: Int, otherActivity: String) -> Unit = writeFalseNegativeToEventsFile
+
 
     private val activitiesFile = File(applicationContext.filesDir, "activities")
     var activities by mutableStateOf(mutableListOf(""))
@@ -58,6 +64,7 @@ class MainViewModel(vibrateWatch: () -> Unit,
     init {
         initializeActivitiesFile()
     }
+
     private fun initializeActivitiesFile(){
         // if /data/data/com.example.delta/activities exists
         if(activitiesFile.exists()){
@@ -69,6 +76,8 @@ class MainViewModel(vibrateWatch: () -> Unit,
         // save activities to mutable list as well
         activities = activitiesFile.readLines().toMutableList()
     }
+
+    // DIALOG CONTROL
     private fun sendDialog(dialogText: String, onDialogResponse: (Boolean) -> Unit){
         mWriteToLogFile("sendDialog($dialogText)")
         // General send dialog called by specific use-case functions
@@ -140,6 +149,18 @@ class MainViewModel(vibrateWatch: () -> Unit,
                                }
         )
     }
+    private val dialogTimer = object : CountDownTimer(dialogTimerLengthMilliseconds, 1000) {
+        override fun onTick(millisUntilFinished: Long) {
+            Log.d("0001","dialogTimer $millisUntilFinished")
+        }
+        override fun onFinish() {
+            Log.d("0001","dialogTimer::onFinish dialog timed out after 20 seconds")
+            // If dialog times out, same as dismissing
+            onDialogResponse("dismiss")
+        }
+    }
+
+    // PUFF AND SESSION DETECTION CONTROL
     private fun resetSessionTimer(){
         mWriteToLogFile("resetSessionTimer")
         sessionTimer.cancel()
@@ -162,29 +183,21 @@ class MainViewModel(vibrateWatch: () -> Unit,
         timer.start()
     }
     private val sessionTimer = object : CountDownTimer(sessionTimerLengthMilliseconds, 1000) {
-                // 8 minutes of milliseconds is 480000
-                override fun onTick(millisUntilFinished: Long) {
-                    // onTick is called every countDownInterval, which we force to be 1000 ms;
-                    // thus, iterate sessionLengthSeconds by 1 every time onTick is called
-                    sessionLengthSeconds ++
-                    // Given a variable with seconds, formats as a string mm:ss
-                    secondarySmokingText = "${(sessionLengthSeconds / 60).toString().padStart(2, '0')} : ${(sessionLengthSeconds % 60).toString().padStart(2, '0')}"
-                }
-                override fun onFinish() {
-                    // onFinish is only called when millisUntilFinished equals 0, never called externally
-                    sendConfirmDoneSmokingDialog()
-                }
-            }
-    private val dialogTimer = object : CountDownTimer(dialogTimerLengthMilliseconds, 1000) {
+            // 8 minutes of milliseconds is 480000
             override fun onTick(millisUntilFinished: Long) {
-                Log.d("0001","dialogTimer $millisUntilFinished")
+                // onTick is called every countDownInterval, which we force to be 1000 ms;
+                // thus, iterate sessionLengthSeconds by 1 every time onTick is called
+                sessionLengthSeconds ++
+                // Given a variable with seconds, formats as a string mm:ss
+                secondarySmokingText = "${(sessionLengthSeconds / 60).toString().padStart(2, '0')} : ${(sessionLengthSeconds % 60).toString().padStart(2, '0')}"
             }
             override fun onFinish() {
-                Log.d("0001","dialogTimer::onFinish dialog timed out after 20 seconds")
-                // If dialog times out, same as dismissing
-                onDialogResponse("dismiss")
+                // onFinish is only called when millisUntilFinished equals 0, never called externally
+                sendConfirmDoneSmokingDialog()
             }
-        }
+    }
+
+    // RESPONSE TO UI
     private fun startSmoking(source: Int){
         mWriteToLogFile("startSmoking")
         mWriteToEventsFile(source)
@@ -242,6 +255,7 @@ class MainViewModel(vibrateWatch: () -> Unit,
         totalNumberOfCigsDetected ++
     }
 
+    // AI
     fun onPuffDetected(){
         mWriteToLogFile("onPuffDetected")
         mWriteToEventsFile(R.integer.PUFF_DETECTED)
