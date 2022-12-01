@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="FALSE_NEGATIVE">0</integer>
+    <integer name="PUFF_DETECTED">1</integer>
+    <integer name="SESSION_DETECTED">2</integer>
+    <integer name="USER_START_SMOKING">3</integer>
+    <integer name="AI_START_SMOKING">4</integer>
+    <integer name="USER_STOP_SMOKING">5</integer>
+    <integer name="TIMER_STOP_SMOKING">6</integer>
+</resources>

@@ -73,9 +73,9 @@ fun LandingScreen(
                     secondarySmokingText = secondarySmokingText
                 )
             }
-//            item {
-//                CompactChip(onClick = onClickIteratePuffsChip, colors = ChipDefaults.secondaryChipColors(),label= { Text("puff") })
-//            }
+            item {
+                CompactChip(onClick = onClickIteratePuffsChip, colors = ChipDefaults.secondaryChipColors(),label= { Text("puff") })
+            }
         }
         val scrollState = rememberScalingLazyListState()
 
