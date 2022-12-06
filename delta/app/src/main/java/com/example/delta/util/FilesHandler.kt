@@ -46,7 +46,7 @@ class FilesHandler(private val applicationContext: Context,
         fLog = FileOutputStream(File(this.filesDir, "$dataFolderName/log.csv"))
 
         fEvents = FileOutputStream(File(this.filesDir, "$dataFolderName/events.csv"))
-        fEvents.write("time,event_id,event,extras\n".toByteArray())   // time in ms, id of event, name of event, and any extras
+        fEvents.write("time,event_id,event,time reported,satisfaction,other activity\n".toByteArray())   // time in ms, id of event, name of event, and any extras
 
         // Info File
         try {
@@ -87,21 +87,16 @@ class FilesHandler(private val applicationContext: Context,
         fEvents.write(("${Calendar.getInstance().timeInMillis}," +
                 "${applicationContext.resources.getInteger(event_id)}," +
                 "${eventIDs[event_id]}," +
-                "null\n").toByteArray())
+                ",,\n").toByteArray())
     }
     fun writeNegativesToEventsFile(event_id: Int, dateTime: String, satisfaction: Int, otherActivity: String){
         // write time, the id of the event, corresponding name of the event, and any extra parameters
         fEvents.write(("${Calendar.getInstance().timeInMillis}," +
                 "${applicationContext.resources.getInteger(event_id)}," +
-                "${eventIDs[event_id]},").toByteArray())
-        // Add extras as json object
-        try {
-            val json = JSONObject()
-                .put("dateTime", dateTime)
-                .put("satisfaction", satisfaction)
-                .put("otherActivity", otherActivity)
-            fEvents.write((json.toString()+"\n").toByteArray())
-        } catch (e: Exception) { e.printStackTrace() }
+                "${eventIDs[event_id]}," +
+                "$dateTime," +
+                "$satisfaction," +
+                "$otherActivity\n").toByteArray())
     }
     fun writeStringToRawFile(string: String){
         fRaw.write(string.toByteArray())
