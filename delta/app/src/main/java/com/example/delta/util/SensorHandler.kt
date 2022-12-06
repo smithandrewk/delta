@@ -15,7 +15,7 @@ class SensorHandler(applicationContext: Context, filesHandler: FilesHandler, mVi
     private val applicationContext = applicationContext
     private val filesHandler = filesHandler
     private val mViewModel = mViewModel
-    private lateinit var neuralHandler: NeuralHandler
+    private var neuralHandler: NeuralHandler
 
     // Record raw data
     private lateinit var sensorManager: SensorManager

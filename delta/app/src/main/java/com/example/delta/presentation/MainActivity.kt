@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.Composable
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.NavHostController
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
@@ -33,8 +34,8 @@ class MainActivity : ComponentActivity() {
         setTheme(android.R.style.Theme_DeviceDefault)
 
         // Initialize Objects
-        mViewModel = MainViewModel(::vibrateWatch,applicationContext,::writeToLogFile, ::writeToEventsFile, ::writeFalseNegativeToEventsFile)
-        filesHandler = FilesHandler(applicationContext, this.filesDir, mViewModel, appStartTimeMillis, appStartTimeReadable)
+        mViewModel = MainViewModel(::vibrateWatch,applicationContext,::writeToLogFile, ::writeToEventsFile, ::writeFalseNegativeToEventsFile,::navigateToSlider)
+        filesHandler = FilesHandler(applicationContext, this.filesDir, appStartTimeMillis, appStartTimeReadable)
         sensorHandler = SensorHandler(
             applicationContext,
             filesHandler,
@@ -75,6 +76,10 @@ class MainActivity : ComponentActivity() {
                     mViewModel.onClickSliderScreenButton(it)
                     navController.navigate(Screen.WatchList.route)
                 },
+                onClickCigSliderScreenButton = {
+                    mViewModel.onClickCigSliderScreenButton(it)
+                    navController.popBackStack()
+                },
                 onClickActivityPickerChip = {
                     mViewModel.onClickActivityButton(it)
                     navController.popBackStack()
@@ -85,7 +90,11 @@ class MainActivity : ComponentActivity() {
                 activities = mViewModel.activities
 
                 )
+
         }
+    }
+    private fun navigateToSlider(){
+        navController.navigate(Screen.CigSlider.route)
     }
     private fun vibrateWatch() {
         val vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator

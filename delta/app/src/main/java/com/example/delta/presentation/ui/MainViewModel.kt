@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavDestination
+import androidx.navigation.NavHostController
 import com.example.delta.R
 import java.io.File
 import java.time.LocalDateTime
@@ -22,7 +23,8 @@ class MainViewModel(vibrateWatch: () -> Unit,
                     writeFalseNegativeToEventsFile: (event_id: Int,
                                                      dateTimeForUserInput: String,
                                                      satisfaction: Int,
-                                                     otherActivity: String) -> Unit
+                                                     otherActivity: String) -> Unit,
+                    navigateToSlider: () -> Unit
 ) : ViewModel() {
     // Timer Lengths
     val sessionTimerLengthMilliseconds: Long = 480000
@@ -43,6 +45,7 @@ class MainViewModel(vibrateWatch: () -> Unit,
     // Local Copies of functions
     lateinit var mOnDialogResponse : (Boolean) -> Unit
     var mVibrateWatch: () -> Unit = vibrateWatch
+    var mNavigateToSlider: () -> Unit = navigateToSlider
     var mWriteToLogFile: (logEntry: String) -> Unit = writeToLogFile
     var mWriteToEventsFile: (events_id: Int) -> Unit = writeToEventsFile
     var mWriteFalseNegativeToEventsFile: (event_id: Int, dateTimeForUserInput: String, satisfaction: Int, otherActivity: String) -> Unit = writeFalseNegativeToEventsFile
@@ -212,6 +215,7 @@ class MainViewModel(vibrateWatch: () -> Unit,
         totalNumberOfCigsDetected ++
         isSmoking = false
         sessionTimer.cancel()
+        mNavigateToSlider()
     }
     fun onClickSmokingToggleChip(){
         mWriteToLogFile("onClickSmokingToggleChip")
@@ -243,6 +247,10 @@ class MainViewModel(vibrateWatch: () -> Unit,
     }
     fun onClickSliderScreenButton(it: Int) {
         mWriteToLogFile("onClickSliderScreenButton $it")
+        satisfaction = it
+    }
+    fun onClickCigSliderScreenButton(it: Int) {
+        mWriteToLogFile("onClickCigSliderScreenButton $it")
         satisfaction = it
     }
     fun onClickActivityButton(it: String){

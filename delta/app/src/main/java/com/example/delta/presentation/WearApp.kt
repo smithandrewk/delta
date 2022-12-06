@@ -56,6 +56,7 @@ fun WearApp(
     secondarySmokingText: String,
     onTimePickerConfirm: (LocalTime) -> Unit,
     onClickSliderScreenButton: (Int) -> Unit,
+    onClickCigSliderScreenButton: (Int) -> Unit,
     onSubmitNewActivity: (String) -> Unit,
     activities: MutableList<String>
 ) {
@@ -216,6 +217,16 @@ fun WearApp(
                             displayValueForUserInput = it
                         },
                         onClickSliderScreenButton = { onClickSliderScreenButton(displayValueForUserInput) }
+                    )
+                }
+                composable(
+                    route = Screen.CigSlider.route) {
+                    SliderScreen(
+                        displayValue = displayValueForUserInput,
+                        onValueChange = {
+                            displayValueForUserInput = it
+                        },
+                        onClickSliderScreenButton = { onClickCigSliderScreenButton(displayValueForUserInput) }
                     )
                 }
                 composable(
