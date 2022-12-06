@@ -22,8 +22,6 @@ class FilesHandler(private val applicationContext: Context,
     private lateinit var fLog: FileOutputStream         // File to write smoking detected events
     private lateinit var fEvents: FileOutputStream                 // File to write all events
 
-    private val numWindowsBatched = 1       // TODO should we get rid of this? or at least make it global
-
     // Map of IDs to name of event
     private val eventIDs = mapOf(
         R.integer.FALSE_NEGATIVE to "False Negative Reported",
@@ -55,7 +53,7 @@ class FilesHandler(private val applicationContext: Context,
             val json = JSONObject()
                 .put("App Start Time", appStartTimeMillis)
                 .put("App Start Time Readable", appStartTimeReadable)
-                .put("Number of Windows Batched", numWindowsBatched)
+                .put("Number of Windows Batched", applicationContext.resources.getInteger(R.integer.NUM_WINDOWS_BATCHED))
                 // TODO put watch model, and other data
             File(this.filesDir, "$dataFolderName/Info.json").appendText(json.toString())
         } catch (e: Exception) { e.printStackTrace() }

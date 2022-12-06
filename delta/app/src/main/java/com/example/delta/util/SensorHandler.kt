@@ -20,7 +20,7 @@ class SensorHandler(applicationContext: Context, filesHandler: FilesHandler, mVi
     // Record raw data
     private lateinit var sensorManager: SensorManager
     private var sampleIndex: Int = 0
-    private val numWindowsBatched = 1
+    private val numWindowsBatched = applicationContext.resources.getInteger(R.integer.NUM_WINDOWS_BATCHED)
     private var xBuffer:MutableList<MutableList<Double>> = mutableListOf()
     private var yBuffer:MutableList<MutableList<Double>> = mutableListOf()
     private var zBuffer:MutableList<MutableList<Double>> = mutableListOf()
