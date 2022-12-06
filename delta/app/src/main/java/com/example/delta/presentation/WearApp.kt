@@ -208,7 +208,8 @@ fun WearApp(
                         showSeconds = false
                     )
                 }
-                composable(route = Screen.Slider.route) {
+                composable(
+                    route = Screen.Slider.route) {
                     SliderScreen(
                         displayValue = displayValueForUserInput,
                         onValueChange = {

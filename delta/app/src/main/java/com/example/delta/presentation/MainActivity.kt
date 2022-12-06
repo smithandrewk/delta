@@ -1,23 +1,19 @@
 package com.example.delta.presentation
 
-import android.hardware.SensorManager
+import  android.hardware.SensorManager
 import android.os.*
 import android.util.Log
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.RequiresApi
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
-import com.example.delta.R
 import com.example.delta.presentation.navigation.Screen
 import com.example.delta.presentation.ui.MainViewModel
 import com.example.delta.util.FilesHandler
 import com.example.delta.util.SensorHandler
 import java.text.SimpleDateFormat
-import java.time.LocalDateTime
 import java.util.*
 
 class MainActivity : ComponentActivity() {
@@ -28,26 +24,25 @@ class MainActivity : ComponentActivity() {
     private lateinit var sensorHandler: SensorHandler
     private lateinit var filesHandler: FilesHandler
 
-    // UI
     private lateinit var mViewModel: MainViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
-
         super.onCreate(savedInstanceState)
-
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
         setTheme(android.R.style.Theme_DeviceDefault)
-        mViewModel = MainViewModel(::vibrateWatch,applicationContext,::writeFalseNegativeToFile,::writeToLogFile)
-        filesHandler = FilesHandler(this.filesDir, mViewModel, appStartTimeMillis, appStartTimeReadable)
-//        sensorHandler = SensorHandler(
-//            applicationContext,
-//            filesHandler,
-//            mViewModel,
-//            getSystemService(SENSOR_SERVICE) as SensorManager,
-//        )
 
+        // Initialize Objects
+        mViewModel = MainViewModel(::vibrateWatch,applicationContext,::writeToLogFile, ::writeToEventsFile, ::writeFalseNegativeToEventsFile)
+        filesHandler = FilesHandler(applicationContext, this.filesDir, mViewModel, appStartTimeMillis, appStartTimeReadable)
+        sensorHandler = SensorHandler(
+            applicationContext,
+            filesHandler,
+            mViewModel,
+            getSystemService(SENSOR_SERVICE) as SensorManager,
+        )
+
+        // UI
         setContent {
             navController = rememberSwipeDismissableNavController()
             navController.addOnDestinationChangedListener { controller, destination, arguments ->
@@ -100,11 +95,14 @@ class MainActivity : ComponentActivity() {
             vibrator.vibrate(1000)
         }
     }
-    private fun writeFalseNegativeToFile(dateTimeForUserInput: LocalDateTime, satisfaction: Int, otherActivity: String){
-        filesHandler.writeFalseNegativeToFile(dateTimeForUserInput,satisfaction,otherActivity)
-    }
     private fun writeToLogFile(logEntry: String){
         filesHandler.writeToLogFile(logEntry)
+    }
+    private fun writeToEventsFile(event_id: Int) {
+        filesHandler.writeToEventsFile(event_id)
+    }
+    private fun writeFalseNegativeToEventsFile(event_id: Int, dateTime: String, satisfaction: Int, otherActivity: String){
+        filesHandler.writeNegativesToEventsFile(event_id, dateTime, satisfaction, otherActivity)
     }
     override fun onDestroy() {
         super.onDestroy()
