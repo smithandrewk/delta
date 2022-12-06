@@ -1,7 +1,7 @@
 package com.example.delta.presentation
 
-import android.hardware.SensorManager
-import android.os.Bundle
+import  android.hardware.SensorManager
+import android.os.*
 import android.util.Log
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
@@ -24,20 +24,17 @@ class MainActivity : ComponentActivity() {
     private lateinit var sensorHandler: SensorHandler
     private lateinit var filesHandler: FilesHandler
 
-
-    // UI
-    private val mViewModel: MainViewModel = MainViewModel()
+    private lateinit var mViewModel: MainViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
-
         super.onCreate(savedInstanceState)
-
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
         setTheme(android.R.style.Theme_DeviceDefault)
 
-        filesHandler = FilesHandler(this.filesDir, mViewModel, appStartTimeMillis, appStartTimeReadable)
+        // Initialize Objects
+        mViewModel = MainViewModel(::vibrateWatch,applicationContext,::writeToLogFile, ::writeToEventsFile, ::writeFalseNegativeToEventsFile)
+        filesHandler = FilesHandler(applicationContext, this.filesDir, mViewModel, appStartTimeMillis, appStartTimeReadable)
         sensorHandler = SensorHandler(
             applicationContext,
             filesHandler,
@@ -45,11 +42,16 @@ class MainActivity : ComponentActivity() {
             getSystemService(SENSOR_SERVICE) as SensorManager,
         )
 
+        // UI
         setContent {
             navController = rememberSwipeDismissableNavController()
+            navController.addOnDestinationChangedListener { controller, destination, arguments ->
+                mViewModel.onDestinationChangedCallback(destination)
+            }
             WearApp(
                 swipeDismissibleNavController = navController,
                 isSmoking = mViewModel.isSmoking,
+                alertStatus = mViewModel.alertStatus,
                 numberOfPuffs = mViewModel.totalNumberOfPuffsDetected,
                 numberOfCigs = mViewModel.totalNumberOfCigsDetected,
                 dialogText = mViewModel.mDialogText,
@@ -57,16 +59,51 @@ class MainActivity : ComponentActivity() {
                 onDialogResponse = { mViewModel.onDialogResponse(it) },
                 onClickIteratePuffsChip = { mViewModel.onPuffDetected() },
                 onClickSmokingToggleChip = { mViewModel.onClickSmokingToggleChip() },
-                onClickReportMissedCigChip = { mViewModel.onClickReportMissedCigChip(navigationCallback = {
-                    navController.navigate(Screen.Time24hPicker.route)
-                }) },
-                onClickActivityPickerChip = { Log.d("0000","activity")},
-                secondarySmokingText = mViewModel.secondarySmokingText
-            )
+                onClickReportMissedCigChip = {
+                    mViewModel.onClickReportMissedCigChip(
+                        navigateToTimePicker = {
+                            Log.d("0001","Navigating to time picker")
+                            navController.navigate(Screen.Time24hPicker.route)
+                        })
+                                             },
+                secondarySmokingText = mViewModel.secondarySmokingText,
+                onTimePickerConfirm = {
+                    mViewModel.onTimePickerConfirm(it)
+                    navController.navigate(Screen.Slider.route)
+                },
+                onClickSliderScreenButton = {
+                    mViewModel.onClickSliderScreenButton(it)
+                    navController.navigate(Screen.WatchList.route)
+                },
+                onClickActivityPickerChip = {
+                    mViewModel.onClickActivityButton(it)
+                    navController.popBackStack()
+                    navController.popBackStack()
+                    navController.popBackStack()
+                },
+                onSubmitNewActivity = {mViewModel.onSubmitNewActivity(it)},
+                activities = mViewModel.activities
+
+                )
         }
-
     }
-
+    private fun vibrateWatch() {
+        val vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
+        if (Build.VERSION.SDK_INT >= 26) {
+            vibrator.vibrate(VibrationEffect.createOneShot(1000, 255))
+        } else {
+            vibrator.vibrate(1000)
+        }
+    }
+    private fun writeToLogFile(logEntry: String){
+        filesHandler.writeToLogFile(logEntry)
+    }
+    private fun writeToEventsFile(event_id: Int) {
+        filesHandler.writeToEventsFile(event_id)
+    }
+    private fun writeFalseNegativeToEventsFile(event_id: Int, dateTime: String, satisfaction: Int, otherActivity: String){
+        filesHandler.writeNegativesToEventsFile(event_id, dateTime, satisfaction, otherActivity)
+    }
     override fun onDestroy() {
         super.onDestroy()
         sensorHandler.unregister()

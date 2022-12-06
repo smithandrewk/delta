@@ -1,6 +1,5 @@
 package com.example.delta.presentation.components
 
-import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
@@ -15,11 +14,12 @@ import com.example.delta.R
 @Composable
 fun ConfirmationDialog(scrollState: ScalingLazyListState,
                         showConfirmationDialog: Boolean,
-                        onDialogResponse: (Boolean) -> Unit,
-                        dialogText: String) {
+                        onDialogResponse: (String) -> Unit,
+                        dialogText: String,
+                        alertStatus: String) {
     Dialog(
         showDialog = showConfirmationDialog,
-        onDismissRequest = { Log.d("0000","ondismissrequest")},
+        onDismissRequest = { if(alertStatus.isEmpty()) onDialogResponse("dismiss") },
         scrollState = scrollState
     ) {
         Alert(
@@ -32,9 +32,7 @@ fun ConfirmationDialog(scrollState: ScalingLazyListState,
             },
             negativeButton = {
                 Button(
-                    onClick = {
-                        onDialogResponse(false)
-                    },
+                    onClick = { onDialogResponse("no") },
                     colors = ButtonDefaults.secondaryButtonColors()
                 ) {
                     Icon(
@@ -45,7 +43,7 @@ fun ConfirmationDialog(scrollState: ScalingLazyListState,
             },
             positiveButton = {
                 Button(
-                    onClick = { onDialogResponse(true) },
+                    onClick = {  onDialogResponse("yes") },
                     colors = ButtonDefaults.primaryButtonColors()
                 ) {
                     Icon(

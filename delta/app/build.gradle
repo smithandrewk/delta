@@ -6,6 +6,14 @@ plugins {
 }
 
 android {
+//    signingConfigs {
+//        debug {
+//            storeFile file('/home/andrew/keystore.jks')
+//            storePassword 'password'
+//            keyAlias 'key0'
+//            keyPassword 'password'
+//        }
+//    }
     namespace 'com.example.delta'
     compileSdk 33
 
@@ -50,7 +58,7 @@ android {
 dependencies {
     def lifecycle_version = "2.6.0-alpha03"
 
-    implementation 'androidx.core:core-ktx:1.7.0'
+    implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'com.google.android.gms:play-services-wearable:18.0.0'
     implementation 'androidx.percentlayout:percentlayout:1.0.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
@@ -59,24 +67,26 @@ dependencies {
     implementation "androidx.wear.compose:compose-material:$wear_compose_version"
     implementation "androidx.wear.compose:compose-foundation:$wear_compose_version"
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_version"
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
-    implementation 'androidx.activity:activity-compose:1.3.1'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.5.1'
+    implementation 'androidx.activity:activity-compose:1.6.1'
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_version"
     implementation 'androidx.core:core-splashscreen:1.0.0'
     implementation 'androidx.navigation:navigation-ui-ktx:2.5.3'
-    implementation 'androidx.wear.compose:compose-navigation:1.0.1'
-    implementation 'com.google.android.horologist:horologist-composables:0.2.1'
-    implementation 'com.google.android.horologist:horologist-compose-layout:0.2.1'
+    implementation 'androidx.wear.compose:compose-navigation:1.0.2'
+    implementation 'com.google.android.horologist:horologist-composables:0.2.3'
+    implementation 'com.google.android.horologist:horologist-compose-layout:0.2.3'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1'
 
-    implementation "androidx.compose.material:material:1.0.0-beta05"
-    implementation "com.google.dagger:hilt-android:2.44"
-    kapt "com.google.dagger:hilt-compiler:2.44"
+    implementation 'androidx.compose.material:material:1.4.0-alpha02'
+    implementation 'com.google.dagger:hilt-android:2.44'
+    kapt 'com.google.dagger:hilt-compiler:2.44'
     // ViewModel
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     // ViewModel utilities for Compose
+    implementation "androidx.wear:wear-input:1.2.0-alpha02"
+
 }
 
 kapt {
