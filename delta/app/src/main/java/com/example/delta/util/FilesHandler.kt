@@ -12,7 +12,6 @@ import java.util.*
 
 class FilesHandler(private val applicationContext: Context,
                    private val filesDir: File,
-                   val mViewModel: MainViewModel,
                    private val appStartTimeMillis: Long,
                    private val appStartTimeReadable: String) {
 
