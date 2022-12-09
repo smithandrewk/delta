@@ -34,7 +34,14 @@ class MainActivity : ComponentActivity() {
         setTheme(android.R.style.Theme_DeviceDefault)
 
         // Initialize Objects
-        mViewModel = MainViewModel(::vibrateWatch,applicationContext,::writeToLogFile, ::writeToEventsFile, ::writeFalseNegativeToEventsFile,::navigateToSlider)
+        mViewModel = MainViewModel(
+            ::vibrateWatch,
+            applicationContext,
+            ::writeToLogFile,
+            ::writeToEventsFile,
+            ::writeStopSessionToEventsFile,
+            ::writeFalseNegativeToEventsFile,
+            ::navigateToSlider)
         filesHandler = FilesHandler(applicationContext, this.filesDir, appStartTimeMillis, appStartTimeReadable)
         sensorHandler = SensorHandler(
             applicationContext,
@@ -109,6 +116,9 @@ class MainActivity : ComponentActivity() {
     }
     private fun writeToEventsFile(event_id: Int) {
         filesHandler.writeToEventsFile(event_id)
+    }
+    private fun writeStopSessionToEventsFile(event_id: Int, satisfaction: Int){
+        filesHandler.writeStopSessionToEventsFile(event_id, satisfaction)
     }
     private fun writeFalseNegativeToEventsFile(event_id: Int, dateTime: String, satisfaction: Int, otherActivity: String){
         filesHandler.writeNegativesToEventsFile(event_id, dateTime, satisfaction, otherActivity)

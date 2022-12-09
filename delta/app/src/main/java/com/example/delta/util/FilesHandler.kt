@@ -89,6 +89,13 @@ class FilesHandler(private val applicationContext: Context,
                 "${eventIDs[event_id]}," +
                 ",,\n").toByteArray())
     }
+    fun writeStopSessionToEventsFile(event_id: Int, satisfaction: Int) {
+        // Write end of session to file
+        fEvents.write(("${Calendar.getInstance().timeInMillis}," +
+                "${applicationContext.resources.getInteger(event_id)}," +
+                "${eventIDs[event_id]},," +
+                "$satisfaction,\n").toByteArray())
+    }
     fun writeNegativesToEventsFile(event_id: Int, dateTime: String, satisfaction: Int, otherActivity: String){
         // write time, the id of the event, corresponding name of the event, and any extra parameters
         fEvents.write(("${Calendar.getInstance().timeInMillis}," +
