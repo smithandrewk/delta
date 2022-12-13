@@ -20,6 +20,7 @@ class MainViewModel(vibrateWatch: () -> Unit,
                     val applicationContext: Context,
                     writeToLogFile: (logEntry: String) -> Unit,
                     writeToEventsFile: (event_id: Int) -> Unit,
+                    writeStopSessionToEventsFile: (event_id: Int, satisfaction: Int) -> Unit,
                     writeFalseNegativeToEventsFile: (event_id: Int,
                                                      dateTimeForUserInput: String,
                                                      satisfaction: Int,
@@ -49,7 +50,7 @@ class MainViewModel(vibrateWatch: () -> Unit,
     var mWriteToLogFile: (logEntry: String) -> Unit = writeToLogFile
     var mWriteToEventsFile: (events_id: Int) -> Unit = writeToEventsFile
     var mWriteFalseNegativeToEventsFile: (event_id: Int, dateTimeForUserInput: String, satisfaction: Int, otherActivity: String) -> Unit = writeFalseNegativeToEventsFile
-
+    var mWriteStopSessionToEventsFile: (event_id: Int, satisfaction: Int) -> Unit = writeStopSessionToEventsFile
 
     private val activitiesFile = File(applicationContext.filesDir, "activities")
     var activities by mutableStateOf(mutableListOf(""))
@@ -186,18 +187,18 @@ class MainViewModel(vibrateWatch: () -> Unit,
         timer.start()
     }
     private val sessionTimer = object : CountDownTimer(sessionTimerLengthMilliseconds, 1000) {
-            // 8 minutes of milliseconds is 480000
-            override fun onTick(millisUntilFinished: Long) {
-                // onTick is called every countDownInterval, which we force to be 1000 ms;
-                // thus, iterate sessionLengthSeconds by 1 every time onTick is called
-                sessionLengthSeconds ++
-                // Given a variable with seconds, formats as a string mm:ss
-                secondarySmokingText = "${(sessionLengthSeconds / 60).toString().padStart(2, '0')} : ${(sessionLengthSeconds % 60).toString().padStart(2, '0')}"
-            }
-            override fun onFinish() {
-                // onFinish is only called when millisUntilFinished equals 0, never called externally
-                sendConfirmDoneSmokingDialog()
-            }
+        // 8 minutes of milliseconds is 480000
+        override fun onTick(millisUntilFinished: Long) {
+            // onTick is called every countDownInterval, which we force to be 1000 ms;
+            // thus, iterate sessionLengthSeconds by 1 every time onTick is called
+            sessionLengthSeconds ++
+            // Given a variable with seconds, formats as a string mm:ss
+            secondarySmokingText = "${(sessionLengthSeconds / 60).toString().padStart(2, '0')} : ${(sessionLengthSeconds % 60).toString().padStart(2, '0')}"
+        }
+        override fun onFinish() {
+            // onFinish is only called when millisUntilFinished equals 0, never called externally
+            sendConfirmDoneSmokingDialog()
+        }
     }
 
     // RESPONSE TO UI
@@ -209,7 +210,7 @@ class MainViewModel(vibrateWatch: () -> Unit,
     }
     private fun stopSmoking(source: Int){
         mWriteToLogFile("stopSmoking")
-        mWriteToEventsFile(source)
+        mWriteStopSessionToEventsFile(source, satisfaction)
         sessionLengthSeconds = 0
         secondarySmokingText = "tap to start"
         totalNumberOfCigsDetected ++

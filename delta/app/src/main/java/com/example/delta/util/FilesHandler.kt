@@ -22,8 +22,6 @@ class FilesHandler(private val applicationContext: Context,
     private lateinit var fLog: FileOutputStream         // File to write smoking detected events
     private lateinit var fEvents: FileOutputStream                 // File to write all events
 
-    private val numWindowsBatched = 1       // TODO should we get rid of this? or at least make it global
-
     // Map of IDs to name of event
     private val eventIDs = mapOf(
         R.integer.FALSE_NEGATIVE to "False Negative Reported",
@@ -48,14 +46,14 @@ class FilesHandler(private val applicationContext: Context,
         fLog = FileOutputStream(File(this.filesDir, "$dataFolderName/log.csv"))
 
         fEvents = FileOutputStream(File(this.filesDir, "$dataFolderName/events.csv"))
-        fEvents.write("time,event_id,event,extras\n".toByteArray())   // time in ms, id of event, name of event, and any extras
+        fEvents.write("time,event_id,event,time reported,satisfaction,other activity\n".toByteArray())   // time in ms, id of event, name of event, and any extras
 
         // Info File
         try {
             val json = JSONObject()
                 .put("App Start Time", appStartTimeMillis)
                 .put("App Start Time Readable", appStartTimeReadable)
-                .put("Number of Windows Batched", numWindowsBatched)
+                .put("Number of Windows Batched", applicationContext.resources.getInteger(R.integer.NUM_WINDOWS_BATCHED))
                 // TODO put watch model, and other data
             File(this.filesDir, "$dataFolderName/Info.json").appendText(json.toString())
         } catch (e: Exception) { e.printStackTrace() }
@@ -89,21 +87,23 @@ class FilesHandler(private val applicationContext: Context,
         fEvents.write(("${Calendar.getInstance().timeInMillis}," +
                 "${applicationContext.resources.getInteger(event_id)}," +
                 "${eventIDs[event_id]}," +
-                "null\n").toByteArray())
+                ",,\n").toByteArray())
+    }
+    fun writeStopSessionToEventsFile(event_id: Int, satisfaction: Int) {
+        // Write end of session to file
+        fEvents.write(("${Calendar.getInstance().timeInMillis}," +
+                "${applicationContext.resources.getInteger(event_id)}," +
+                "${eventIDs[event_id]},," +
+                "$satisfaction,\n").toByteArray())
     }
     fun writeNegativesToEventsFile(event_id: Int, dateTime: String, satisfaction: Int, otherActivity: String){
         // write time, the id of the event, corresponding name of the event, and any extra parameters
         fEvents.write(("${Calendar.getInstance().timeInMillis}," +
                 "${applicationContext.resources.getInteger(event_id)}," +
-                "${eventIDs[event_id]},").toByteArray())
-        // Add extras as json object
-        try {
-            val json = JSONObject()
-                .put("dateTime", dateTime)
-                .put("satisfaction", satisfaction)
-                .put("otherActivity", otherActivity)
-            fEvents.write((json.toString()+"\n").toByteArray())
-        } catch (e: Exception) { e.printStackTrace() }
+                "${eventIDs[event_id]}," +
+                "$dateTime," +
+                "$satisfaction," +
+                "$otherActivity\n").toByteArray())
     }
     fun writeStringToRawFile(string: String){
         fRaw.write(string.toByteArray())
