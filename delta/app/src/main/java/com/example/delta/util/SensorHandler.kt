@@ -21,9 +21,9 @@ class SensorHandler(applicationContext: Context, filesHandler: FilesHandler, mVi
     private lateinit var sensorManager: SensorManager
     private var sampleIndex: Int = 0
     private val numWindowsBatched = applicationContext.resources.getInteger(R.integer.NUM_WINDOWS_BATCHED)
-    private var xBuffer:MutableList<MutableList<Double>> = mutableListOf()
-    private var yBuffer:MutableList<MutableList<Double>> = mutableListOf()
-    private var zBuffer:MutableList<MutableList<Double>> = mutableListOf()
+    private var xBuffer:MutableList<MutableList<Float>> = mutableListOf()
+    private var yBuffer:MutableList<MutableList<Float>> = mutableListOf()
+    private var zBuffer:MutableList<MutableList<Float>> = mutableListOf()
     private var extrasBuffer:MutableList<MutableList<String>> = mutableListOf()
     private val windowUpperLim = numWindowsBatched + 99
     private val windowRange:IntRange = numWindowsBatched..windowUpperLim
@@ -41,9 +41,9 @@ class SensorHandler(applicationContext: Context, filesHandler: FilesHandler, mVi
     override fun onSensorChanged(event: SensorEvent) {
         if (sampleIndex == 5) {
             sampleIndex = 0
-            xBuffer.add(mutableListOf(event.values[0].toDouble()))
-            yBuffer.add(mutableListOf(event.values[1].toDouble()))
-            zBuffer.add(mutableListOf(event.values[2].toDouble()))
+            xBuffer.add(mutableListOf(event.values[0]))
+            yBuffer.add(mutableListOf(event.values[1]))
+            zBuffer.add(mutableListOf(event.values[2]))
             extrasBuffer.add(mutableListOf(
                 event.timestamp.toString(),
                 Calendar.getInstance().timeInMillis.toString(),
@@ -53,9 +53,9 @@ class SensorHandler(applicationContext: Context, filesHandler: FilesHandler, mVi
                 neuralHandler.processBatch(extrasBuffer, xBuffer, yBuffer, zBuffer)
 
                 // clear buffer
-                xBuffer = xBuffer.slice(windowRange) as MutableList<MutableList<Double>>
-                yBuffer = yBuffer.slice(windowRange) as MutableList<MutableList<Double>>
-                zBuffer = zBuffer.slice(windowRange) as MutableList<MutableList<Double>>
+                xBuffer = xBuffer.slice(windowRange) as MutableList<MutableList<Float>>
+                yBuffer = yBuffer.slice(windowRange) as MutableList<MutableList<Float>>
+                zBuffer = zBuffer.slice(windowRange) as MutableList<MutableList<Float>>
                 extrasBuffer = extrasBuffer.slice(windowRange)  as MutableList<MutableList<String>>
             }
 //        Log.v("onSensorChanged", "Time: ${event.timestamp}    x: ${event.values[0]}     y: ${event.values[1]}    z: ${event.values[2]}    smoking: ${mViewModel.isSmokingState}")
@@ -75,22 +75,12 @@ class SensorHandler(applicationContext: Context, filesHandler: FilesHandler, mVi
         sensorManager.unregisterListener(this)
     }
     private fun getNeuralHandler(): NeuralHandler{
-        // Load ANN weights and input ranges
-        // TODO: Can we move loading the weights to the NeuralHandler class?
-        var ins: InputStream = applicationContext.resources.openRawResource(R.raw.input_to_hidden_weights_and_biases)
-        val inputToHiddenWeightsAndBiasesString = ins.bufferedReader().use { it.readText() }
-        ins.close()
-        ins = applicationContext.resources.openRawResource(R.raw.hidden_to_output_weights_and_biases)
-        val hiddenToOutputWeightsAndBiasesString = ins.bufferedReader().use { it.readText() }
-        ins.close()
-        ins = applicationContext.resources.openRawResource(R.raw.input_ranges)
-        val inputRangesString = ins.bufferedReader().use { it.readText() }
-        ins.close()
         return NeuralHandler(
-            "big boy",
-            inputToHiddenWeightsAndBiasesString,
-            hiddenToOutputWeightsAndBiasesString,
-            inputRangesString,
-            numWindowsBatched,applicationContext,filesHandler,mViewModel)
+            "big Pytorch boy",
+            "model.pt",
+            numWindowsBatched,
+            applicationContext,
+            filesHandler,
+            mViewModel)
     }
 }

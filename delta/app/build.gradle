@@ -87,6 +87,9 @@ dependencies {
     // ViewModel utilities for Compose
     implementation "androidx.wear:wear-input:1.2.0-alpha02"
 
+    // Pytorch
+    implementation 'org.pytorch:pytorch_android_lite:1.13.0'
+
 }
 
 kapt {

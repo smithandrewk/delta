@@ -7,21 +7,24 @@ import com.example.delta.util.Matrix.Companion.logSigmoid
 import com.example.delta.util.Matrix.Companion.minMaxNorm
 import com.example.delta.util.Matrix.Companion.tanSigmoid
 import java.io.FileOutputStream
+import org.pytorch.IValue
+import org.pytorch.LiteModuleLoader
+import org.pytorch.Module
+import org.pytorch.Tensor
+import java.io.File
+import java.io.IOException
 
 
-class NeuralHandler (name: String,
-                     inputToHiddenWeightsAndBiasesString: String,
-                     hiddenToOutputWeightsAndBiasesString: String,
-                     inputRangesString:String,
-                     private var numWindows: Int,
-                     applicationContext: Context,
-                     filesHandler: FilesHandler,
-                     mViewModel: MainViewModel){
-    val mName = name.uppercase()
+class NeuralHandler (
+    private val name: String,
+    private var assetName: String,
+    private var numWindows: Int,
+    applicationContext: Context,
+    filesHandler: FilesHandler,
+    mViewModel: MainViewModel) {
 
-    private var inputToHiddenWeightsAndBiases: Matrix
-    private var hiddenToOutputWeightsAndBiases: Matrix
-    private var inputRanges: Matrix
+
+    private lateinit var module: Module
     private val windowSize = 100
     private var state = 0
     private var currentPuffLength = 0
@@ -33,18 +36,43 @@ class NeuralHandler (name: String,
 
     init{
         Log.d("0010","Initializing Neural Handler...")
-        inputToHiddenWeightsAndBiases = Matrix(inputToHiddenWeightsAndBiasesString)
-        hiddenToOutputWeightsAndBiases = Matrix(hiddenToOutputWeightsAndBiasesString)
-        inputRanges = Matrix(inputRangesString)
+        loadModule()
         if (numWindows < 1) {
             throw IllegalArgumentException("Number of Windows Batched must be 1 or greater")
         }
     }
 
+    private fun loadModule() {
+        // Loads pytorch model onto watch and into "module" variable
+        var moduleFileAbsoluteFilePath: String = ""
+        val moduleFile = File(applicationContext.filesDir, assetName)   // File on watch
+        try {
+            applicationContext.assets.open(assetName).use { `is` -> // Read from module file in "assets" dir
+                FileOutputStream(moduleFile).use { os ->    // Write to file on watch
+                    val buffer = ByteArray(4 * 1024)
+                    while (true) {
+                        val length = `is`.read(buffer)
+                        if (length <= 0)
+                            break
+                        os.write(buffer, 0, length)     // Write module to file on watch
+                    }
+                    os.flush()
+                    os.close()
+                }
+                moduleFileAbsoluteFilePath = moduleFile.absolutePath    // Path to file on watch
+            }
+        } catch (e: IOException) {
+            Log.e("Main", "Error process asset $assetName to file path")
+        }
+
+        // Load module
+        module = LiteModuleLoader.load(moduleFileAbsoluteFilePath)
+    }
+
     fun processBatch(extrasBuffer: MutableList<MutableList<String>>,
-                     xBuffer: MutableList<MutableList<Double>>,
-                     yBuffer: MutableList<MutableList<Double>>,
-                     zBuffer: MutableList<MutableList<Double>>) {
+                     xBuffer: MutableList<MutableList<Float>>,
+                     yBuffer: MutableList<MutableList<Float>>,
+                     zBuffer: MutableList<MutableList<Float>>) {
         /*
             extrasBuffer: 3x200 timestamps and activity with each row:
                             [SensorEvent timestamp (ns), Calendar timestamp (ms), current activity]
@@ -64,10 +92,11 @@ class NeuralHandler (name: String,
         // Run ANN on windows
         var i = 0
         while(i < numWindows){
-            rawSmokingOutput = forwardPropagate(
-                Matrix((xBuffer.slice(i until i+windowSize)+
-                        yBuffer.slice(i until i+windowSize)+
-                        zBuffer.slice(i until i+windowSize)).toMutableList()))
+            rawSmokingOutput = forwardPropagate((
+                xBuffer.slice(i until i+windowSize) +
+                yBuffer.slice(i until i+windowSize) +
+                zBuffer.slice(i until i+windowSize)
+            ).flatten().toFloatArray())
 
             smokingOutput = if (rawSmokingOutput >= 0.85){
                 1.0
@@ -132,9 +161,9 @@ class NeuralHandler (name: String,
                 state = 2
             }
             filesHandler.writeToRawFile(eventTimeStamp = extrasBuffer[i][0],
-                                        acc_x = xBuffer[i][0],
-                                        acc_y = yBuffer[i][0],
-                                        acc_z = zBuffer[i][0],
+                                        acc_x = xBuffer[i][0].toDouble(),
+                                        acc_y = yBuffer[i][0].toDouble(),
+                                        acc_z = zBuffer[i][0].toDouble(),
                                         timeInMillis = extrasBuffer[i][1],
                                         smokingStateString = extrasBuffer[i][2],
                                         thresholdSmokingOutput = smokingOutput,
@@ -144,7 +173,7 @@ class NeuralHandler (name: String,
         }
     }
 
-    private fun forwardPropagate(input: Matrix): Double {
+    private fun forwardPropagate(input: FloatArray): Double {
         /*
             input : three-axis accelerometer values from smartwatch sampled at 20 Hz for 5 seconds.
                     i.e. the input is (1x300) where the first 100 values are x accelerometer
@@ -154,10 +183,11 @@ class NeuralHandler (name: String,
                     If anyone asks where this info is found, see (Cole et al. 2017) at
                     https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5745355/.
          */
-        var normedInput = minMaxNorm(input)
-        normedInput.addOneToFront()
-        var hiddenOutput = tanSigmoid(inputToHiddenWeightsAndBiases * normedInput)
-        hiddenOutput.addOneToFront()
-        return logSigmoid(hiddenToOutputWeightsAndBiases * hiddenOutput)[0][0]
+
+        // forward propagate on Pytorch module
+        val inputTensor = Tensor.fromBlob(input, longArrayOf(300))
+        val outputTensor = module.forward(IValue.from(inputTensor))?.toTensor()
+        Log.d("Main", "${outputTensor?.dataAsFloatArray?.get(0)}")
+        return outputTensor?.dataAsFloatArray?.get(0)?.toDouble() ?: 0.0
     }
 }
