@@ -84,24 +84,6 @@ class Matrix {
         shape = Pair(mData.size,mData[0].size)
     }
     companion object{
-        fun minMaxNorm(input: Matrix): Matrix {
-            var min = 0.0
-            var max = 0.0
-            for (row in input.getData()){
-                if(row[0] < min){
-                    min = row[0]
-                }
-                if(row[0] > max){
-                    max = row[0]
-                }
-            }
-
-            val output = input.copy()
-            for (i in 0 until input.getRowSize()) {
-                output[i][0] = (input[i][0] - min) / (max - min)
-            }
-            return output
-        }
         fun tanSigmoid(input: Matrix): Matrix {
             val output = input.copy()
             for (i in 0 until input.getRowSize()){

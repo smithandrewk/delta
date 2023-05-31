@@ -4,10 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.example.delta.presentation.ui.MainViewModel
 import com.example.delta.util.Matrix.Companion.logSigmoid
-import com.example.delta.util.Matrix.Companion.minMaxNorm
 import com.example.delta.util.Matrix.Companion.tanSigmoid
-import java.io.FileOutputStream
-
 
 class NeuralHandler (name: String,
                      inputToHiddenWeightsAndBiasesString: String,
@@ -77,6 +74,7 @@ class NeuralHandler (name: String,
             // puff counter
             if (state == 0 && smokingOutput == 0.0){
                 // no action
+                state = 0
             } else if (state == 0 && smokingOutput == 1.0){
                 // starting validating puff length
                 state = 1
@@ -114,8 +112,9 @@ class NeuralHandler (name: String,
                 if (currentPuffLength > 14) {
                     // valid puff length!
                     state = 2
+                } else {
+                    state = 1
                 }
-                state = 1
             } else if (state == 4 && smokingOutput == 0.0) {
                 currentInterPuffIntervalLength ++
                 if (currentInterPuffIntervalLength > 49){
@@ -143,7 +142,13 @@ class NeuralHandler (name: String,
             i++
         }
     }
-
+    private fun minMaxNorm(input: Matrix): Matrix {
+        val output = input.copy()
+        for (i in 0 until input.getRowSize()) {
+            output[i][0] = ((2*((input[i][0] - inputRanges[i][0]) / (inputRanges[i][1] - inputRanges[i][0])))-1)
+        }
+        return output
+    }
     private fun forwardPropagate(input: Matrix): Double {
         /*
             input : three-axis accelerometer values from smartwatch sampled at 20 Hz for 5 seconds.
