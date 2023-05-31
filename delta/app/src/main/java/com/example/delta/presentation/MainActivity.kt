@@ -14,6 +14,7 @@ import com.example.delta.presentation.navigation.Screen
 import com.example.delta.presentation.ui.MainViewModel
 import com.example.delta.util.FilesHandler
 import com.example.delta.util.SensorHandler
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -26,7 +27,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var filesHandler: FilesHandler
 
     private lateinit var mViewModel: MainViewModel
-
+    private lateinit var filesDir: File
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
@@ -42,7 +43,8 @@ class MainActivity : ComponentActivity() {
             ::writeStopSessionToEventsFile,
             ::writeFalseNegativeToEventsFile,
             ::navigateToSlider)
-        filesHandler = FilesHandler(applicationContext, this.filesDir, appStartTimeMillis, appStartTimeReadable)
+        filesDir = getExternalFilesDir(null)!!
+        filesHandler = FilesHandler(applicationContext,filesDir, appStartTimeMillis, appStartTimeReadable)
         sensorHandler = SensorHandler(
             applicationContext,
             filesHandler,
