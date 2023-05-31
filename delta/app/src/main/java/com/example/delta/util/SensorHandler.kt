@@ -39,26 +39,24 @@ class SensorHandler(applicationContext: Context, filesHandler: FilesHandler, mVi
     }
 
     override fun onSensorChanged(event: SensorEvent) {
-        if (sampleIndex == 5) {
-            sampleIndex = 0
-            xBuffer.add(mutableListOf(event.values[0].toDouble()))
-            yBuffer.add(mutableListOf(event.values[1].toDouble()))
-            zBuffer.add(mutableListOf(event.values[2].toDouble()))
-            extrasBuffer.add(mutableListOf(
-                event.timestamp.toString(),
-                Calendar.getInstance().timeInMillis.toString(),
-                if(mViewModel.isSmoking) "Smoking" else "None"
-            ))
-            if(xBuffer.size > windowUpperLim){
-                neuralHandler.processBatch(extrasBuffer, xBuffer, yBuffer, zBuffer)
+        if (sampleIndex != 5) return
+        sampleIndex = 0
+        xBuffer.add(mutableListOf(event.values[0].toDouble()))
+        yBuffer.add(mutableListOf(event.values[1].toDouble()))
+        zBuffer.add(mutableListOf(event.values[2].toDouble()))
+        extrasBuffer.add(mutableListOf(
+            event.timestamp.toString(),
+            Calendar.getInstance().timeInMillis.toString(),
+            if(mViewModel.isSmoking) "Smoking" else "None"
+        ))
+        if(xBuffer.size > windowUpperLim){
+            neuralHandler.processBatch(extrasBuffer, xBuffer, yBuffer, zBuffer)
 
-                // clear buffer
-                xBuffer = xBuffer.slice(windowRange) as MutableList<MutableList<Double>>
-                yBuffer = yBuffer.slice(windowRange) as MutableList<MutableList<Double>>
-                zBuffer = zBuffer.slice(windowRange) as MutableList<MutableList<Double>>
-                extrasBuffer = extrasBuffer.slice(windowRange)  as MutableList<MutableList<String>>
-            }
-//        Log.v("onSensorChanged", "Time: ${event.timestamp}    x: ${event.values[0]}     y: ${event.values[1]}    z: ${event.values[2]}    smoking: ${mViewModel.isSmokingState}")
+            // clear buffer
+            xBuffer = xBuffer.slice(windowRange) as MutableList<MutableList<Double>>
+            yBuffer = yBuffer.slice(windowRange) as MutableList<MutableList<Double>>
+            zBuffer = zBuffer.slice(windowRange) as MutableList<MutableList<Double>>
+            extrasBuffer = extrasBuffer.slice(windowRange)  as MutableList<MutableList<String>>
         }
         sampleIndex++
     }
@@ -66,17 +64,11 @@ class SensorHandler(applicationContext: Context, filesHandler: FilesHandler, mVi
     override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
         // do nothing
     }
-
-    fun onIsSmokingToggleClicked() {
-        Log.i("Delta","SensorManager.onIsSmokingToggleClicked() : isSmoking = ${mViewModel.isSmoking}")
-    }
-
     fun unregister() {
         sensorManager.unregisterListener(this)
     }
     private fun getNeuralHandler(): NeuralHandler{
         // Load ANN weights and input ranges
-        // TODO: Can we move loading the weights to the NeuralHandler class?
         var ins: InputStream = applicationContext.resources.openRawResource(R.raw.input_to_hidden_weights_and_biases)
         val inputToHiddenWeightsAndBiasesString = ins.bufferedReader().use { it.readText() }
         ins.close()

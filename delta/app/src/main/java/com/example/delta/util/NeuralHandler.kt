@@ -14,7 +14,6 @@ class NeuralHandler (name: String,
                      applicationContext: Context,
                      filesHandler: FilesHandler,
                      mViewModel: MainViewModel){
-    val mName = name.uppercase()
 
     private var inputToHiddenWeightsAndBiases: Matrix
     private var hiddenToOutputWeightsAndBiases: Matrix
@@ -23,7 +22,6 @@ class NeuralHandler (name: String,
     private var state = 0
     private var currentPuffLength = 0
     private var currentInterPuffIntervalLength = 0
-    private val applicationContext = applicationContext
     private val filesHandler = filesHandler
     private val mViewModel = mViewModel
 
@@ -54,7 +52,6 @@ class NeuralHandler (name: String,
             and ANN outputs to a file
         */
 
-//        Log.v("0004","x: ${xBuffer.size}     y: ${yBuffer.size}    z: ${zBuffer.size}, extras: ${extrasBuffer.size}")
         var smokingOutput: Double
         var rawSmokingOutput: Double
 
