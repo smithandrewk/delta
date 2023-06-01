@@ -5,11 +5,9 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.util.Log
 import com.example.delta.R
 import com.example.delta.presentation.ui.MainViewModel
 import java.io.InputStream
-import java.util.*
 
 class SensorHandler(applicationContext: Context, filesHandler: FilesHandler, mViewModel: MainViewModel, sensorManager: SensorManager) : SensorEventListener {
     private val applicationContext = applicationContext
@@ -39,24 +37,26 @@ class SensorHandler(applicationContext: Context, filesHandler: FilesHandler, mVi
     }
 
     override fun onSensorChanged(event: SensorEvent) {
-        if (sampleIndex != 5) return
-        sampleIndex = 0
-        xBuffer.add(mutableListOf(event.values[0].toDouble()))
-        yBuffer.add(mutableListOf(event.values[1].toDouble()))
-        zBuffer.add(mutableListOf(event.values[2].toDouble()))
-        extrasBuffer.add(mutableListOf(
-            event.timestamp.toString(),
-            Calendar.getInstance().timeInMillis.toString(),
-            if(mViewModel.isSmoking) "Smoking" else "None"
-        ))
-        if(xBuffer.size > windowUpperLim){
-            neuralHandler.processBatch(extrasBuffer, xBuffer, yBuffer, zBuffer)
+        if (sampleIndex == 5) {
+            sampleIndex = 0
+            xBuffer.add(mutableListOf(event.values[0].toDouble()))
+            yBuffer.add(mutableListOf(event.values[1].toDouble()))
+            zBuffer.add(mutableListOf(event.values[2].toDouble()))
+            extrasBuffer.add(
+                mutableListOf(
+                    event.timestamp.toString(),
+                    if (mViewModel.isSmoking) "Smoking" else "None"
+                )
+            )
+            if (xBuffer.size > windowUpperLim) {
+                neuralHandler.processBatch(extrasBuffer, xBuffer, yBuffer, zBuffer)
 
-            // clear buffer
-            xBuffer = xBuffer.slice(windowRange) as MutableList<MutableList<Double>>
-            yBuffer = yBuffer.slice(windowRange) as MutableList<MutableList<Double>>
-            zBuffer = zBuffer.slice(windowRange) as MutableList<MutableList<Double>>
-            extrasBuffer = extrasBuffer.slice(windowRange)  as MutableList<MutableList<String>>
+                // clear buffer
+                xBuffer = xBuffer.slice(windowRange) as MutableList<MutableList<Double>>
+                yBuffer = yBuffer.slice(windowRange) as MutableList<MutableList<Double>>
+                zBuffer = zBuffer.slice(windowRange) as MutableList<MutableList<Double>>
+                extrasBuffer = extrasBuffer.slice(windowRange) as MutableList<MutableList<String>>
+            }
         }
         sampleIndex++
     }
@@ -79,10 +79,11 @@ class SensorHandler(applicationContext: Context, filesHandler: FilesHandler, mVi
         val inputRangesString = ins.bufferedReader().use { it.readText() }
         ins.close()
         return NeuralHandler(
-            "big boy",
             inputToHiddenWeightsAndBiasesString,
             hiddenToOutputWeightsAndBiasesString,
             inputRangesString,
-            numWindowsBatched,applicationContext,filesHandler,mViewModel)
+            numWindowsBatched,
+            filesHandler, mViewModel
+        )
     }
 }

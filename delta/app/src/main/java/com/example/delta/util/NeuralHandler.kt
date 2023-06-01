@@ -1,19 +1,17 @@
 package com.example.delta.util
 
-import android.content.Context
-import android.util.Log
 import com.example.delta.presentation.ui.MainViewModel
 import com.example.delta.util.Matrix.Companion.logSigmoid
 import com.example.delta.util.Matrix.Companion.tanSigmoid
 
-class NeuralHandler (name: String,
-                     inputToHiddenWeightsAndBiasesString: String,
-                     hiddenToOutputWeightsAndBiasesString: String,
-                     inputRangesString:String,
-                     private var numWindows: Int,
-                     applicationContext: Context,
-                     filesHandler: FilesHandler,
-                     mViewModel: MainViewModel){
+class NeuralHandler(
+    inputToHiddenWeightsAndBiasesString: String,
+    hiddenToOutputWeightsAndBiasesString: String,
+    inputRangesString: String,
+    private var numWindows: Int,
+    filesHandler: FilesHandler,
+    mViewModel: MainViewModel
+){
 
     private var inputToHiddenWeightsAndBiases: Matrix
     private var hiddenToOutputWeightsAndBiases: Matrix
@@ -27,7 +25,6 @@ class NeuralHandler (name: String,
 
 
     init{
-        Log.d("0010","Initializing Neural Handler...")
         inputToHiddenWeightsAndBiases = Matrix(inputToHiddenWeightsAndBiasesString)
         hiddenToOutputWeightsAndBiases = Matrix(hiddenToOutputWeightsAndBiasesString)
         inputRanges = Matrix(inputRangesString)
@@ -115,7 +112,7 @@ class NeuralHandler (name: String,
             } else if (state == 4 && smokingOutput == 0.0) {
                 currentInterPuffIntervalLength ++
                 if (currentInterPuffIntervalLength > 49){
-                    // valid interpuff for valid puff
+                    // valid inter-puff for valid puff
                     state = 0
                     currentPuffLength = 0
                     currentInterPuffIntervalLength = 0
@@ -131,9 +128,7 @@ class NeuralHandler (name: String,
                                         acc_x = xBuffer[i][0],
                                         acc_y = yBuffer[i][0],
                                         acc_z = zBuffer[i][0],
-                                        timeInMillis = extrasBuffer[i][1],
-                                        smokingStateString = extrasBuffer[i][2],
-                                        thresholdSmokingOutput = smokingOutput,
+                                        smokingStateString = extrasBuffer[i][1],
                                         rawSmokingOutput = rawSmokingOutput,
                                         expertStateMachineState = state)
             i++
