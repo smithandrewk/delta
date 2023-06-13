@@ -3,9 +3,6 @@ package com.example.delta.util
 import android.content.Context
 import android.util.Log
 import com.example.delta.presentation.ui.MainViewModel
-import com.example.delta.util.Matrix.Companion.logSigmoid
-import com.example.delta.util.Matrix.Companion.minMaxNorm
-import com.example.delta.util.Matrix.Companion.tanSigmoid
 import java.io.FileOutputStream
 import org.pytorch.IValue
 import org.pytorch.LiteModuleLoader
@@ -16,10 +13,9 @@ import java.io.IOException
 
 
 class NeuralHandler (
-    private val name: String,
     private var assetName: String,
     private var numWindows: Int,
-    applicationContext: Context,
+    private var applicationContext: Context,
     filesHandler: FilesHandler,
     mViewModel: MainViewModel) {
 
@@ -29,14 +25,13 @@ class NeuralHandler (
     private var state = 0
     private var currentPuffLength = 0
     private var currentInterPuffIntervalLength = 0
-    private val applicationContext = applicationContext
     private val filesHandler = filesHandler
     private val mViewModel = mViewModel
 
 
     init{
-        Log.d("0010","Initializing Neural Handler...")
         loadModule()
+
         if (numWindows < 1) {
             throw IllegalArgumentException("Number of Windows Batched must be 1 or greater")
         }
@@ -85,7 +80,6 @@ class NeuralHandler (
             and ANN outputs to a file
         */
 
-//        Log.v("0004","x: ${xBuffer.size}     y: ${yBuffer.size}    z: ${zBuffer.size}, extras: ${extrasBuffer.size}")
         var smokingOutput: Double
         var rawSmokingOutput: Double
 
@@ -106,6 +100,7 @@ class NeuralHandler (
             // puff counter
             if (state == 0 && smokingOutput == 0.0){
                 // no action
+                state = 0
             } else if (state == 0 && smokingOutput == 1.0){
                 // starting validating puff length
                 state = 1
@@ -143,12 +138,13 @@ class NeuralHandler (
                 if (currentPuffLength > 14) {
                     // valid puff length!
                     state = 2
+                } else {
+                    state = 1
                 }
-                state = 1
             } else if (state == 4 && smokingOutput == 0.0) {
                 currentInterPuffIntervalLength ++
                 if (currentInterPuffIntervalLength > 49){
-                    // valid interpuff for valid puff
+                    // valid inter-puff for valid puff
                     state = 0
                     currentPuffLength = 0
                     currentInterPuffIntervalLength = 0
@@ -164,9 +160,7 @@ class NeuralHandler (
                                         acc_x = xBuffer[i][0].toDouble(),
                                         acc_y = yBuffer[i][0].toDouble(),
                                         acc_z = zBuffer[i][0].toDouble(),
-                                        timeInMillis = extrasBuffer[i][1],
-                                        smokingStateString = extrasBuffer[i][2],
-                                        thresholdSmokingOutput = smokingOutput,
+                                        smokingStateString = extrasBuffer[i][1],
                                         rawSmokingOutput = rawSmokingOutput,
                                         expertStateMachineState = state)
             i++

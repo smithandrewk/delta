@@ -5,17 +5,15 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.util.Log
 import com.example.delta.R
 import com.example.delta.presentation.ui.MainViewModel
 import java.io.InputStream
-import java.util.*
 
 class SensorHandler(applicationContext: Context, filesHandler: FilesHandler, mViewModel: MainViewModel, sensorManager: SensorManager) : SensorEventListener {
     private val applicationContext = applicationContext
     private val filesHandler = filesHandler
     private val mViewModel = mViewModel
-    private var neuralHandler: NeuralHandler
+    private val neuralHandler: NeuralHandler
 
     // Record raw data
     private lateinit var sensorManager: SensorManager
@@ -44,11 +42,12 @@ class SensorHandler(applicationContext: Context, filesHandler: FilesHandler, mVi
             xBuffer.add(mutableListOf(event.values[0]))
             yBuffer.add(mutableListOf(event.values[1]))
             zBuffer.add(mutableListOf(event.values[2]))
-            extrasBuffer.add(mutableListOf(
-                event.timestamp.toString(),
-                Calendar.getInstance().timeInMillis.toString(),
-                if(mViewModel.isSmoking) "Smoking" else "None"
-            ))
+            extrasBuffer.add(
+                mutableListOf(
+                    event.timestamp.toString(),
+                    if (mViewModel.isSmoking) "Smoking" else "None"
+                )
+            )
             if(xBuffer.size > windowUpperLim){
                 neuralHandler.processBatch(extrasBuffer, xBuffer, yBuffer, zBuffer)
 
@@ -58,7 +57,6 @@ class SensorHandler(applicationContext: Context, filesHandler: FilesHandler, mVi
                 zBuffer = zBuffer.slice(windowRange) as MutableList<MutableList<Float>>
                 extrasBuffer = extrasBuffer.slice(windowRange)  as MutableList<MutableList<String>>
             }
-//        Log.v("onSensorChanged", "Time: ${event.timestamp}    x: ${event.values[0]}     y: ${event.values[1]}    z: ${event.values[2]}    smoking: ${mViewModel.isSmokingState}")
         }
         sampleIndex++
     }
@@ -66,17 +64,11 @@ class SensorHandler(applicationContext: Context, filesHandler: FilesHandler, mVi
     override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
         // do nothing
     }
-
-    fun onIsSmokingToggleClicked() {
-        Log.i("Delta","SensorManager.onIsSmokingToggleClicked() : isSmoking = ${mViewModel.isSmoking}")
-    }
-
     fun unregister() {
         sensorManager.unregisterListener(this)
     }
     private fun getNeuralHandler(): NeuralHandler{
         return NeuralHandler(
-            "big Pytorch boy",
             "model.pt",
             numWindowsBatched,
             applicationContext,
