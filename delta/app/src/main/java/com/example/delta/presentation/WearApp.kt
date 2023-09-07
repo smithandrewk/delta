@@ -58,7 +58,8 @@ fun WearApp(
     onClickSliderScreenButton: (Int) -> Unit,
     onClickCigSliderScreenButton: (Int) -> Unit,
     onSubmitNewActivity: (String) -> Unit,
-    activities: MutableList<String>
+    activities: MutableList<String>,
+    heroText: String
 ) {
     var themeColors by remember { mutableStateOf(initialThemeValues.colors) }
     WearAppTheme(colors = themeColors) {
@@ -197,7 +198,8 @@ fun WearApp(
                         } else {
                             ChipDefaults.primaryChipColors()
                         },
-                        secondarySmokingText = secondarySmokingText
+                        secondarySmokingText = secondarySmokingText,
+                        heroText = heroText
                     )
 
                     RequestFocusOnResume(focusRequester)

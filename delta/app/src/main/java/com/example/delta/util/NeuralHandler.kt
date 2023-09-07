@@ -125,10 +125,9 @@ class NeuralHandler(
                 state = 2
             }
             filesHandler.writeToRawFile(eventTimeStamp = extrasBuffer[i][0],
-                                        acc_x = xBuffer[i][0],
-                                        acc_y = yBuffer[i][0],
-                                        acc_z = zBuffer[i][0],
-                                        smokingStateString = extrasBuffer[i][1],
+                                        x = xBuffer[i][0],
+                                        y = yBuffer[i][0],
+                                        z = zBuffer[i][0],
                                         rawSmokingOutput = rawSmokingOutput,
                                         expertStateMachineState = state)
             i++

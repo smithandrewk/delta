@@ -71,11 +71,11 @@ class FilesHandler(private val applicationContext: Context,
         val rawFilename = "$appStartTimeReadable.$rawFileIndex.csv"
         fRaw = FileOutputStream(File(this.filesDir, "$dataFolderName/raw/$rawFilename"))
         fRaw.write("File Start Time: ${Calendar.getInstance().timeInMillis}\n".toByteArray())
-        fRaw.write("timestamp,acc_x,acc_y,acc_z,activity,rawlabel,state\n".toByteArray())
+        fRaw.write("timestamp,acc_x,acc_y,acc_z,rawlabel,state\n".toByteArray())
         rawFileIndex++
     }
-    fun writeToRawFile(eventTimeStamp: String, acc_x: Double,acc_y: Double,acc_z: Double,smokingStateString: String,rawSmokingOutput: Double,expertStateMachineState: Int){
-        fRaw.write("${eventTimeStamp},${acc_x},${acc_y},${acc_z},${smokingStateString},${rawSmokingOutput},${expertStateMachineState}\n".toByteArray())
+    fun writeToRawFile(eventTimeStamp: String, x: Double,y: Double,z: Double,rawSmokingOutput: Double,expertStateMachineState: Int){
+        fRaw.write("${eventTimeStamp},${x},${y},${z},${rawSmokingOutput},${expertStateMachineState}\n".toByteArray())
     }
     fun writeToLogFile(logEntry: String){
         fLog.write("${Calendar.getInstance().timeInMillis}: $logEntry\n".toByteArray())
@@ -102,9 +102,6 @@ class FilesHandler(private val applicationContext: Context,
                 "$dateTime," +
                 "$satisfaction," +
                 "$otherActivity\n").toByteArray())
-    }
-    fun writeStringToRawFile(string: String){
-        fRaw.write(string.toByteArray())
     }
     fun closeRawFile(){
         fRaw.close()

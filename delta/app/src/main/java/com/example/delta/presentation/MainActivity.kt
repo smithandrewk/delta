@@ -6,9 +6,13 @@ import android.util.Log
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
+import androidx.wear.compose.material.Text
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import com.example.delta.presentation.navigation.Screen
 import com.example.delta.presentation.ui.MainViewModel
@@ -49,7 +53,7 @@ class MainActivity : ComponentActivity() {
             applicationContext,
             filesHandler,
             mViewModel,
-            getSystemService(SENSOR_SERVICE) as SensorManager,
+            getSystemService(SENSOR_SERVICE) as SensorManager
         )
 
         // UI
@@ -96,10 +100,9 @@ class MainActivity : ComponentActivity() {
                     navController.popBackStack()
                 },
                 onSubmitNewActivity = {mViewModel.onSubmitNewActivity(it)},
-                activities = mViewModel.activities
-
+                activities = mViewModel.activities,
+                heroText = appStartTimeReadable
                 )
-
         }
     }
     private fun navigateToSlider(){

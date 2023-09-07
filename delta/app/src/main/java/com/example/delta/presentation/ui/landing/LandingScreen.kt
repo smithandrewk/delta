@@ -51,7 +51,8 @@ fun LandingScreen(
     onClickSmokingToggleChip: () -> Unit,
     onClickReportMissedCigChip: () -> Unit,
     chipColors: ChipColors,
-    secondarySmokingText: String
+    secondarySmokingText: String,
+    heroText: String
 ) {
 
     Box(modifier = modifier.fillMaxSize()) {
@@ -59,12 +60,11 @@ fun LandingScreen(
         ScalingLazyColumn(
             modifier = Modifier.scrollableColumn(focusRequester, scalingLazyListState),
             state = scalingLazyListState,
-            anchorType = ScalingLazyListAnchorType.ItemStart,
+            anchorType = ScalingLazyListAnchorType.ItemCenter,
             ) {
+
             item {
-                // Signify we have drawn the content of the first screen
-                ReportFullyDrawn()
-                ReportMissedCigChip (onClickReportMissedCigChip)
+                Text(text=heroText)
             }
             item {
                 SmokingToggleChip(
@@ -72,9 +72,8 @@ fun LandingScreen(
                     chipColors = chipColors,
                     secondarySmokingText = secondarySmokingText
                 )
-            }
-            item {
-                CompactChip(onClick = onClickIteratePuffsChip, colors = ChipDefaults.secondaryChipColors(),label= { Text("puff") })
+                // Signify we have drawn the content of the first screen
+                ReportFullyDrawn()
             }
         }
         val scrollState = rememberScalingLazyListState()

@@ -16,7 +16,7 @@ class SensorHandler(applicationContext: Context, filesHandler: FilesHandler, mVi
     private var neuralHandler: NeuralHandler
 
     // Record raw data
-    private lateinit var sensorManager: SensorManager
+    private var mSensorManager: SensorManager = sensorManager
     private var sampleIndex: Int = 0
     private val numWindowsBatched = applicationContext.resources.getInteger(R.integer.NUM_WINDOWS_BATCHED)
     private var xBuffer:MutableList<MutableList<Double>> = mutableListOf()
@@ -28,11 +28,10 @@ class SensorHandler(applicationContext: Context, filesHandler: FilesHandler, mVi
 
     init {
         neuralHandler = getNeuralHandler()
-
         val samplingRateHertz = 100
         val sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
         val samplingPeriodMicroseconds = 1000000/samplingRateHertz
-        sensorManager.registerListener(this, sensor, samplingPeriodMicroseconds)
+        mSensorManager.registerListener(this, sensor, samplingPeriodMicroseconds)
 
     }
 
@@ -45,7 +44,6 @@ class SensorHandler(applicationContext: Context, filesHandler: FilesHandler, mVi
             extrasBuffer.add(
                 mutableListOf(
                     event.timestamp.toString(),
-                    if (mViewModel.isSmoking) "Smoking" else "None"
                 )
             )
             if (xBuffer.size > windowUpperLim) {
@@ -65,7 +63,7 @@ class SensorHandler(applicationContext: Context, filesHandler: FilesHandler, mVi
         // do nothing
     }
     fun unregister() {
-        sensorManager.unregisterListener(this)
+        mSensorManager.unregisterListener(this)
     }
     private fun getNeuralHandler(): NeuralHandler{
         // Load ANN weights and input ranges
