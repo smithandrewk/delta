@@ -63,15 +63,27 @@ fun LandingScreen(
             anchorType = ScalingLazyListAnchorType.ItemCenter,
             ) {
 
+            // Data-time of app start time (dir name)
             item {
                 Text(text=heroText)
             }
+
+            // Report False Negative Button
+            item {
+                ReportMissedCigChip(onClickReportMissedCigChip)
+            }
+
+            // Start/stop smoking button
             item {
                 SmokingToggleChip(
                     onClickSmokingToggleChip = onClickSmokingToggleChip,
                     chipColors = chipColors,
                     secondarySmokingText = secondarySmokingText
                 )
+            }
+
+            item {
+                CompactChip(onClick = onClickIteratePuffsChip, colors = ChipDefaults.secondaryChipColors(),label= { Text("puff") })
                 // Signify we have drawn the content of the first screen
                 ReportFullyDrawn()
             }
