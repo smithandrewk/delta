@@ -52,13 +52,16 @@ fun WearApp(
     onClickIteratePuffsChip: () -> Unit,
     onClickSmokingToggleChip: () -> Unit,
     onClickReportMissedCigChip : () -> Unit,
-    onClickActivityPickerChip: (String) -> Unit,
+    onClickFNActivityPickerChip: (String) -> Unit,
     secondarySmokingText: String,
-    onTimePickerConfirm: (LocalTime) -> Unit,
-    onClickSliderScreenButton: (Int) -> Unit,
+    onFnTimePickerConfirm: (LocalTime) -> Unit,
+    onClickFnSliderScreenButton: (Int) -> Unit,
     onClickCigSliderScreenButton: (Int) -> Unit,
-    onSubmitNewActivity: (String) -> Unit,
-    activities: MutableList<String>,
+    onSubmitNewFNActivity: (String) -> Unit,
+    fnActivities: MutableList<String>,
+    onSubmitNewFpActivity: (String) -> Unit,
+    fpActivities: MutableList<String>,
+    onClickFpActivityPickerChip: (String) -> Unit,
     heroText: String
 ) {
     var themeColors by remember { mutableStateOf(initialThemeValues.colors) }
@@ -206,7 +209,7 @@ fun WearApp(
                 }
                 composable(Screen.Time24hPicker.route) {
                     TimePicker(
-                        onTimeConfirm = onTimePickerConfirm,
+                        onTimeConfirm = onFnTimePickerConfirm,
                         time = dateTimeForUserInput.toLocalTime(),
                         showSeconds = false
                     )
@@ -218,7 +221,7 @@ fun WearApp(
                         onValueChange = {
                             displayValueForUserInput = it
                         },
-                        onClickSliderScreenButton = { onClickSliderScreenButton(displayValueForUserInput) }
+                        onClickSliderScreenButton = { onClickFnSliderScreenButton(displayValueForUserInput) }
                     )
                 }
                 composable(
@@ -232,7 +235,7 @@ fun WearApp(
                     )
                 }
                 composable(
-                    route = Screen.WatchList.route,
+                    route = Screen.FnActivityList.route,
                     arguments = listOf(
                         // In this case, the argument isn't part of the route, it's just attached
                         // as information for the destination.
@@ -246,12 +249,36 @@ fun WearApp(
                     val focusRequester = remember { FocusRequester() }
 
                     ActivityPickerScreen(
-                        activities = activities,
+                        activities = fnActivities,
                         scalingLazyListState = scalingLazyListState,
                         focusRequester = focusRequester,
-                        onClickWatch = onClickActivityPickerChip,
-                        onClickCreateNewActivityButton = {Log.d("0000","create new activity")},
-                        onSubmitNewActivity = onSubmitNewActivity
+                        onClickActivity = onClickFNActivityPickerChip,
+                        onClickCreateNewActivityButton = {Log.d("0000","create new FN activity")},
+                        onSubmitNewFNActivity = onSubmitNewFNActivity
+                    )
+                    RequestFocusOnResume(focusRequester)
+                }
+                composable(
+                    route = Screen.FpActivityList.route,
+                    arguments = listOf(
+                        // In this case, the argument isn't part of the route, it's just attached
+                        // as information for the destination.
+                        navArgument(SCROLL_TYPE_NAV_ARGUMENT) {
+                            type = NavType.EnumType(DestinationScrollType::class.java)
+                            defaultValue = DestinationScrollType.SCALING_LAZY_COLUMN_SCROLLING
+                        }
+                    )
+                ) {
+                    val scalingLazyListState = scalingLazyListState(it)
+                    val focusRequester = remember { FocusRequester() }
+
+                    ActivityPickerScreen(
+                        activities = fpActivities,
+                        scalingLazyListState = scalingLazyListState,
+                        focusRequester = focusRequester,
+                        onClickActivity = onClickFpActivityPickerChip,
+                        onClickCreateNewActivityButton = {Log.d("0000","create new FP activity")},
+                        onSubmitNewFNActivity = onSubmitNewFpActivity
                     )
                     RequestFocusOnResume(focusRequester)
                 }

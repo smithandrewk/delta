@@ -18,6 +18,7 @@ import java.time.format.DateTimeFormatter
 
 class MainViewModel(vibrateWatch: () -> Unit,
                     val applicationContext: Context,
+                    val filesDir: File,
                     writeToLogFile: (logEntry: String) -> Unit,
                     writeToEventsFile: (event_id: Int) -> Unit,
                     writeStopSessionToEventsFile: (event_id: Int, satisfaction: Int) -> Unit,
@@ -25,7 +26,10 @@ class MainViewModel(vibrateWatch: () -> Unit,
                                                      dateTimeForUserInput: String,
                                                      satisfaction: Int,
                                                      otherActivity: String) -> Unit,
-                    navigateToSlider: () -> Unit
+                    writeFalsePositiveToEventsFile: (event_id: Int, otherActivity: String) -> Unit,
+                    navigateToFnSlider: () -> Unit,
+                    navigateToFpActivitiesList: () -> Unit
+
 ) : ViewModel() {
     // Timer Lengths
     val sessionTimerLengthMilliseconds: Long = 480000
@@ -46,14 +50,22 @@ class MainViewModel(vibrateWatch: () -> Unit,
     // Local Copies of functions
     lateinit var mOnDialogResponse : (Boolean) -> Unit
     var mVibrateWatch: () -> Unit = vibrateWatch
-    var mNavigateToSlider: () -> Unit = navigateToSlider
+    var mNavigateToFnSlider: () -> Unit = navigateToFnSlider
     var mWriteToLogFile: (logEntry: String) -> Unit = writeToLogFile
     var mWriteToEventsFile: (events_id: Int) -> Unit = writeToEventsFile
     var mWriteFalseNegativeToEventsFile: (event_id: Int, dateTimeForUserInput: String, satisfaction: Int, otherActivity: String) -> Unit = writeFalseNegativeToEventsFile
+    var mWriteFalsePositiveToEventsFile: (event_id: Int, otherActivity: String) -> Unit = writeFalsePositiveToEventsFile
     var mWriteStopSessionToEventsFile: (event_id: Int, satisfaction: Int) -> Unit = writeStopSessionToEventsFile
+    var mNavigateToFpActivitiesList: () -> Unit = navigateToFpActivitiesList
 
-    private val activitiesFile = File(applicationContext.filesDir, "activities")
-    var activities by mutableStateOf(mutableListOf(""))
+    // False Negative Activities
+    private val fnActivitiesFile = File(filesDir, "fnActivities")
+    var fnActivities by mutableStateOf(mutableListOf(""))
+
+    // False Positive Activities
+    private val fpActivitiesFile = File(filesDir, "fpActivities")
+    var fpActivities by mutableStateOf(mutableListOf(""))
+
     var dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH_mm_ss")
     var dateTimeForUserInput: LocalDateTime by mutableStateOf(LocalDateTime.now())
     var satisfaction by mutableStateOf(5)
@@ -66,19 +78,20 @@ class MainViewModel(vibrateWatch: () -> Unit,
     var mQueuedDialogText by mutableStateOf("")
 
     init {
-        initializeActivitiesFile()
+        fnActivities = initializeActivitiesFile(fnActivitiesFile, "reclining\ndriving\nLaying\n")
+        fpActivities = initializeActivitiesFile(fpActivitiesFile, "eating\nvaping\ndrinking\n")
     }
 
-    private fun initializeActivitiesFile(){
+    private fun initializeActivitiesFile(file: File, activitiesList: String): MutableList<String> {
         // if /data/data/com.example.delta/activities exists
-        if(activitiesFile.exists()){
+        if(file.exists()){
             // do nothing
         } else {
             // if activities file doesn't exist, write simple list of activities to file
-            activitiesFile.writeText("reclining\nvaping\neating\ndriving\n")
+            file.writeText(activitiesList)
         }
         // save activities to mutable list as well
-        activities = activitiesFile.readLines().toMutableList()
+        return file.readLines().toMutableList()
     }
 
     // DIALOG CONTROL
@@ -126,13 +139,18 @@ class MainViewModel(vibrateWatch: () -> Unit,
         mWriteToLogFile("sendConfirmSmokingDialog")
         sendDialog("Confirm that you started smoking.",
             onDialogResponse = { response ->
-                if(response) startSmoking(R.integer.AI_START_SMOKING)
+                if(response){
+                    startSmoking(R.integer.AI_START_SMOKING)
+                }
+                else {
+                    onRejectDetectedPuff()
+                }
                 for (timer in puffTimers) {
                     timer.cancel()
                 }
                 puffTimers.clear()
                 numberOfPuffsInCurrentSession = 0
-                               }
+            }
         )
     }
     private fun sendConfirmDoneSmokingDialog() {
@@ -150,7 +168,7 @@ class MainViewModel(vibrateWatch: () -> Unit,
                 } else {
                     resetSessionTimer()
                 }
-                               }
+           }
         )
     }
     private val dialogTimer = object : CountDownTimer(dialogTimerLengthMilliseconds, 1000) {
@@ -216,8 +234,9 @@ class MainViewModel(vibrateWatch: () -> Unit,
         totalNumberOfCigsDetected ++
         isSmoking = false
         sessionTimer.cancel()
-        mNavigateToSlider()
+        mNavigateToFnSlider()
     }
+
     fun onClickSmokingToggleChip(){
         mWriteToLogFile("onClickSmokingToggleChip")
         if(isSmoking){
@@ -230,32 +249,55 @@ class MainViewModel(vibrateWatch: () -> Unit,
         currentDestination = "${destination.route}"
 //        allowDialogToBeSent = currentDestination == "landing"
     }
-    fun onSubmitNewActivity(activity: String){
-        mWriteToLogFile("onSubmitNewActivity $activity")
-        activitiesFile.appendText("$activity\n")
-        activities.add(activity)
+
+    fun onClickCigSliderScreenButton(it: Int) {
+        mWriteToLogFile("onClickCigSliderScreenButton $it")
+        satisfaction = it
     }
 
+    // False Positives
+
+    fun onSubmitNewFpActivity(activity: String) {
+        mWriteToLogFile("OnSubmitNewFPActivity")
+        fpActivitiesFile.appendText("$activity\n")
+        fpActivities.add(activity)
+    }
+    fun onRejectDetectedPuff() {
+        mWriteToLogFile("onRejectDetectedPuff")
+        mNavigateToFpActivitiesList()
+    }
+    fun onClickFPActivityButton(it: String){
+        mWriteToLogFile("onClickFPActivityButton $it")
+        mWriteFalsePositiveToEventsFile(
+            R.integer.FALSE_POSITIVE,
+            it // chosen activity
+        )
+    }
+
+
     // False Negatives
+
+    fun onSubmitNewFNActivity(activity: String){
+        mWriteToLogFile("onSubmitNewFNActivity $activity")
+        fnActivitiesFile.appendText("$activity\n")
+        fnActivities.add(activity)
+    }
+
     fun onClickReportMissedCigChip(navigateToTimePicker: () -> Unit){
         mWriteToLogFile("onClickReportMissedCigChip")
         sendDialog("Confirm that you want to report missed cig.",
             onDialogResponse = { if(it) navigateToTimePicker() })
     }
-    fun onTimePickerConfirm(it: LocalTime){
-        mWriteToLogFile("onTimePickerConfirm $it")
+    fun onFnTimePickerConfirm(it: LocalTime){
+        mWriteToLogFile("onFnTimePickerConfirm $it")
         dateTimeForUserInput = it.atDate(dateTimeForUserInput.toLocalDate())
     }
-    fun onClickSliderScreenButton(it: Int) {
-        mWriteToLogFile("onClickSliderScreenButton $it")
+    fun onClickFnSliderScreenButton(it: Int) {
+        mWriteToLogFile("onClickFnSliderScreenButton $it")
         satisfaction = it
     }
-    fun onClickCigSliderScreenButton(it: Int) {
-        mWriteToLogFile("onClickCigSliderScreenButton $it")
-        satisfaction = it
-    }
-    fun onClickActivityButton(it: String){
-        mWriteToLogFile("onClickActivityButton $it")
+    fun onClickFNActivityButton(it: String){
+        mWriteToLogFile("onClickFNActivityButton $it")
         otherActivity = it
         mWriteFalseNegativeToEventsFile(R.integer.FALSE_NEGATIVE,
                                         dateTimeForUserInput.format(dateTimeFormatter),

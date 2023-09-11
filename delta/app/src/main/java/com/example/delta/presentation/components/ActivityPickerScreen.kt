@@ -62,10 +62,10 @@ fun ActivityPickerScreen(
     activities: List<String>,
     scalingLazyListState: ScalingLazyListState,
     focusRequester: FocusRequester,
-    onClickWatch: (String) -> Unit,
+    onClickActivity: (String) -> Unit,
     modifier: Modifier = Modifier,
     onClickCreateNewActivityButton: () -> Unit,
-    onSubmitNewActivity: (String) -> Unit
+    onSubmitNewFNActivity: (String) -> Unit
 ) {
     var textForUserInput by remember { mutableStateOf("") }
 
@@ -79,7 +79,7 @@ fun ActivityPickerScreen(
                 val results: Bundle = RemoteInput.getResultsFromIntent(data)
                 val newInputText: CharSequence? = results.getCharSequence(inputTextKey)
                 textForUserInput = newInputText.toString()
-                onSubmitNewActivity(textForUserInput)
+                onSubmitNewFNActivity(textForUserInput)
             }
         }
     ScalingLazyColumn(
@@ -89,7 +89,7 @@ fun ActivityPickerScreen(
         // Displays all watches.
         items(activities) { string ->
             Chip(
-                onClick = { onClickWatch(string) },
+                onClick = { onClickActivity(string) },
                 label = {
                     Text(
                         text = string,

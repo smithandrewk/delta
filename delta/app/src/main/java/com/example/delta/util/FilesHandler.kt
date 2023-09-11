@@ -28,7 +28,8 @@ class FilesHandler(private val applicationContext: Context,
         R.integer.USER_START_SMOKING to "User Started Smoking Session",
         R.integer.AI_START_SMOKING to "AI Started Smoking Session",
         R.integer.USER_STOP_SMOKING to "User Stopped Smoking Session",
-        R.integer.TIMER_STOP_SMOKING to "Timer Stopped Smoking Session"
+        R.integer.TIMER_STOP_SMOKING to "Timer Stopped Smoking Session",
+        R.integer.FALSE_POSITIVE to "False Positive Reported"
     )
 
     init {
@@ -101,6 +102,13 @@ class FilesHandler(private val applicationContext: Context,
                 "${eventIDs[event_id]}," +
                 "$dateTime," +
                 "$satisfaction," +
+                "$otherActivity\n").toByteArray())
+    }
+    fun writePositivesToEventsFile(event_id: Int, otherActivity: String) {
+        // write time, id of event, corrosponding name of event, and any extra parameters
+        fEvents.write(("${Calendar.getInstance().timeInMillis}," +
+                "${applicationContext.resources.getInteger(event_id)}," +
+                "${eventIDs[event_id]},,," +
                 "$otherActivity\n").toByteArray())
     }
     fun closeRawFile(){

@@ -7,4 +7,5 @@
     <integer name="AI_START_SMOKING">4</integer>
     <integer name="USER_STOP_SMOKING">5</integer>
     <integer name="TIMER_STOP_SMOKING">6</integer>
+    <integer name="FALSE_POSITIVE">7</integer>
 </resources>

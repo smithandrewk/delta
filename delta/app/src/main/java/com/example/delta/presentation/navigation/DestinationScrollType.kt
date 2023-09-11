@@ -15,7 +15,8 @@ sealed class Screen(
     val route: String
 ) {
     object Landing : Screen("landing")
-    object WatchList : Screen("watchList")
+    object FnActivityList : Screen("fnActivityList")
+    object FpActivityList : Screen("fpActivityList")
     object WatchDetail : Screen("watchDetail")
     object UserInputComponents : Screen("userInputComponents")
     object Stepper : Screen("stepper")

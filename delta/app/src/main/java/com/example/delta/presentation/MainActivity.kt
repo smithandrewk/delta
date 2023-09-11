@@ -39,15 +39,19 @@ class MainActivity : ComponentActivity() {
         setTheme(android.R.style.Theme_DeviceDefault)
 
         // Initialize Objects
+        filesDir = getExternalFilesDir(null)!!
         mViewModel = MainViewModel(
             ::vibrateWatch,
             applicationContext,
+            filesDir,
             ::writeToLogFile,
             ::writeToEventsFile,
             ::writeStopSessionToEventsFile,
             ::writeFalseNegativeToEventsFile,
-            ::navigateToSlider)
-        filesDir = getExternalFilesDir(null)!!
+            ::writeFalsePositiveToEventsFile,
+            ::navigateToFnSlider,
+            ::navigateToFpActivitiesList
+        )
         filesHandler = FilesHandler(applicationContext,filesDir, appStartTimeMillis, appStartTimeReadable)
         sensorHandler = SensorHandler(
             applicationContext,
@@ -73,40 +77,59 @@ class MainActivity : ComponentActivity() {
                 onDialogResponse = { mViewModel.onDialogResponse(it) },
                 onClickIteratePuffsChip = { mViewModel.onPuffDetected() },
                 onClickSmokingToggleChip = { mViewModel.onClickSmokingToggleChip() },
+
+                // Click Report FN
                 onClickReportMissedCigChip = {
                     mViewModel.onClickReportMissedCigChip(
                         navigateToTimePicker = {
                             Log.d("0001","Navigating to time picker")
                             navController.navigate(Screen.Time24hPicker.route)
-                        })
-                                             },
+                        }
+                    )
+                },
                 secondarySmokingText = mViewModel.secondarySmokingText,
-                onTimePickerConfirm = {
-                    mViewModel.onTimePickerConfirm(it)
+                // Select time that false negative occurred
+                onFnTimePickerConfirm = {
+                    mViewModel.onFnTimePickerConfirm(it)
                     navController.navigate(Screen.Slider.route)
                 },
-                onClickSliderScreenButton = {
-                    mViewModel.onClickSliderScreenButton(it)
-                    navController.navigate(Screen.WatchList.route)
+                // Select Enjoyment after false negative reported smoke session
+                onClickFnSliderScreenButton = {
+                    mViewModel.onClickFnSliderScreenButton(it)
+                    navController.navigate(Screen.FnActivityList.route)
                 },
+                // Select Enjoyment after detected/manually started smoking session
                 onClickCigSliderScreenButton = {
                     mViewModel.onClickCigSliderScreenButton(it)
                     navController.popBackStack()
                 },
-                onClickActivityPickerChip = {
-                    mViewModel.onClickActivityButton(it)
+                // While reporting false negative, choose activity user was doing
+                onClickFNActivityPickerChip = {
+                    mViewModel.onClickFNActivityButton(it)
                     navController.popBackStack()
                     navController.popBackStack()
                     navController.popBackStack()
                 },
-                onSubmitNewActivity = {mViewModel.onSubmitNewActivity(it)},
-                activities = mViewModel.activities,
+                // Submit new false negative activity
+                onSubmitNewFNActivity = {mViewModel.onSubmitNewFNActivity(it)},
+                fnActivities = mViewModel.fnActivities,
+                // Submit new false positive activity
+                onSubmitNewFpActivity = {mViewModel.onSubmitNewFpActivity(it)},
+                fpActivities = mViewModel.fpActivities,
+                // While reporting false positive, choose activity user was doing
+                onClickFpActivityPickerChip = {
+                    mViewModel.onClickFPActivityButton(it)
+                    navController.popBackStack()
+                },
                 heroText = appStartTimeReadable
                 )
         }
     }
-    private fun navigateToSlider(){
+    private fun navigateToFnSlider(){
         navController.navigate(Screen.CigSlider.route)
+    }
+    private fun navigateToFpActivitiesList() {
+        navController.navigate(Screen.FpActivityList.route)
     }
     private fun vibrateWatch() {
         val vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
@@ -127,6 +150,9 @@ class MainActivity : ComponentActivity() {
     }
     private fun writeFalseNegativeToEventsFile(event_id: Int, dateTime: String, satisfaction: Int, otherActivity: String){
         filesHandler.writeNegativesToEventsFile(event_id, dateTime, satisfaction, otherActivity)
+    }
+    private fun writeFalsePositiveToEventsFile(event_id: Int, otherActivity: String) {
+        filesHandler.writePositivesToEventsFile(event_id, otherActivity)
     }
     override fun onDestroy() {
         super.onDestroy()
