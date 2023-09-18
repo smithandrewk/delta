@@ -67,6 +67,7 @@ class MainActivity : ComponentActivity() {
                 mViewModel.onDestinationChangedCallback(destination)
             }
             WearApp(
+                applicationContext,
                 swipeDismissibleNavController = navController,
                 isSmoking = mViewModel.isSmoking,
                 alertStatus = mViewModel.alertStatus,
