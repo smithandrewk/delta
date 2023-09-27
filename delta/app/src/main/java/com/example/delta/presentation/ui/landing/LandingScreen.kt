@@ -80,13 +80,14 @@ fun LandingScreen(
                     chipColors = chipColors,
                     secondarySmokingText = secondarySmokingText
                 )
-            }
-
-            item {
-                CompactChip(onClick = onClickIteratePuffsChip, colors = ChipDefaults.secondaryChipColors(),label= { Text("puff") })
-                // Signify we have drawn the content of the first screen
                 ReportFullyDrawn()
             }
+
+//            item {
+//                CompactChip(onClick = onClickIteratePuffsChip, colors = ChipDefaults.secondaryChipColors(),label= { Text("puff") })
+//                // Signify we have drawn the content of the first screen
+//                ReportFullyDrawn()
+//            }
         }
         val scrollState = rememberScalingLazyListState()
 
@@ -97,61 +98,61 @@ fun LandingScreen(
             dialogText = dialogText,
             alertStatus = alertStatus
         )
-
-        // Places curved text at the bottom of round devices and straight text at the bottom of
-        // non-round devices.
-        if (LocalConfiguration.current.isScreenRound) {
-            val watchShape = "Cigs: $numberOfCigs, Puffs: $numberOfPuffs"
-            val primaryColor = MaterialTheme.colors.primary
-            CurvedLayout(
-                anchor = 90F,
-                anchorType = AnchorType.Center,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                curvedRow {
-                    curvedText(
-                        text = watchShape,
-                        angularDirection = CurvedDirection.Angular.CounterClockwise,
-                        style = CurvedTextStyle(
-                            fontSize = 18.sp,
-                            color = primaryColor
-                        ),
-                        modifier = CurvedModifier
-                            .radialGradientBackground(
-                                0f to Color.Transparent,
-                                0.2f to Color.DarkGray.copy(alpha = 0.2f),
-                                0.6f to Color.DarkGray.copy(alpha = 0.2f),
-                                0.7f to Color.DarkGray.copy(alpha = 0.05f),
-                                1f to Color.Transparent
-                            )
-                    )
-                }
-            }
-        } else {
-            Row(
-                modifier = Modifier.fillMaxSize(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.Bottom
-            ) {
-                Text(
-                    modifier = Modifier
-                        .padding(bottom = 2.dp)
-                        .background(
-                            Brush.verticalGradient(
-                                0f to Color.Transparent,
-                                0.3f to Color.DarkGray.copy(alpha = 0.05f),
-                                0.4f to Color.DarkGray.copy(alpha = 0.2f),
-                                0.8f to Color.DarkGray.copy(alpha = 0.2f),
-                                1f to Color.Transparent
-                            )
-                        ),
-                    textAlign = TextAlign.Center,
-                    color = MaterialTheme.colors.primary,
-                    text = "Cigs: $numberOfCigs, Puffs: $numberOfPuffs",
-                    fontSize = 18.sp
-                )
-            }
-        }
+//
+//        // Places curved text at the bottom of round devices and straight text at the bottom of
+//        // non-round devices.
+//        if (LocalConfiguration.current.isScreenRound) {
+////            val watchShape = "Cigs: $numberOfCigs, Puffs: $numberOfPuffs"
+//            val primaryColor = MaterialTheme.colors.primary
+//            CurvedLayout(
+//                anchor = 90F,
+//                anchorType = AnchorType.Center,
+//                modifier = Modifier.fillMaxSize()
+//            ) {
+//                curvedRow {
+//                    curvedText(
+//                        text = watchShape,
+//                        angularDirection = CurvedDirection.Angular.CounterClockwise,
+//                        style = CurvedTextStyle(
+//                            fontSize = 18.sp,
+//                            color = primaryColor
+//                        ),
+//                        modifier = CurvedModifier
+//                            .radialGradientBackground(
+//                                0f to Color.Transparent,
+//                                0.2f to Color.DarkGray.copy(alpha = 0.2f),
+//                                0.6f to Color.DarkGray.copy(alpha = 0.2f),
+//                                0.7f to Color.DarkGray.copy(alpha = 0.05f),
+//                                1f to Color.Transparent
+//                            )
+//                    )
+//                }
+//            }
+//        } else {
+//            Row(
+//                modifier = Modifier.fillMaxSize(),
+//                horizontalArrangement = Arrangement.Center,
+//                verticalAlignment = Alignment.Bottom
+//            ) {
+//                Text(
+//                    modifier = Modifier
+//                        .padding(bottom = 2.dp)
+//                        .background(
+//                            Brush.verticalGradient(
+//                                0f to Color.Transparent,
+//                                0.3f to Color.DarkGray.copy(alpha = 0.05f),
+//                                0.4f to Color.DarkGray.copy(alpha = 0.2f),
+//                                0.8f to Color.DarkGray.copy(alpha = 0.2f),
+//                                1f to Color.Transparent
+//                            )
+//                        ),
+//                    textAlign = TextAlign.Center,
+//                    color = MaterialTheme.colors.primary,
+//                    text = "Cigs: $numberOfCigs, Puffs: $numberOfPuffs",
+//                    fontSize = 18.sp
+//                )
+//            }
+//        }
     }
 }
 
@@ -176,13 +177,13 @@ fun SmokingToggleChip(onClickSmokingToggleChip: () -> Unit,chipColors: ChipColor
         onClick = onClickSmokingToggleChip,
         enabled = true,
         // When we have both label and secondary label present limit both to 1 line of text
-        label = { Text(text = "Smoking Session", maxLines = 1, overflow = TextOverflow.Ellipsis) },
+        label = { Text(text = stringResource(R.string.main_annotation_session_button_label), maxLines = 1, overflow = TextOverflow.Ellipsis) },
         secondaryLabel = {
             Text(text = secondarySmokingText, maxLines = 1, overflow = TextOverflow.Ellipsis)
         },
         icon = {
             Icon(
-                painter = painterResource(id = R.drawable.lungs),
+                painter = painterResource(id = R.drawable.apple),
                 contentDescription = "lungs",
                 modifier = Modifier
                     .size(ChipDefaults.IconSize)

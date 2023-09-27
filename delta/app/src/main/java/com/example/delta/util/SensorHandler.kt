@@ -47,7 +47,8 @@ class SensorHandler(applicationContext: Context, filesHandler: FilesHandler, mVi
                 )
             )
             if (xBuffer.size > windowUpperLim) {
-                neuralHandler.processBatch(extrasBuffer, xBuffer, yBuffer, zBuffer)
+                // TODO turn neural network back on once we have an eating model
+//                neuralHandler.processBatch(extrasBuffer, xBuffer, yBuffer, zBuffer)
 
                 // clear buffer
                 xBuffer = xBuffer.slice(windowRange) as MutableList<MutableList<Double>>

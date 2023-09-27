@@ -18,7 +18,7 @@ android {
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.example.delta"
+        applicationId "com.example.delta_eat"
         minSdk 26
         targetSdk 33
         versionCode 1

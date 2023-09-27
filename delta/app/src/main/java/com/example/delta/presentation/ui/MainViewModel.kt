@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
@@ -78,8 +79,8 @@ class MainViewModel(vibrateWatch: () -> Unit,
     var mQueuedDialogText by mutableStateOf("")
 
     init {
-        fnActivities = initializeActivitiesFile(fnActivitiesFile, "reclining\ndriving\nLaying\n")
-        fpActivities = initializeActivitiesFile(fpActivitiesFile, "eating\nvaping\ndrinking\n")
+        fnActivities = initializeActivitiesFile(fnActivitiesFile, "reclining\n")
+        fpActivities = initializeActivitiesFile(fpActivitiesFile, "smoking\n")
     }
 
     private fun initializeActivitiesFile(file: File, activitiesList: String): MutableList<String> {
@@ -137,7 +138,7 @@ class MainViewModel(vibrateWatch: () -> Unit,
     }
     private fun sendConfirmSmokingDialog(){
         mWriteToLogFile("sendConfirmSmokingDialog")
-        sendDialog("Confirm that you started smoking.",
+        sendDialog(applicationContext.getString(R.string.confirm_ai_detected_session),
             onDialogResponse = { response ->
                 if(response){
                     startSmoking(R.integer.AI_START_SMOKING)
@@ -285,7 +286,8 @@ class MainViewModel(vibrateWatch: () -> Unit,
 
     fun onClickReportMissedCigChip(navigateToTimePicker: () -> Unit){
         mWriteToLogFile("onClickReportMissedCigChip")
-        sendDialog("Confirm that you want to report missed cig.",
+        sendDialog(
+            applicationContext.getString(R.string.report_false_negative_dialog_text),
             onDialogResponse = { if(it) navigateToTimePicker() })
     }
     fun onFnTimePickerConfirm(it: LocalTime){

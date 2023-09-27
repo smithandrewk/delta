@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">delta</string>
+    <string name="app_name">delta_eat</string>
     <!--
     This string is used for square devices and overridden by hello_world in
     values-round/strings.xml for round devices.
@@ -23,4 +23,7 @@
     <string name="stop_smoking_session_button_label">stop smoking</string>
     <string name="text_input_label">Create New Activity</string>
     <string name="manual_text_entry_label">Enter Activity Manually</string>
+    <string name="main_annotation_session_button_label">Eating Session</string>
+    <string name="report_false_negative_dialog_text">Confirm that you want to report a missed eating session.</string>
+    <string name="confirm_ai_detected_session">Confirm that you started eating.</string>
 </resources>

@@ -12,5 +12,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "delta"
+rootProject.name = "delta_eat"
 include ':app'
