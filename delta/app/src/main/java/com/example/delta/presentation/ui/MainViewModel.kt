@@ -156,7 +156,8 @@ class MainViewModel(vibrateWatch: () -> Unit,
     }
     private fun sendConfirmDoneSmokingDialog() {
         mWriteToLogFile("sendConfirmDoneSmokingDialog")
-        sendDialog("Confirm that you are done smoking.",
+        sendDialog(
+            applicationContext.getString(R.string.confirm_done_session_dialog_text),
             onDialogResponse = { response ->
                 Log.d("0001","Confirm Done Smoking Response: $response")
                 if(response) {
