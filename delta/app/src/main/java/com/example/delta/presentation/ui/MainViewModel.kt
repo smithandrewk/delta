@@ -73,6 +73,7 @@ class MainViewModel(vibrateWatch: () -> Unit,
     var puffTimers = mutableListOf<CountDownTimer>()
     var currentDestination: String = ""
     var lastResponse: String = "dismiss"
+    var lastDialogWasTimedOut = false
     var dialogQueued: Boolean = false
     lateinit var mQueuedOnDialogResponse : (Boolean) -> Unit
     var mQueuedDialogText by mutableStateOf("")
@@ -142,8 +143,9 @@ class MainViewModel(vibrateWatch: () -> Unit,
                 if(response){
                     startSmoking(R.integer.AI_START_SMOKING)
                 }
-                else {
+                else if (!lastDialogWasTimedOut) {
                     onRejectDetectedPuff()
+                    lastDialogWasTimedOut = false
                 }
                 for (timer in puffTimers) {
                     timer.cancel()
@@ -178,6 +180,7 @@ class MainViewModel(vibrateWatch: () -> Unit,
         override fun onFinish() {
             Log.d("0001","dialogTimer::onFinish dialog timed out after 20 seconds")
             // If dialog times out, same as dismissing
+            lastDialogWasTimedOut = true
             onDialogResponse("dismiss")
         }
     }
