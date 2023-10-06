@@ -78,6 +78,9 @@ class FilesHandler(private val applicationContext: Context,
     fun writeToRawFile(eventTimeStamp: String, x: Double,y: Double,z: Double,rawSmokingOutput: Double,expertStateMachineState: Int){
         fRaw.write("${eventTimeStamp},${x},${y},${z},${rawSmokingOutput},${expertStateMachineState}\n".toByteArray())
     }
+    fun writeEventToRawFile(eventTimeStamp: Long, x: Float,y: Float,z: Float){
+        fRaw.write("${eventTimeStamp},${x},${y},${z}\n".toByteArray())
+    }
     fun writeToLogFile(logEntry: String){
         fLog.write("${Calendar.getInstance().timeInMillis}: $logEntry\n".toByteArray())
     }
