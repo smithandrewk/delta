@@ -24,8 +24,8 @@ class SensorHandler(applicationContext: Context, filesHandler: FilesHandler, mVi
     override fun onSensorChanged(event: SensorEvent) {
         filesHandler.writeEventToRawFile(eventTimeStamp = event.timestamp,
             x = event.values[0],
-            y = event.values[0],
-            z = event.values[0])
+            y = event.values[1],
+            z = event.values[2])
     }
 
     override fun onAccuracyChanged(p0: Sensor?, p1: Int) {

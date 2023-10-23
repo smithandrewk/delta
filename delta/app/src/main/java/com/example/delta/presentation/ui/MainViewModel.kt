@@ -33,7 +33,7 @@ class MainViewModel(vibrateWatch: () -> Unit,
 
 ) : ViewModel() {
     // Timer Lengths
-    val sessionTimerLengthMilliseconds: Long = 480000
+    val sessionTimerLengthMilliseconds: Long = 1800000 // 30 minutes
     val dialogTimerLengthMilliseconds: Long = 20000
 
     // State variables
@@ -188,7 +188,6 @@ class MainViewModel(vibrateWatch: () -> Unit,
     private fun resetSessionTimer(){
         mWriteToLogFile("resetSessionTimer")
         sessionTimer.cancel()
-        sessionLengthSeconds = 0
         sessionTimer.start()
     }
     private fun startPuffTimer(){
