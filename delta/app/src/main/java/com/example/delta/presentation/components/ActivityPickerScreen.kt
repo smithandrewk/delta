@@ -18,13 +18,20 @@ package com.example.delta.presentation.components
 
 
 import android.app.RemoteInput
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.inputmethod.EditorInfo
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,16 +56,23 @@ import androidx.wear.input.RemoteInputIntentHelper
 import androidx.wear.input.wearableExtender
 import com.example.delta.R
 
-import com.google.android.horologist.compose.navscaffold.scrollableColumn
+// Material 3 components
+import androidx.compose.material3.Surface
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 
+import com.google.android.horologist.compose.navscaffold.scrollableColumn
+import dagger.hilt.android.qualifiers.ApplicationContext
 
 
 /**
  * Displays a list of watches plus a [ToggleChip] at the top to display/hide the Vignette around
  * the screen. The list is powered using a [ScalingLazyColumn].
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ActivityPickerScreen(
+    applicationContext: Context,
     activities: List<String>,
     scalingLazyListState: ScalingLazyListState,
     focusRequester: FocusRequester,
@@ -89,7 +103,7 @@ fun ActivityPickerScreen(
         // Displays all watches.
         items(activities) { string ->
             Chip(
-                onClick = { onClickActivity(string) },
+                onClick = { /* Nothing. This can't be clicked */ },
                 label = {
                     Text(
                         text = string,
@@ -97,8 +111,24 @@ fun ActivityPickerScreen(
                         overflow = TextOverflow.Ellipsis
                     )
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().height(52.dp)
             )
+
+            Surface(
+                color = Color.Transparent,
+                shape = RoundedCornerShape(80),
+                modifier = Modifier.combinedClickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = LocalIndication.current,
+                    onClick = {
+                        Toast.makeText(applicationContext, "Press and Hold to Select", Toast.LENGTH_SHORT).show();
+                    },
+                    onLongClick = {
+                        Log.d("ActivityPickerScreen", "Long Press")
+                        onClickActivity(string)
+                    }
+                ).fillMaxWidth().height(52.dp)
+            ) {}
         }
 
         item {

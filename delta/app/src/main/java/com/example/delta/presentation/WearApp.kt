@@ -1,6 +1,7 @@
 package com.example.delta.presentation
 
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.runtime.*
@@ -36,10 +37,12 @@ import com.example.delta.presentation.components.UserInputComponentsScreen
 import com.google.android.horologist.composables.TimePicker
 import com.example.delta.presentation.navigation.Screen
 import com.example.delta.presentation.ui.landing.LandingScreen
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.LocalTime
 
 @Composable
 fun WearApp(
+    applicationContext: Context,
     modifier: Modifier = Modifier,
     swipeDismissibleNavController: NavHostController = rememberSwipeDismissableNavController(),
     isSmoking: Boolean,
@@ -249,6 +252,7 @@ fun WearApp(
                     val focusRequester = remember { FocusRequester() }
 
                     ActivityPickerScreen(
+                        applicationContext,
                         activities = fnActivities,
                         scalingLazyListState = scalingLazyListState,
                         focusRequester = focusRequester,
@@ -273,6 +277,7 @@ fun WearApp(
                     val focusRequester = remember { FocusRequester() }
 
                     ActivityPickerScreen(
+                        applicationContext,
                         activities = fpActivities,
                         scalingLazyListState = scalingLazyListState,
                         focusRequester = focusRequester,
