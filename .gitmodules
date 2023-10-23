@@ -1,0 +1,3 @@
+[submodule "delta/app/src/main/java/com/example/delta/submodules"]
+	path = delta/app/src/main/java/com/example/delta/submodules
+	url = https://github.com/Musa-Azeem/delta_components

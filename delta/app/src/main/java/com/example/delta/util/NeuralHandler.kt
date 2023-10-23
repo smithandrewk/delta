@@ -1,8 +1,10 @@
 package com.example.delta.util
 
 import com.example.delta.presentation.ui.MainViewModel
-import com.example.delta.util.Matrix.Companion.logSigmoid
-import com.example.delta.util.Matrix.Companion.tanSigmoid
+import com.example.delta.submodules.util.Matrix
+import com.example.delta.submodules.util.Matrix.Companion.logSigmoid
+import com.example.delta.submodules.util.Matrix.Companion.tanSigmoid
+
 
 class NeuralHandler(
     inputToHiddenWeightsAndBiasesString: String,
@@ -58,7 +60,8 @@ class NeuralHandler(
             rawSmokingOutput = forwardPropagate(
                 Matrix((xBuffer.slice(i until i+windowSize)+
                         yBuffer.slice(i until i+windowSize)+
-                        zBuffer.slice(i until i+windowSize)).toMutableList()))
+                        zBuffer.slice(i until i+windowSize)).toMutableList())
+            )
 
             smokingOutput = if (rawSmokingOutput >= 0.85){
                 1.0
