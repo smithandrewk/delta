@@ -176,7 +176,10 @@ fun SmokingToggleChip(onClickSmokingToggleChip: () -> Unit,chipColors: ChipColor
         onClick = onClickSmokingToggleChip,
         enabled = true,
         // When we have both label and secondary label present limit both to 1 line of text
-        label = { Text(text = "Smoking Session", maxLines = 1, overflow = TextOverflow.Ellipsis) },
+        label = { Text(
+            text = stringResource(R.string.main_annotation_session_button_label), 
+            maxLines = 1, 
+            overflow = TextOverflow.Ellipsis) },
         secondaryLabel = {
             Text(text = secondarySmokingText, maxLines = 1, overflow = TextOverflow.Ellipsis)
         },

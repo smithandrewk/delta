@@ -138,7 +138,7 @@ class MainViewModel(vibrateWatch: () -> Unit,
     }
     private fun sendConfirmSmokingDialog(){
         mWriteToLogFile("sendConfirmSmokingDialog")
-        sendDialog("Confirm that you started smoking.",
+        sendDialog(applicationContext.getString(R.string.confirm_ai_detected_session),
             onDialogResponse = { response ->
                 if(response){
                     startSmoking(R.integer.AI_START_SMOKING)
@@ -157,7 +157,8 @@ class MainViewModel(vibrateWatch: () -> Unit,
     }
     private fun sendConfirmDoneSmokingDialog() {
         mWriteToLogFile("sendConfirmDoneSmokingDialog")
-        sendDialog("Confirm that you are done smoking.",
+        sendDialog(
+            applicationContext.getString(R.string.confirm_done_session_dialog_text),
             onDialogResponse = { response ->
                 Log.d("0001","Confirm Done Smoking Response: $response")
                 if(response) {
@@ -288,7 +289,7 @@ class MainViewModel(vibrateWatch: () -> Unit,
 
     fun onClickReportMissedCigChip(navigateToTimePicker: () -> Unit){
         mWriteToLogFile("onClickReportMissedCigChip")
-        sendDialog("Confirm that you want to report missed cig.",
+        sendDialog(applicationContext.getString(R.string.report_false_negative_dialog_text),
             onDialogResponse = { if(it) navigateToTimePicker() })
     }
     fun onFnTimePickerConfirm(it: LocalTime){
