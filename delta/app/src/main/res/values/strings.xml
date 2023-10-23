@@ -4,5 +4,23 @@
     This string is used for square devices and overridden by hello_world in
     values-round/strings.xml for round devices.
     -->
-    <string name="hello_world">Hello Square World!</string>
+    <string name="hello_world">From the Square world,\nHello, %1$s!</string>
+    <string name="title_text">Hi, andrew!</string>
+    <string name="watch_shape">round</string>
+    <string name="report_false_negative_button_label">Report False Negative</string>
+    <string name="start_smoking_session_button_label">start smoking</string>
+    <string name="leading_time_text">leading text</string>
+    <string name="confirmation_dialog_no">no</string>
+    <string name="alert_dialog_yes">yes</string>
+    <string name="dialog_timed_out">timed out</string>
+    <string name="dialog_dismissed">dismissed</string>
+    <string name="confirmation_dialog_label">confirmation dialog label</string>
+    <string name="alert_dialog_label">alert dialog label</string>
+    <string name="confirmation_dialog_tick">confirm dialog tick</string>
+    <string name="confirmation_dialog_success">confirm dialog success</string>
+    <string name="confirmation_dialog_power_off">confirm dialog power off</string>
+    <string name="dialog_sure">Cancel or confirm?</string>
+    <string name="stop_smoking_session_button_label">stop smoking</string>
+    <string name="text_input_label">Create New Activity</string>
+    <string name="manual_text_entry_label">Enter Activity Manually</string>
 </resources>
