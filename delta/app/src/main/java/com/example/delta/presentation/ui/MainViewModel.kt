@@ -190,7 +190,6 @@ class MainViewModel(vibrateWatch: () -> Unit,
     private fun resetSessionTimer(){
         mWriteToLogFile("resetSessionTimer")
         sessionTimer.cancel()
-        sessionLengthSeconds = 0
         sessionTimer.start()
     }
     private fun startPuffTimer(){
