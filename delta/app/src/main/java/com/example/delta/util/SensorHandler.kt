@@ -1,37 +1,29 @@
 package com.example.delta.util
 
-import android.content.Context
 import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import com.example.delta.R
-import com.example.delta.presentation.ui.MainViewModel
-import java.io.InputStream
 
-class SensorHandler(applicationContext: Context, filesHandler: FilesHandler, mViewModel: MainViewModel, sensorManager: SensorManager) : SensorEventListener {
-    private val filesHandler = filesHandler
+class SensorHandler(fileHandler: FileHandler, sensorManager: SensorManager) {
     private var mSensorManager: SensorManager = sensorManager
-
+    private var mFileHandler: FileHandler = fileHandler
+    private val mAccelerometerListener: AccelerometerListener = AccelerometerListener(mFileHandler)
+    private val mGyroscopeListener: GyroscopeListener = GyroscopeListener(mFileHandler)
     init {
         val samplingRateHertz = 100
-        val sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        val mAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        val mGyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
         val samplingPeriodMicroseconds = 1000000/samplingRateHertz
-        mSensorManager.registerListener(this, sensor, samplingPeriodMicroseconds)
-
+        mSensorManager.registerListener(mAccelerometerListener, mAccelerometer, samplingPeriodMicroseconds)
+        mSensorManager.registerListener(mGyroscopeListener, mGyroscope, samplingPeriodMicroseconds)
     }
-
-    override fun onSensorChanged(event: SensorEvent) {
-        filesHandler.writeEventToRawFile(eventTimeStamp = event.timestamp,
-            x = event.values[0],
-            y = event.values[1],
-            z = event.values[2])
+    private fun unregisterAccelerometer() {
+        mSensorManager.unregisterListener(mAccelerometerListener)
     }
-
-    override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
-        // do nothing
+    private fun unregisterGyroscope() {
+        mSensorManager.unregisterListener(mGyroscopeListener)
     }
-    fun unregister() {
-        mSensorManager.unregisterListener(this)
+    fun unregisterAll() {
+        unregisterAccelerometer()
+        unregisterGyroscope()
     }
 }

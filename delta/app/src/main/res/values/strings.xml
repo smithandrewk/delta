@@ -27,4 +27,6 @@
     <string name="report_false_negative_dialog_text">Confirm that you want to report a missed eating session.</string>
     <string name="confirm_ai_detected_session">Confirm that you started eating.</string>
     <string name="confirm_done_session_dialog_text">Confirm that you are done eating</string>
+    <string name="title_activity_presentation._main2">presentation.MainActivity2</string>
+    <string name="title_activity_main2">MainActivity2</string>
 </resources>
