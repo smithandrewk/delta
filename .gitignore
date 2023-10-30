@@ -86,3 +86,7 @@ lint/tmp/
 
 .idea
 .DS_Store
+
+
+# Make sure this is commented in the submodules branch
+submodules
