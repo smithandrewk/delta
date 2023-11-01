@@ -4,6 +4,10 @@
 *.ap_
 *.aab
 
+*.DS_Store
+*.csv
+*.json
+
 # Files for the ART/Dalvik VM
 *.dex
 

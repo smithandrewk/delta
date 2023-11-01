@@ -11,7 +11,7 @@ class SensorHandler(fileHandler: FileHandler, sensorManager: SensorManager) {
     init {
         val samplingRateHertz = 100
         val mAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-        val mGyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        val mGyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
         val samplingPeriodMicroseconds = 1000000/samplingRateHertz
         mSensorManager.registerListener(mAccelerometerListener, mAccelerometer, samplingPeriodMicroseconds)
         mSensorManager.registerListener(mGyroscopeListener, mGyroscope, samplingPeriodMicroseconds)

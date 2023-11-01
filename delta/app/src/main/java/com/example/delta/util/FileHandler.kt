@@ -11,7 +11,6 @@ class FileHandler(filesDir: File) {
     private val appStartTimeReadable = SimpleDateFormat("yyyy-MM-dd_HH_mm_ss", Locale.ENGLISH).format(
         Date()
     )
-    private lateinit var dataFolderName: String
     private var fLog: FileOutputStream
     private var fAccelerometerData: FileOutputStream
     private var fGyroscopeData: FileOutputStream
@@ -31,7 +30,7 @@ class FileHandler(filesDir: File) {
             val json = JSONObject()
                 .put("App Start Time Readable", appStartTimeReadable)
             // TODO put watch model, and other data
-            File(mFilesDir, "$dataFolderName/info.json").appendText(json.toString())
+            File(mFilesDir, "$appStartTimeReadable/info.json").appendText(json.toString())
         } catch (e: Exception) { e.printStackTrace() }
     }
 
