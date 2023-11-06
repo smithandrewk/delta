@@ -2,6 +2,7 @@ package com.example.delta.presentation
 
 import  android.hardware.SensorManager
 import android.os.*
+import android.util.Log
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -25,22 +26,39 @@ import com.example.delta.util.FileHandler
 import com.example.delta.util.SensorHandler
 import java.util.*
 import androidx.wear.compose.material.curvedText
+import io.ktor.client.HttpClient
+import io.ktor.client.request.forms.InputProvider
+import io.ktor.client.request.forms.formData
+import io.ktor.client.request.forms.submitFormWithBinaryData
+import io.ktor.client.request.request
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
+import io.ktor.http.quote
+import io.ktor.utils.io.streams.asInput
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import java.io.File
 
 class MainActivity : ComponentActivity() {
     private lateinit var mSensorHandler: SensorHandler
     private lateinit var mFileHandler: FileHandler
     private lateinit var mBatteryHandler: BatteryHandler
-    private val mMainViewModel = MainViewModel()
+    private lateinit var filesDir: File
+    private lateinit var mMainViewModel: MainViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
+
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setTheme(android.R.style.Theme_DeviceDefault)
 
-        mFileHandler = FileHandler(getExternalFilesDir(null)!!)
+        filesDir = getExternalFilesDir(null)!!
+        mMainViewModel = MainViewModel(filesDir)
+
+        mFileHandler = FileHandler(filesDir)
         mSensorHandler = SensorHandler(mFileHandler,getSystemService(SENSOR_SERVICE) as SensorManager)
-        mBatteryHandler = BatteryHandler(::registerReceiver,::unregisterReceiver, mFileHandler, mMainViewModel::updateBatteryLevel)
+        mBatteryHandler = BatteryHandler(::registerReceiver,::unregisterReceiver, mFileHandler, mMainViewModel::updateBatteryLevel, mMainViewModel::setIsCharging)
 
         setContent {
             WearApp(mMainViewModel)
@@ -81,9 +99,40 @@ fun WearApp(viewModel: MainViewModel) {
     }
 }
 
-class MainViewModel(): ViewModel() {
+class MainViewModel(private val filesDir: File): ViewModel() {
     var currentBatteryLevel by mutableStateOf(0f)
+    var isCharging by mutableStateOf(0)
+    private val client = HttpClient()
+
     fun updateBatteryLevel(newLevel: Float) {
         currentBatteryLevel = newLevel
+    }
+    fun setIsCharging(newState: Int) {
+        if (newState == 1 && isCharging == 0) {
+            isCharging = newState
+            makeRequest()
+        }
+        else if (newState == 0) {
+            isCharging = newState
+        }
+    }
+    fun makeRequest() = runBlocking{
+        launch {
+            val file = File("${filesDir}/2023-10-30_19_32_14/raw/2023-10-30_19_32_14.0.csv")
+            val response = client.request("")
+            Log.d("DELTA", "response: $response")
+//            client.submitFormWithBinaryData(
+//                url = "https://129.252.131.173:8000/upload_raw",
+//                formData = formData {
+//                    append(
+//                        "document".quote(),
+//                        InputProvider(file.length()) { file.inputStream().asInput() },
+//                        Headers.build {
+//                            append(HttpHeaders.ContentDisposition, "filename=${file.name.quote()}")
+//                        }
+//                    )
+//                }
+//            )
+        }
     }
 }

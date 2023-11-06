@@ -91,6 +91,10 @@ dependencies {
     // ViewModel utilities for Compose
     implementation "androidx.wear:wear-input:1.2.0-alpha02"
 
+    // http requests
+    implementation "io.ktor:ktor-client-core:2.3.5"
+    implementation "io.ktor:ktor-client-okhttp:2.3.5"
+
 }
 
 kapt {
