@@ -3,6 +3,7 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-kapt'
     id 'com.google.dagger.hilt.android'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.4.21'
 }
 
 android {
@@ -36,17 +37,17 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '17'
     }
     buildFeatures {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion '1.4.0'
+        kotlinCompilerExtensionVersion '1.4.3'
     }
     packagingOptions {
         resources {
@@ -92,9 +93,11 @@ dependencies {
     implementation "androidx.wear:wear-input:1.2.0-alpha02"
 
     // http requests
-    implementation "io.ktor:ktor-client-core:2.3.5"
-    implementation "io.ktor:ktor-client-okhttp:2.3.5"
-
+//    implementation "io.ktor:ktor-client-okhttp:2.3.5"
+    implementation "io.ktor:ktor-client-core:$ktor_version"
+    implementation "io.ktor:ktor-client-cio:$ktor_version"
+    implementation "io.ktor:ktor-client-content-negotiation:$ktor_version"
+    implementation "io.ktor:ktor-serialization-kotlinx-json:$ktor_version"
 }
 
 kapt {

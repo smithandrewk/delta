@@ -4,10 +4,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
-import android.util.Log
 import androidx.activity.ComponentActivity
+import kotlin.reflect.KFunction1
 
-class BatteryHandler (registerReceiver: (receiver: BroadcastReceiver, filter: IntentFilter, flags: Int) -> Unit, unregisterReceiver: (br: BroadcastReceiver) -> Unit, fileHandler: FileHandler, updateBatteryLevel: (newLevel: Float) -> Unit, setIsChargingState: (newState: Int) -> Unit){
+class BatteryHandler(registerReceiver: (receiver: BroadcastReceiver, filter: IntentFilter, flags: Int) -> Unit, unregisterReceiver: (br: BroadcastReceiver) -> Unit, fileHandler: FileHandler, updateBatteryLevel: (newLevel: Float) -> Unit, setIsChargingState: KFunction1<Int, Unit>){
     private val br: BroadcastReceiver = BatteryBroadcastReceiver(fileHandler,updateBatteryLevel, setIsChargingState)
     private val filter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
     private val listenToBroadcastsFromOtherApps = false
@@ -28,12 +28,14 @@ class BatteryHandler (registerReceiver: (receiver: BroadcastReceiver, filter: In
         private val mUpdateBatteryLevel = updateBatteryLevel
         private val setIsChargingState = setIsChargingState
         override fun onReceive(context: Context, intent: Intent) {
+            val status: Int = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1) ?: -1
             val level: Int = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
             val scale: Int = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
-            val isCharging: Int = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1)
+            val isCharging: Boolean = status == BatteryManager.BATTERY_STATUS_CHARGING
+                    || status == BatteryManager.BATTERY_STATUS_FULL
             val batteryLevel = level * 100 / scale.toFloat()
             mFileHandler.writeToLog("battery: $batteryLevel")
-            setIsChargingState(isCharging)
+//            setIsChargingState(if(isCharging) 1 else 0)
             mUpdateBatteryLevel(batteryLevel)
         }
     }
