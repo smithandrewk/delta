@@ -25,13 +25,54 @@ import com.example.delta.util.FileHandler
 import com.example.delta.util.SensorHandler
 import java.util.*
 import androidx.wear.compose.material.curvedText
+import java.io.File
+import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.StandardCopyOption
 
 class MainActivity : ComponentActivity() {
     private lateinit var mSensorHandler: SensorHandler
     private lateinit var mFileHandler: FileHandler
     private lateinit var mBatteryHandler: BatteryHandler
     private val mMainViewModel = MainViewModel()
+    fun listDirectories(path: String) {
+        val root = File(path)
+        val files = root.listFiles()
 
+        files?.filter { it.isDirectory }?.forEach { directory ->
+            println("${directory.name} - Size: ${getDirectorySize(directory)} bytes")
+        }
+    }
+
+    private fun getDirectorySize(directory: File): Long {
+        var size: Long = 0
+        val files = directory.listFiles()
+
+        files?.forEach { file ->
+            size += if (file.isDirectory) getDirectorySize(file) else file.length()
+        }
+
+        return size
+    }
+
+    fun copyDirectory(sourcePath: Path, targetPath: Path) {
+        Files.walk(sourcePath).forEach { source ->
+            val target = targetPath.resolve(sourcePath.relativize(source))
+            try {
+                if (Files.isDirectory(source)) {
+                    if (Files.notExists(target)) {
+                        Files.createDirectory(target)
+                    }
+                } else {
+                    Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING)
+                }
+            } catch (e: IOException) {
+                e.printStackTrace()
+                // Handle the exception as needed
+            }
+        }
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
@@ -41,6 +82,14 @@ class MainActivity : ComponentActivity() {
         mFileHandler = FileHandler(getExternalFilesDir(null)!!)
         mSensorHandler = SensorHandler(mFileHandler,getSystemService(SENSOR_SERVICE) as SensorManager)
         mBatteryHandler = BatteryHandler(::registerReceiver,::unregisterReceiver, mFileHandler, mMainViewModel::updateBatteryLevel)
+        print("Listing external ")
+        println(listDirectories(getExternalFilesDir(null)!!.absolutePath))
+        println("Copying")
+        copyDirectory(getExternalFilesDir(null)!!.toPath(),filesDir.toPath())
+        print("Listing external ")
+        println(listDirectories(getExternalFilesDir(null)!!.absolutePath))
+        print("Listing internal ")
+        println(listDirectories(filesDir.absolutePath))
 
         setContent {
             WearApp(mMainViewModel)
