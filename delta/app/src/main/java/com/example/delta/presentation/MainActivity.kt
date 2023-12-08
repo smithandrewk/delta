@@ -2,6 +2,7 @@ package com.example.delta.presentation
 
 import  android.hardware.SensorManager
 import android.os.*
+import android.util.Log
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -35,6 +36,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
+        Log.d("0000","onCreate")
+
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setTheme(android.R.style.Theme_DeviceDefault)
 
@@ -47,10 +50,36 @@ class MainActivity : ComponentActivity() {
         }
     }
     override fun onDestroy() {
+        Log.d("0000","onDestroy")
         super.onDestroy()
         mSensorHandler.unregisterAll()
         mFileHandler.closeFiles()
         mBatteryHandler.unregister()
+    }
+
+    override fun onPause() {
+        Log.d("0000","onPause")
+        super.onPause()
+    }
+
+    override fun onStart() {
+        Log.d("0000","onStart")
+        super.onStart()
+    }
+
+    override fun onResume() {
+        Log.d("0000","onResume")
+        super.onResume()
+    }
+
+    override fun onRestart() {
+        Log.d("0000","onRestart")
+        super.onRestart()
+    }
+
+    override fun onStop() {
+        Log.d("0000","onStop")
+        super.onStop()
     }
 }
 @Composable
